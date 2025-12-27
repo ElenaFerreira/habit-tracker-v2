@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import SignOutButton from "./components/SignOutButton";
-import { User } from "lucide-react";
+import AppShell from "./components/AppShell";
 
 export default async function AppPage() {
   const supabase = await createClient();
@@ -10,28 +9,15 @@ export default async function AppPage() {
   if (!data.user) redirect("/login");
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      {/* Header */}
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-900">Habit Tracker</h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-slate-600">
-              <User size={18} />
-              <span>{data.user.email}</span>
-            </div>
-            <SignOutButton />
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 p-8">
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Bienvenue ! 👋</h2>
-          <p className="text-slate-500">Prochaine étape : construire la one-page (New day, habits, steps, goals, streaks).</p>
-        </div>
+    <main className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-rose-50">
+      {/* Fond décoratif */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 -left-20 w-72 h-72 bg-orange-200/30 rounded-full blur-3xl" />
+        <div className="absolute -bottom-20 right-1/4 w-80 h-80 bg-rose-200/30 rounded-full blur-3xl" />
       </div>
+
+      <AppShell userEmail={data.user.email || ""} />
     </main>
   );
 }
