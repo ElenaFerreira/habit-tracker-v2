@@ -59,11 +59,9 @@ export default function AppShell({ userEmail }: AppShellProps) {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="relative max-w-2xl mx-auto px-6 py-8">
-        <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-xl shadow-orange-900/5 border border-white/50 p-6 sm:p-8">
-          <HabitList key={habitsKey} onOpenSettings={() => setSettingsOpen(true)} />
-        </div>
+      {/* Content - Bento Layout */}
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <HabitList key={habitsKey} onOpenSettings={() => setSettingsOpen(true)} />
       </div>
 
       {/* Settings Modal */}
