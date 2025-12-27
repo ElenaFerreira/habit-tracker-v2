@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings, LogOut, History } from "lucide-react";
+import Link from "next/link";
 import HabitList from "./HabitList";
 import HabitSettings from "./HabitSettings";
 import { createClient } from "@/lib/supabase/client";
@@ -34,6 +35,11 @@ export default function AppShell({ userEmail }: AppShellProps) {
           <h1 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Habit Tracker</h1>
 
           <div className="flex items-center gap-2">
+            {/* History button */}
+            <Link href="/history" className="p-2.5 hover:bg-amber-100 rounded-xl transition-colors" title="Historique">
+              <History size={18} className="text-slate-600" />
+            </Link>
+
             {/* Settings button */}
             <button
               onClick={() => setSettingsOpen(true)}

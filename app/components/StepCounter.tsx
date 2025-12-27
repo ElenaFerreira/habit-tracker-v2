@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { StepEntry } from "@/lib/types";
-import { Footprints, TrendingUp, Minus, Target, AlertTriangle, CheckCircle } from "lucide-react";
+import { Footprints, TrendingUp, Minus, Target, CheckCircle } from "lucide-react";
 
-const WEEKLY_GOAL = 15000;
+const DAILY_GOAL = 15000;
 
 // Récupère le lundi de la semaine courante
 function getMondayOfWeek(date: Date): Date {
@@ -120,21 +120,14 @@ export default function StepCounter() {
 
   // Calcul de la moyenne (seulement les jours avec des données)
   const stepsValues = Array.from(weekSteps.values());
-  const totalSteps = stepsValues.reduce((acc, val) => acc + val, 0);
   const daysWithData = stepsValues.filter((v) => v > 0).length;
+  const totalSteps = stepsValues.reduce((acc, val) => acc + val, 0);
   const average = daysWithData > 0 ? Math.round(totalSteps / daysWithData) : 0;
   const todayValue = weekSteps.get(today) || 0;
 
-  // Calcul de l'objectif et du rattrapage
-  const daysPassed = weekDays.length; // Jours écoulés (lundi à aujourd'hui inclus)
-  const hasEnteredToday = todayValue > 0;
-  // Si on a déjà rentré ses pas aujourd'hui, il reste les jours APRÈS aujourd'hui
-  // Sinon, aujourd'hui compte encore comme un jour pour faire des pas
-  const daysRemaining = hasEnteredToday ? 7 - daysPassed : 7 - daysPassed + 1;
-  const stepsRemaining = WEEKLY_GOAL - totalSteps;
-  const stepsNeededPerDay = daysRemaining > 0 ? Math.round(stepsRemaining / daysRemaining) : stepsRemaining;
-  const isOnTrack = stepsRemaining <= 0 || stepsNeededPerDay <= Math.round(WEEKLY_GOAL / 7);
-  const progressPercent = Math.min(100, Math.round((totalSteps / WEEKLY_GOAL) * 100));
+  // Progression du jour vers l'objectif journalier
+  const todayProgressPercent = Math.min(100, Math.round((todayValue / DAILY_GOAL) * 100));
+  const todayGoalReached = todayValue >= DAILY_GOAL;
 
   if (loading) {
     return <div className="bento-card h-full bg-slate-200/50 rounded-3xl animate-pulse min-h-[200px]" />;
@@ -186,61 +179,39 @@ export default function StepCounter() {
           </div>
         )}
 
-        {/* Objectif hebdo */}
+        {/* Barre de progression du jour */}
         <div className="space-y-2">
-          {/* Barre de progression vers l'objectif */}
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-1.5">
               <Target size={12} />
-              <span>Objectif : {WEEKLY_GOAL.toLocaleString("fr-FR")}/sem</span>
+              <span>Objectif : {DAILY_GOAL.toLocaleString("fr-FR")}/jour</span>
             </div>
-            <span className="font-semibold">
-              {totalSteps.toLocaleString("fr-FR")} ({progressPercent}%)
-            </span>
+            <span className="font-semibold">{todayProgressPercent}%</span>
           </div>
-          <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-white/20 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${isOnTrack ? "bg-white" : "bg-amber-300"}`}
-              style={{ width: `${progressPercent}%` }}
+              className={`h-full rounded-full transition-all duration-500 ${todayGoalReached ? "bg-white" : "bg-white/80"}`}
+              style={{ width: `${todayProgressPercent}%` }}
             />
           </div>
-
-          {/* Message de rattrapage */}
-          {stepsRemaining <= 0 ? (
+          {todayGoalReached && (
             <div className="flex items-center gap-2 text-white/90 text-xs">
               <CheckCircle size={12} />
-              <span>Objectif atteint ! Bravo 🎉</span>
-            </div>
-          ) : isOnTrack ? (
-            <div className="flex items-center gap-2 text-white/90 text-xs">
-              <CheckCircle size={12} />
-              <span>En rythme ! Reste {stepsRemaining.toLocaleString("fr-FR")} pas à faire 👍</span>
-            </div>
-          ) : (
-            <div className="flex items-start gap-2 bg-white/10 rounded-lg px-2.5 py-2 text-xs">
-              <AlertTriangle size={14} className="text-amber-300 shrink-0 mt-0.5" />
-              <div>
-                <span className="text-white/80">Reste </span>
-                <span className="text-amber-200 font-semibold">{stepsRemaining.toLocaleString("fr-FR")} pas</span>
-                <span className="text-white/80"> à faire{daysRemaining > 0 ? ` en ${daysRemaining} jour${daysRemaining > 1 ? "s" : ""}` : ""}</span>
-                {daysRemaining > 0 && (
-                  <>
-                    <span className="text-white/80"> → </span>
-                    <span className="font-bold text-white">{stepsNeededPerDay.toLocaleString("fr-FR")}</span>
-                    <span className="text-white/80"> pas/jour</span>
-                  </>
-                )}
-              </div>
+              <span>Objectif du jour atteint ! 🎉</span>
             </div>
           )}
         </div>
 
-        {/* Moyenne */}
-        <div className="flex items-center gap-2 text-white/70 text-xs">
-          <TrendingUp size={12} />
-          <span>
-            Moyenne : <span className="font-semibold">{average.toLocaleString("fr-FR")}</span> pas/jour
-          </span>
+        {/* Moyenne vs Objectif */}
+        <div className="flex items-center justify-between bg-white/10 rounded-xl px-3 py-2.5">
+          <div className="flex items-center gap-2 text-white/80 text-xs">
+            <TrendingUp size={14} />
+            <span>Moyenne</span>
+          </div>
+          <div className="text-right">
+            <span className={`text-lg font-bold ${average >= DAILY_GOAL ? "text-white" : "text-white/90"}`}>{average.toLocaleString("fr-FR")}</span>
+            <span className="text-white/60 text-xs ml-1">/ {DAILY_GOAL.toLocaleString("fr-FR")}</span>
+          </div>
         </div>
 
         {/* Barre des jours de la semaine */}
