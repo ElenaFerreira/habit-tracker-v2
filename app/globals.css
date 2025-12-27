@@ -83,6 +83,9 @@ body {
 .bento-card:nth-child(3) {
   animation-delay: 200ms;
 }
+.bento-card:nth-child(4) {
+  animation-delay: 300ms;
+}
 
 @keyframes bento-appear {
   from {

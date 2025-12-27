@@ -21,3 +21,12 @@ export interface HabitCompletion {
 export interface HabitWithStatus extends Habit {
   completed_today: boolean;
 }
+
+// Type pour le compteur de pas
+export interface StepEntry {
+  id: string;
+  user_id: string;
+  date: string; // format YYYY-MM-DD
+  steps: number;
+  created_at: string;
+}

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { HabitWithStatus } from "@/lib/types";
 import HabitCheckbox from "./HabitCheckbox";
+import StepCounter from "./StepCounter";
 import { Sparkles, Calendar, TrendingUp, Flame } from "lucide-react";
 
 function getTodayDate(): string {
@@ -120,6 +121,7 @@ export default function HabitList({ onOpenSettings }: HabitListProps) {
         <div className="flex flex-col gap-4">
           <div className="h-36 bg-slate-200/50 rounded-3xl animate-pulse" />
           <div className="h-28 bg-slate-200/50 rounded-3xl animate-pulse" />
+          <div className="h-48 bg-slate-200/50 rounded-3xl animate-pulse" />
         </div>
         <div className="md:col-span-2 h-64 bg-slate-200/50 rounded-3xl animate-pulse" />
       </div>
@@ -159,6 +161,9 @@ export default function HabitList({ onOpenSettings }: HabitListProps) {
             </p>
           </div>
         </div>
+
+        {/* Bento Card: Compteur de pas */}
+        <StepCounter />
       </div>
 
       {/* Bento Card: Progression + Habitudes */}
