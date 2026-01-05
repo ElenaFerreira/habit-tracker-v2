@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Goal, GoalType, GoalPeriod, Habit } from "@/lib/types";
+import { formatDateLocal } from "@/lib/hooks/useToday";
 import { X, Plus, Trash2, Target, Flame, Calendar, Star, Gift, Pencil, Save } from "lucide-react";
 import { HabitIcon, ICON_CATEGORIES } from "./HabitSettings";
 
@@ -86,7 +87,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
       type: goalType,
       target_value: goalType === "one_time" ? 1 : targetValue,
       period: goalType === "quantitative" ? period : null,
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: formatDateLocal(new Date()),
       end_date: endDate || null,
       icon: !selectedHabit ? selectedIcon : null,
       reward: reward.trim() || null,
@@ -194,7 +195,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
               <Target size={20} className="text-white" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">Mes objectifs</h2>
@@ -297,14 +298,9 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
           {/* Formulaire objectif */}
           <div className="border-t border-slate-100 pt-6">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-slate-700">
-                {isEditing ? "Modifier l'objectif" : "Nouvel objectif"}
-              </p>
+              <p className="text-sm font-semibold text-slate-700">{isEditing ? "Modifier l'objectif" : "Nouvel objectif"}</p>
               {isEditing && (
-                <button
-                  onClick={cancelEdit}
-                  className="text-xs text-slate-500 hover:text-slate-700 underline cursor-pointer"
-                >
+                <button onClick={cancelEdit} className="text-xs text-slate-500 hover:text-slate-700 underline cursor-pointer">
                   Annuler
                 </button>
               )}
@@ -512,7 +508,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               <button
                 onClick={isEditing ? updateGoal : addGoal}
                 disabled={loading || !isFormValid}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-300 disabled:cursor-not-allowed cursor-pointer text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/30 disabled:shadow-none"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-300 disabled:cursor-not-allowed cursor-pointer text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/30 disabled:shadow-none"
               >
                 {isEditing ? <Save size={18} /> : <Plus size={18} />}
                 {isEditing ? "Enregistrer" : "Créer l'objectif"}

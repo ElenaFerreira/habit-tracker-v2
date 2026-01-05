@@ -7,6 +7,7 @@ import HabitList from "./HabitList";
 import HabitSettings from "./HabitSettings";
 import GoalSettings from "./GoalSettings";
 import GoalsList, { GoalsListRef } from "./GoalsList";
+import MoodPicker from "./MoodPicker";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -42,7 +43,7 @@ export default function AppShell({ userEmail }: AppShellProps) {
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-amber-200/50 sticky top-0 z-40">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Habit Tracker</h1>
+          <h1 className="text-xl font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Habit Tracker</h1>
 
           <div className="flex items-center gap-2">
             {/* History button */}
@@ -86,6 +87,9 @@ export default function AppShell({ userEmail }: AppShellProps) {
 
       {/* Content - Bento Layout */}
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        {/* Section Mood */}
+        <MoodPicker />
+
         <HabitList key={`habits-${habitsKey}`} onOpenSettings={() => setSettingsOpen(true)} onHabitToggle={refreshGoals} />
 
         {/* Section Objectifs */}

@@ -3,13 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { HabitWithStatus } from "@/lib/types";
+import { useToday, formatDateLocal } from "@/lib/hooks/useToday";
 import HabitCheckbox from "./HabitCheckbox";
 import StepCounter from "./StepCounter";
 import { Sparkles, Calendar, TrendingUp, Flame } from "lucide-react";
-
-function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0];
-}
 
 function formatDate(dateStr: string): { weekday: string; day: string; month: string } {
   const date = new Date(dateStr + "T00:00:00");
@@ -20,14 +17,10 @@ function formatDate(dateStr: string): { weekday: string; day: string; month: str
   };
 }
 
-function getDateString(date: Date): string {
-  return date.toISOString().split("T")[0];
-}
-
 function getPreviousDate(dateStr: string): string {
   const date = new Date(dateStr + "T00:00:00");
   date.setDate(date.getDate() - 1);
-  return getDateString(date);
+  return formatDateLocal(date);
 }
 
 interface HabitListProps {
@@ -39,7 +32,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
   const [habits, setHabits] = useState<HabitWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
-  const [today] = useState(getTodayDate());
+  const today = useToday();
   const supabase = createClient();
 
   const fetchHabitsWithStatus = useCallback(async () => {
@@ -78,7 +71,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
       .from("habit_completions")
       .select("habit_id, date")
       .in("habit_id", habitIds)
-      .gte("date", getDateString(ninetyDaysAgo));
+      .gte("date", formatDateLocal(ninetyDaysAgo));
 
     // Grouper les complétions par date
     const completionsByDate = new Map<string, Set<string>>();
@@ -134,7 +127,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
       {/* Colonne gauche : Date + Streak */}
       <div className="flex flex-col gap-4">
         {/* Bento Card: Date d'aujourd'hui */}
-        <div className="bento-card bg-gradient-to-br from-amber-400 via-orange-400 to-rose-400 p-5 rounded-3xl text-white relative overflow-hidden">
+        <div className="bento-card bg-linear-to-br from-amber-400 via-orange-400 to-rose-400 p-5 rounded-3xl text-white relative overflow-hidden">
           <div className="absolute top-3 right-3 opacity-20">
             <Calendar size={40} strokeWidth={1.5} />
           </div>
@@ -147,7 +140,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
         </div>
 
         {/* Bento Card: Streak */}
-        <div className="bento-card bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 p-5 rounded-3xl text-white relative overflow-hidden">
+        <div className="bento-card bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 p-5 rounded-3xl text-white relative overflow-hidden">
           <div className="absolute top-3 right-3 opacity-20">
             <Flame size={40} strokeWidth={1.5} />
           </div>
@@ -187,7 +180,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
               </div>
               <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-500"
+                  className="h-full bg-linear-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>

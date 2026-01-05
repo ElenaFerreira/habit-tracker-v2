@@ -59,3 +59,23 @@ export interface GoalWithProgress extends Goal {
   habit_name: string | null; // null si pas d'habitude associée
   habit_emoji: string | null;
 }
+
+// Types pour le Mood Tracker
+export type MoodType = "best_day" | "good" | "moody" | "bad" | "awful";
+
+export interface MoodEntry {
+  id: string;
+  user_id: string;
+  date: string; // format YYYY-MM-DD
+  mood: MoodType;
+  created_at: string;
+}
+
+// Configuration des moods pour l'affichage
+export const MOOD_CONFIG: Record<MoodType, { label: string; emoji: string; color: string; bgColor: string }> = {
+  best_day: { label: "Best day", emoji: "🤩", color: "text-yellow-600", bgColor: "bg-yellow-100" },
+  good: { label: "Good", emoji: "😊", color: "text-emerald-600", bgColor: "bg-emerald-100" },
+  moody: { label: "Moody", emoji: "😐", color: "text-slate-600", bgColor: "bg-slate-100" },
+  bad: { label: "Bad", emoji: "😔", color: "text-orange-600", bgColor: "bg-orange-100" },
+  awful: { label: "Awful", emoji: "😢", color: "text-red-600", bgColor: "bg-red-100" },
+};

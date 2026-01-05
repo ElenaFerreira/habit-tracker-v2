@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Goal, GoalWithProgress, Habit } from "@/lib/types";
+import { formatDateLocal } from "@/lib/hooks/useToday";
 import GoalCard from "./GoalCard";
 import { Target, Plus } from "lucide-react";
 
@@ -33,7 +34,7 @@ function getStartOfYear(date: Date): Date {
 }
 
 function getDateString(date: Date): string {
-  return date.toISOString().split("T")[0];
+  return formatDateLocal(date);
 }
 
 const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ onOpenSettings }, ref) {
@@ -195,7 +196,7 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
           <p className="text-slate-500 text-sm mb-5">Définis des objectifs pour te motiver !</p>
           <button
             onClick={onOpenSettings}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-lg shadow-emerald-500/30"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-lg shadow-emerald-500/30"
           >
             <Plus size={18} />
             Créer un objectif
@@ -214,7 +215,7 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+          <div className="w-10 h-10 bg-linear-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
             <Target size={20} className="text-white" />
           </div>
           <div>

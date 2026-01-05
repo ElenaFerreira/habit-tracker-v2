@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { StepEntry } from "@/lib/types";
+import { useToday, formatDateLocal } from "@/lib/hooks/useToday";
 import { Footprints, TrendingUp, Minus, Target, CheckCircle } from "lucide-react";
 
 const DAILY_GOAL = 15000;
@@ -16,11 +17,7 @@ function getMondayOfWeek(date: Date): Date {
 }
 
 function getDateString(date: Date): string {
-  return date.toISOString().split("T")[0];
-}
-
-function getTodayDate(): string {
-  return new Date().toISOString().split("T")[0];
+  return formatDateLocal(date);
 }
 
 // Génère les jours de la semaine depuis lundi jusqu'à aujourd'hui
@@ -54,7 +51,7 @@ export default function StepCounter() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const today = getTodayDate();
+  const today = useToday();
   const weekDays = getWeekDays();
   const supabase = createClient();
 
@@ -134,7 +131,7 @@ export default function StepCounter() {
   }
 
   return (
-    <div className="bento-card bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 p-5 rounded-3xl text-white relative overflow-hidden">
+    <div className="bento-card bg-linear-to-br from-emerald-400 via-teal-500 to-cyan-500 p-5 rounded-3xl text-white relative overflow-hidden">
       <div className="absolute top-3 right-3 opacity-20">
         <Footprints size={40} strokeWidth={1.5} />
       </div>

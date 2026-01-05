@@ -130,7 +130,7 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           ) : (
             <button
               onClick={markAsCompleted}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-semibold rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/30"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-linear-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-semibold rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/30"
             >
               <Check size={18} />
               Marquer comme accompli
@@ -165,7 +165,7 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           {/* Barre de progression */}
           <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className={`h-full bg-gradient-to-r ${colors.progressGradient} rounded-full transition-all duration-500`}
+              className={`h-full bg-linear-to-r ${colors.progressGradient} rounded-full transition-all duration-500`}
               style={{ width: `${progressClamp}%` }}
             />
           </div>
