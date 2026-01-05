@@ -1,0 +1,263 @@
+"use client";
+
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { Goal, GoalWithProgress, Habit } from "@/lib/types";
+import GoalCard from "./GoalCard";
+import { Target, Plus } from "lucide-react";
+
+interface GoalsListProps {
+  onOpenSettings: () => void;
+}
+
+export interface GoalsListRef {
+  refresh: () => void;
+}
+
+// Helpers pour les dates
+function getStartOfWeek(date: Date): Date {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Lundi = début de semaine
+  d.setDate(diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+function getStartOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function getStartOfYear(date: Date): Date {
+  return new Date(date.getFullYear(), 0, 1);
+}
+
+function getDateString(date: Date): string {
+  return date.toISOString().split("T")[0];
+}
+
+const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ onOpenSettings }, ref) {
+  const [goals, setGoals] = useState<GoalWithProgress[]>([]);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  const calculateGoalProgress = useCallback(async () => {
+    // Récupérer tous les goals
+    const { data: goalsData } = await supabase.from("goals").select("*").order("created_at", { ascending: false });
+
+    if (!goalsData || goalsData.length === 0) {
+      setGoals([]);
+      setLoading(false);
+      return;
+    }
+
+    // Récupérer les habitudes associées (seulement celles qui ont un habit_id)
+    const habitIds = goalsData.filter((g) => g.habit_id).map((g) => g.habit_id);
+    let habitsMap = new Map<string, Habit>();
+
+    if (habitIds.length > 0) {
+      const { data: habitsData } = await supabase.from("habits").select("*").in("id", habitIds);
+      habitsMap = new Map(habitsData?.map((h) => [h.id, h]) || []);
+    }
+
+    const today = new Date();
+    const todayStr = getDateString(today);
+
+    // Pour chaque goal, calculer la progression
+    const goalsWithProgress: GoalWithProgress[] = await Promise.all(
+      goalsData.map(async (goal: Goal) => {
+        const habit = goal.habit_id ? habitsMap.get(goal.habit_id) : null;
+
+        let current_value = 0;
+        let is_completed = false;
+
+        if (goal.type === "one_time") {
+          // Goal one-time : complété si completed_at est défini
+          is_completed = !!goal.completed_at;
+          current_value = is_completed ? 1 : 0;
+        } else if (goal.type === "quantitative" && goal.habit_id) {
+          // Calculer le nombre de complétions dans la période
+          let startDate: string;
+          let endDate: string = todayStr;
+
+          switch (goal.period) {
+            case "week":
+              startDate = getDateString(getStartOfWeek(today));
+              break;
+            case "month":
+              startDate = getDateString(getStartOfMonth(today));
+              break;
+            case "year":
+              startDate = getDateString(getStartOfYear(today));
+              break;
+            default:
+              startDate = goal.start_date || todayStr;
+          }
+
+          if (goal.end_date) {
+            endDate = goal.end_date;
+          }
+
+          const { count } = await supabase
+            .from("habit_completions")
+            .select("*", { count: "exact", head: true })
+            .eq("habit_id", goal.habit_id)
+            .gte("date", startDate)
+            .lte("date", endDate);
+
+          current_value = count || 0;
+          is_completed = current_value >= goal.target_value;
+        } else if (goal.type === "streak" && goal.habit_id) {
+          // Type streak - calculer la série actuelle
+          const ninetyDaysAgo = new Date();
+          ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+          const { data: completions } = await supabase
+            .from("habit_completions")
+            .select("date")
+            .eq("habit_id", goal.habit_id)
+            .gte("date", getDateString(ninetyDaysAgo))
+            .order("date", { ascending: false });
+
+          const completedDates = new Set(completions?.map((c) => c.date) || []);
+
+          // Calculer le streak en partant d'aujourd'hui ou d'hier
+          let checkDate = new Date(today);
+          // Si aujourd'hui n'est pas complété, commencer à hier
+          if (!completedDates.has(todayStr)) {
+            checkDate.setDate(checkDate.getDate() - 1);
+          }
+
+          while (completedDates.has(getDateString(checkDate))) {
+            current_value++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          }
+
+          is_completed = current_value >= goal.target_value;
+        }
+
+        const progress_percent = goal.target_value > 0 ? (current_value / goal.target_value) * 100 : 0;
+
+        return {
+          ...goal,
+          current_value,
+          progress_percent,
+          is_completed,
+          habit_name: habit?.name || null,
+          habit_emoji: habit?.emoji || null,
+        };
+      })
+    );
+
+    setGoals(goalsWithProgress);
+    setLoading(false);
+  }, [supabase]);
+
+  // Exposer la méthode refresh via ref
+  useImperativeHandle(
+    ref,
+    () => ({
+      refresh: calculateGoalProgress,
+    }),
+    [calculateGoalProgress]
+  );
+
+  useEffect(() => {
+    calculateGoalProgress();
+  }, [calculateGoalProgress]);
+
+  // Refresh toutes les 30 secondes
+  useEffect(() => {
+    const interval = setInterval(calculateGoalProgress, 30000);
+    return () => clearInterval(interval);
+  }, [calculateGoalProgress]);
+
+  if (loading) {
+    return (
+      <div className="bento-card bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/50 shadow-lg">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 bg-slate-200 rounded w-32" />
+          <div className="h-24 bg-slate-200 rounded-xl" />
+          <div className="h-24 bg-slate-200 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (goals.length === 0) {
+    return (
+      <div className="bento-card bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/50 shadow-lg">
+        <div className="text-center py-6">
+          <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Target size={24} className="text-emerald-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">Pas encore d'objectifs</h3>
+          <p className="text-slate-500 text-sm mb-5">Définis des objectifs pour te motiver !</p>
+          <button
+            onClick={onOpenSettings}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-lg shadow-emerald-500/30"
+          >
+            <Plus size={18} />
+            Créer un objectif
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Séparer les goals actifs des goals complétés
+  const activeGoals = goals.filter((g) => !g.is_completed);
+  const completedGoals = goals.filter((g) => g.is_completed);
+
+  return (
+    <div className="bento-card bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/50 shadow-lg">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+            <Target size={20} className="text-white" />
+          </div>
+          <div>
+            <h3 className="font-bold text-slate-800">Mes objectifs</h3>
+            <p className="text-xs text-slate-500">
+              {activeGoals.length} en cours · {completedGoals.length} atteint{completedGoals.length > 1 ? "s" : ""}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onOpenSettings}
+          className="p-2.5 hover:bg-emerald-50 rounded-xl transition-colors cursor-pointer text-emerald-600"
+          title="Gérer mes objectifs"
+        >
+          <Plus size={18} />
+        </button>
+      </div>
+
+      {/* Goals actifs */}
+      {activeGoals.length > 0 && (
+        <div className="space-y-3 mb-4">
+          {activeGoals.map((goal) => (
+            <GoalCard key={goal.id} goal={goal} onUpdate={calculateGoalProgress} />
+          ))}
+        </div>
+      )}
+
+      {/* Goals complétés */}
+      {completedGoals.length > 0 && (
+        <div className="pt-3 border-t border-slate-100">
+          <p className="text-xs font-medium text-slate-500 mb-3 uppercase tracking-wider">✅ Objectifs atteints</p>
+          <div className="space-y-3 opacity-70">
+            {completedGoals.slice(0, 2).map((goal) => (
+              <GoalCard key={goal.id} goal={goal} onUpdate={calculateGoalProgress} />
+            ))}
+          </div>
+          {completedGoals.length > 2 && (
+            <p className="text-xs text-slate-400 mt-3 text-center">+{completedGoals.length - 2} autres objectifs atteints</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+});
+
+export default GoalsList;

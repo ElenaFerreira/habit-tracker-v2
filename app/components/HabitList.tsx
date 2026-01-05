@@ -32,9 +32,10 @@ function getPreviousDate(dateStr: string): string {
 
 interface HabitListProps {
   onOpenSettings: () => void;
+  onHabitToggle?: () => void; // Callback quand une habitude est cochée/décochée
 }
 
-export default function HabitList({ onOpenSettings }: HabitListProps) {
+export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListProps) {
   const [habits, setHabits] = useState<HabitWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
@@ -195,7 +196,15 @@ export default function HabitList({ onOpenSettings }: HabitListProps) {
             {/* Liste des habitudes */}
             <div className="space-y-2.5 pt-2">
               {habits.map((habit) => (
-                <HabitCheckbox key={habit.id} habit={habit} date={today} onToggle={fetchHabitsWithStatus} />
+                <HabitCheckbox
+                  key={habit.id}
+                  habit={habit}
+                  date={today}
+                  onToggle={() => {
+                    fetchHabitsWithStatus();
+                    onHabitToggle?.();
+                  }}
+                />
               ))}
             </div>
           </div>

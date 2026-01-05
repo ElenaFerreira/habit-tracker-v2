@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { User, Settings, LogOut, History } from "lucide-react";
+import { useState, useRef } from "react";
+import { User, Settings, LogOut, History, Target } from "lucide-react";
 import Link from "next/link";
 import HabitList from "./HabitList";
 import HabitSettings from "./HabitSettings";
+import GoalSettings from "./GoalSettings";
+import GoalsList, { GoalsListRef } from "./GoalsList";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -14,7 +16,9 @@ interface AppShellProps {
 
 export default function AppShell({ userEmail }: AppShellProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [goalsSettingsOpen, setGoalsSettingsOpen] = useState(false);
   const [habitsKey, setHabitsKey] = useState(0);
+  const goalsListRef = useRef<GoalsListRef>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -25,6 +29,12 @@ export default function AppShell({ userEmail }: AppShellProps) {
 
   function handleHabitsChange() {
     setHabitsKey((k) => k + 1);
+    // Refresh les goals (dépendent des habitudes)
+    goalsListRef.current?.refresh();
+  }
+
+  function refreshGoals() {
+    goalsListRef.current?.refresh();
   }
 
   return (
@@ -39,6 +49,15 @@ export default function AppShell({ userEmail }: AppShellProps) {
             <Link href="/history" className="p-2.5 hover:bg-amber-100 rounded-xl transition-colors" title="Historique">
               <History size={18} className="text-slate-600" />
             </Link>
+
+            {/* Goals button */}
+            <button
+              onClick={() => setGoalsSettingsOpen(true)}
+              className="p-2.5 hover:bg-emerald-100 rounded-xl transition-colors cursor-pointer"
+              title="Objectifs"
+            >
+              <Target size={18} className="text-emerald-600" />
+            </button>
 
             {/* Settings button */}
             <button
@@ -66,12 +85,18 @@ export default function AppShell({ userEmail }: AppShellProps) {
       </header>
 
       {/* Content - Bento Layout */}
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8">
-        <HabitList key={habitsKey} onOpenSettings={() => setSettingsOpen(true)} />
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+        <HabitList key={`habits-${habitsKey}`} onOpenSettings={() => setSettingsOpen(true)} onHabitToggle={refreshGoals} />
+
+        {/* Section Objectifs */}
+        <GoalsList ref={goalsListRef} onOpenSettings={() => setGoalsSettingsOpen(true)} />
       </div>
 
       {/* Settings Modal */}
       <HabitSettings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} onHabitsChange={handleHabitsChange} />
+
+      {/* Goals Settings Modal */}
+      <GoalSettings isOpen={goalsSettingsOpen} onClose={() => setGoalsSettingsOpen(false)} onGoalsChange={refreshGoals} />
     </>
   );
 }

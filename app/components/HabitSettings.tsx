@@ -64,8 +64,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-// Catégories d'icônes
-const ICON_CATEGORIES: { name: string; icons: { name: string; icon: LucideIcon }[] }[] = [
+// Catégories d'icônes (exporté pour réutilisation dans GoalSettings)
+export const ICON_CATEGORIES: { name: string; icons: { name: string; icon: LucideIcon }[] }[] = [
   {
     name: "Général",
     icons: [
