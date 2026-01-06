@@ -195,8 +195,8 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-linear-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center">
-              <Target size={20} className="text-white" />
+            <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
+              <Target size={20} className="text-rose-600" />
             </div>
             <h2 className="text-xl font-bold text-slate-900">Mes objectifs</h2>
           </div>
@@ -314,9 +314,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   <button
                     onClick={() => setGoalType("one_time")}
                     className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                      goalType === "one_time"
-                        ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      goalType === "one_time" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     <Star size={18} />
@@ -325,9 +323,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   <button
                     onClick={() => setGoalType("quantitative")}
                     className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                      goalType === "quantitative"
-                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/30"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      goalType === "quantitative" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     <Target size={18} />
@@ -336,9 +332,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   <button
                     onClick={() => setGoalType("streak")}
                     className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                      goalType === "streak"
-                        ? "bg-violet-500 text-white shadow-lg shadow-violet-500/30"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      goalType === "streak" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                     }`}
                   >
                     <Flame size={18} />
@@ -348,9 +342,10 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               </div>
 
               {/* Nom + Icône pour one_time sans habitude */}
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-end">
                 {goalType === "one_time" && !selectedHabit && (
                   <div className="relative">
+                    <label className="block text-xs font-medium text-slate-600 mb-2">Icône</label>
                     <button
                       onClick={() => setShowIconPicker(!showIconPicker)}
                       className="w-12 h-12 flex items-center justify-center bg-amber-100 hover:bg-amber-200 rounded-xl transition-colors cursor-pointer"
@@ -412,7 +407,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                         ? "Ex: 14 jours de méditation"
                         : "Ex: 20 séances ce mois"
                     }
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
                   />
                 </div>
               </div>
@@ -426,7 +421,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   <select
                     value={selectedHabit}
                     onChange={(e) => setSelectedHabit(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 cursor-pointer"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 cursor-pointer"
                   >
                     <option value="">{goalType === "one_time" ? "Aucune (objectif personnel)" : "Choisir une habitude..."}</option>
                     {habits.map((habit) => (
@@ -450,7 +445,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                       min={1}
                       value={targetValue}
                       onChange={(e) => setTargetValue(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
                     />
                   </div>
 
@@ -460,7 +455,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                       <select
                         value={period}
                         onChange={(e) => setPeriod(e.target.value as GoalPeriod)}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 cursor-pointer"
+                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 cursor-pointer"
                       >
                         <option value="week">Par semaine</option>
                         <option value="month">Par mois</option>
@@ -483,7 +478,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
                 />
               </div>
 
@@ -500,7 +495,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   value={reward}
                   onChange={(e) => setReward(e.target.value)}
                   placeholder="Ex: M'offrir un resto, Acheter un jeu..."
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
                 />
               </div>
 
@@ -508,7 +503,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               <button
                 onClick={isEditing ? updateGoal : addGoal}
                 disabled={loading || !isFormValid}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 disabled:from-slate-200 disabled:to-slate-300 disabled:cursor-not-allowed cursor-pointer text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-500/30 disabled:shadow-none"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-200 disabled:cursor-not-allowed cursor-pointer text-white font-semibold rounded-xl transition-all"
               >
                 {isEditing ? <Save size={18} /> : <Plus size={18} />}
                 {isEditing ? "Enregistrer" : "Créer l'objectif"}

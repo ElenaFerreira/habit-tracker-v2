@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, Settings, LogOut, History, Target } from "lucide-react";
+import { User, ListChecks, LogOut, History, Target } from "lucide-react";
 import Link from "next/link";
 import HabitList from "./HabitList";
 import HabitSettings from "./HabitSettings";
@@ -41,38 +41,38 @@ export default function AppShell({ userEmail }: AppShellProps) {
   return (
     <>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-amber-200/50 sticky top-0 z-40">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold bg-linear-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Habit Tracker</h1>
+          <h1 className="text-xl font-bold text-slate-800">Habit Tracker</h1>
 
           <div className="flex items-center gap-2">
             {/* History button */}
-            <Link href="/history" className="p-2.5 hover:bg-amber-100 rounded-xl transition-colors" title="Historique">
+            <Link href="/history" className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors" title="Historique">
               <History size={18} className="text-slate-600" />
             </Link>
 
             {/* Goals button */}
             <button
               onClick={() => setGoalsSettingsOpen(true)}
-              className="p-2.5 hover:bg-emerald-100 rounded-xl transition-colors cursor-pointer"
+              className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
               title="Objectifs"
             >
-              <Target size={18} className="text-emerald-600" />
+              <Target size={18} className="text-slate-600" />
             </button>
 
-            {/* Settings button */}
+            {/* Habits settings button */}
             <button
               onClick={() => setSettingsOpen(true)}
-              className="p-2.5 hover:bg-amber-100 rounded-xl transition-colors cursor-pointer"
-              title="Paramètres"
+              className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              title="Gérer mes habitudes"
             >
-              <Settings size={18} className="text-slate-600" />
+              <ListChecks size={18} className="text-slate-600" />
             </button>
 
             {/* User info */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-xl">
-              <div className="w-7 h-7 bg-amber-100 rounded-full flex items-center justify-center">
-                <User size={14} className="text-amber-600" />
+            <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-xl">
+              <div className="w-7 h-7 bg-violet-100 rounded-full flex items-center justify-center">
+                <User size={14} className="text-violet-600" />
               </div>
               <span className="text-sm text-slate-600 hidden sm:inline max-w-32 truncate">{userEmail}</span>
             </div>

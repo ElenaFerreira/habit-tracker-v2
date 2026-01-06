@@ -9,7 +9,7 @@ import { HabitIcon } from "./HabitSettings";
 interface HabitCheckboxProps {
   habit: HabitWithStatus;
   date: string; // format YYYY-MM-DD
-  onToggle: () => void;
+  onToggle: (newCompleted: boolean) => void;
 }
 
 export default function HabitCheckbox({ habit, date, onToggle }: HabitCheckboxProps) {
@@ -48,7 +48,7 @@ export default function HabitCheckbox({ habit, date, onToggle }: HabitCheckboxPr
     }
 
     setIsLoading(false);
-    onToggle();
+    onToggle(newState);
   }
 
   return (

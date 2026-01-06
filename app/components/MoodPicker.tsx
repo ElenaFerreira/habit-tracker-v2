@@ -70,7 +70,7 @@ export default function MoodPicker() {
 
   if (loading) {
     return (
-      <div className="bento-card bg-linear-to-br from-violet-50 to-purple-50 p-6 rounded-3xl border border-violet-100/50 shadow-lg">
+      <div className="bento-card bg-violet-50 p-6 rounded-3xl border border-violet-200">
         <div className="flex items-center justify-center gap-2">
           <Loader2 className="animate-spin text-violet-500" size={20} />
           <span className="text-violet-600">Chargement...</span>
@@ -80,7 +80,7 @@ export default function MoodPicker() {
   }
 
   return (
-    <div className="bento-card bg-linear-to-br from-violet-50 via-purple-50 to-fuchsia-50 p-6 rounded-3xl border border-violet-100/50 shadow-lg">
+    <div className="bento-card bg-violet-50 p-6 rounded-3xl border border-violet-200">
       {/* Header */}
       <div className="flex items-center gap-2 mb-5">
         <div className="w-8 h-8 bg-violet-100 rounded-xl flex items-center justify-center">
@@ -104,8 +104,8 @@ export default function MoodPicker() {
                 flex flex-col items-center justify-center gap-1 w-[72px] h-[72px] rounded-2xl transition-all cursor-pointer
                 ${
                   isSelected
-                    ? `${config.bgColor} ring-2 ring-offset-2 ring-violet-400 scale-105 shadow-md`
-                    : "bg-white/60 hover:bg-white hover:shadow-md border border-white/50"
+                    ? `${config.bgColor} ring-2 ring-offset-2 ring-slate-400 scale-105`
+                    : "bg-slate-50 hover:bg-slate-100 border border-slate-200"
                 }
                 ${saving ? "opacity-50 cursor-wait" : ""}
               `}

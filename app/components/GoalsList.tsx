@@ -175,11 +175,11 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
 
   if (loading) {
     return (
-      <div className="bento-card bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/50 shadow-lg">
+      <div className="bento-card bg-rose-50 p-6 rounded-3xl border border-rose-200">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-slate-200 rounded w-32" />
-          <div className="h-24 bg-slate-200 rounded-xl" />
-          <div className="h-24 bg-slate-200 rounded-xl" />
+          <div className="h-6 bg-rose-100 rounded w-32" />
+          <div className="h-24 bg-rose-100 rounded-xl" />
+          <div className="h-24 bg-rose-100 rounded-xl" />
         </div>
       </div>
     );
@@ -187,16 +187,16 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
 
   if (goals.length === 0) {
     return (
-      <div className="bento-card bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/50 shadow-lg">
+      <div className="bento-card bg-rose-50 p-6 rounded-3xl border border-rose-200">
         <div className="text-center py-6">
-          <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Target size={24} className="text-emerald-500" />
+          <div className="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Target size={24} className="text-rose-500" />
           </div>
           <h3 className="text-lg font-semibold text-slate-800 mb-2">Pas encore d'objectifs</h3>
           <p className="text-slate-500 text-sm mb-5">Définis des objectifs pour te motiver !</p>
           <button
             onClick={onOpenSettings}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-semibold rounded-xl transition-colors cursor-pointer shadow-lg shadow-emerald-500/30"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-colors cursor-pointer"
           >
             <Plus size={18} />
             Créer un objectif
@@ -211,12 +211,12 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
   const completedGoals = goals.filter((g) => g.is_completed);
 
   return (
-    <div className="bento-card bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/50 shadow-lg">
+    <div className="bento-card bg-rose-50 p-6 rounded-3xl border border-rose-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-linear-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-            <Target size={20} className="text-white" />
+          <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
+            <Target size={20} className="text-rose-600" />
           </div>
           <div>
             <h3 className="font-bold text-slate-800">Mes objectifs</h3>
@@ -227,7 +227,7 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
         </div>
         <button
           onClick={onOpenSettings}
-          className="p-2.5 hover:bg-emerald-50 rounded-xl transition-colors cursor-pointer text-emerald-600"
+          className="p-2.5 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer text-rose-600"
           title="Gérer mes objectifs"
         >
           <Plus size={18} />

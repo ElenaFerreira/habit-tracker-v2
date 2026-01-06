@@ -30,32 +30,14 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
   const isQuantitative = goal.type === "quantitative";
   const progressClamp = Math.min(goal.progress_percent, 100);
 
-  // Couleurs selon le type
+  // Couleurs selon le type - plus sobre
   const getColors = () => {
-    if (isOneTime) {
-      return {
-        bgLight: "bg-amber-100",
-        textAccent: "text-amber-600",
-        progressGradient: "from-amber-400 to-orange-500",
-        badgeBg: "bg-amber-100",
-        badgeText: "text-amber-700",
-      };
-    }
-    if (isStreak) {
-      return {
-        bgLight: "bg-violet-100",
-        textAccent: "text-violet-600",
-        progressGradient: "from-violet-400 to-fuchsia-500",
-        badgeBg: "bg-violet-100",
-        badgeText: "text-violet-700",
-      };
-    }
     return {
-      bgLight: "bg-emerald-100",
-      textAccent: "text-emerald-600",
+      bgLight: "bg-slate-100",
+      textAccent: "text-slate-600",
       progressGradient: "from-emerald-400 to-teal-500",
-      badgeBg: "bg-emerald-100",
-      badgeText: "text-emerald-700",
+      badgeBg: "bg-slate-100",
+      badgeText: "text-slate-600",
     };
   };
 
@@ -93,7 +75,7 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
   const badge = getBadge();
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-md p-4 hover:shadow-lg transition-shadow">
+    <div className="bg-white rounded-2xl border border-rose-200 p-4">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
@@ -120,17 +102,17 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
         // Goal one-time : bouton pour marquer comme fait
         <div className="space-y-3">
           {goal.is_completed ? (
-            <div className="flex items-center justify-center gap-2 py-4 bg-amber-50 rounded-xl">
-              <Trophy size={24} className="text-amber-500" />
+            <div className="flex items-center justify-center gap-2 py-4 bg-emerald-50 rounded-xl">
+              <Trophy size={24} className="text-emerald-500" />
               <div>
-                <p className="font-semibold text-amber-700">Objectif atteint !</p>
-                {goal.completed_at && <p className="text-xs text-amber-600">Le {new Date(goal.completed_at).toLocaleDateString("fr-FR")}</p>}
+                <p className="font-semibold text-emerald-700">Objectif atteint !</p>
+                {goal.completed_at && <p className="text-xs text-emerald-600">Le {new Date(goal.completed_at).toLocaleDateString("fr-FR")}</p>}
               </div>
             </div>
           ) : (
             <button
               onClick={markAsCompleted}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-linear-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-semibold rounded-xl transition-all cursor-pointer shadow-lg shadow-amber-500/30"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-all cursor-pointer"
             >
               <Check size={18} />
               Marquer comme accompli
@@ -155,7 +137,7 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
             </div>
 
             {goal.is_completed && (
-              <div className="flex items-center gap-1 text-amber-500">
+              <div className="flex items-center gap-1 text-emerald-500">
                 <Trophy size={16} />
                 <span className="text-xs font-semibold">Objectif atteint !</span>
               </div>
@@ -207,9 +189,9 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
       {goal.reward && (
         <div className="mt-3 pt-3 border-t border-slate-100">
           <div className="flex items-center gap-2 text-xs">
-            <Gift size={14} className="text-amber-500" />
+            <Gift size={14} className="text-slate-500" />
             <span className="text-slate-600">
-              <span className="font-medium text-amber-600">Récompense :</span> {goal.reward}
+              <span className="font-medium text-slate-700">Récompense :</span> {goal.reward}
             </span>
           </div>
         </div>

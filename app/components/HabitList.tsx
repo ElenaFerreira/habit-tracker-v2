@@ -104,6 +104,32 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
     fetchHabitsWithStatus();
   }, [fetchHabitsWithStatus]);
 
+  // Mise à jour optimiste quand une habitude est cochée
+  const handleHabitToggle = useCallback(
+    (habitId: string, newCompleted: boolean) => {
+      // Mise à jour optimiste des habitudes
+      setHabits((prev) => prev.map((h) => (h.id === habitId ? { ...h, completed_today: newCompleted } : h)));
+
+      // Calcul optimiste du streak
+      const updatedHabits = habits.map((h) => (h.id === habitId ? { ...h, completed_today: newCompleted } : h));
+      const allCompleted = updatedHabits.every((h) => h.completed_today);
+      const wasAllCompleted = habits.every((h) => h.completed_today);
+
+      if (allCompleted && !wasAllCompleted) {
+        // On vient de compléter toutes les habitudes -> +1 streak
+        setStreak((s) => s + 1);
+      } else if (!allCompleted && wasAllCompleted) {
+        // On vient de décocher une habitude alors que tout était fait -> -1 streak (si > 0)
+        setStreak((s) => Math.max(0, s - 1));
+      }
+
+      // Refresh en arrière-plan pour synchroniser
+      fetchHabitsWithStatus();
+      onHabitToggle?.();
+    },
+    [habits, fetchHabitsWithStatus, onHabitToggle]
+  );
+
   const completedCount = habits.filter((h) => h.completed_today).length;
   const totalCount = habits.length;
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
@@ -127,30 +153,30 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
       {/* Colonne gauche : Date + Streak */}
       <div className="flex flex-col gap-4">
         {/* Bento Card: Date d'aujourd'hui */}
-        <div className="bento-card bg-linear-to-br from-amber-400 via-orange-400 to-rose-400 p-5 rounded-3xl text-white relative overflow-hidden">
-          <div className="absolute top-3 right-3 opacity-20">
-            <Calendar size={40} strokeWidth={1.5} />
+        <div className="bento-card bg-slate-50 p-5 rounded-3xl border border-slate-200 relative overflow-hidden">
+          <div className="absolute top-3 right-3 opacity-10">
+            <Calendar size={40} strokeWidth={1.5} className="text-slate-800" />
           </div>
           <div className="relative z-10">
-            <p className="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Aujourd'hui</p>
-            <p className="text-4xl font-black leading-none mb-0.5">{dateInfo.day}</p>
-            <p className="text-lg font-semibold capitalize">{dateInfo.month}</p>
-            <p className="text-white/70 text-xs capitalize mt-1">{dateInfo.weekday}</p>
+            <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">Aujourd'hui</p>
+            <p className="text-4xl font-black leading-none mb-0.5 text-slate-800">{dateInfo.day}</p>
+            <p className="text-lg font-semibold capitalize text-slate-700">{dateInfo.month}</p>
+            <p className="text-slate-400 text-xs capitalize mt-1">{dateInfo.weekday}</p>
           </div>
         </div>
 
         {/* Bento Card: Streak */}
-        <div className="bento-card bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 p-5 rounded-3xl text-white relative overflow-hidden">
-          <div className="absolute top-3 right-3 opacity-20">
-            <Flame size={40} strokeWidth={1.5} />
+        <div className="bento-card bg-amber-50 p-5 rounded-3xl border border-amber-200 relative overflow-hidden">
+          <div className={`absolute top-3 right-3 ${streak >= 1 ? "opacity-30" : "opacity-10"}`}>
+            <Flame size={40} strokeWidth={1.5} className={streak >= 1 ? "text-orange-500" : "text-amber-800"} />
           </div>
           <div className="relative z-10">
-            <p className="text-white/80 text-xs font-medium uppercase tracking-wider mb-1">Série</p>
+            <p className="text-amber-600 text-xs font-medium uppercase tracking-wider mb-1">Série</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-4xl font-black leading-none">{streak}</p>
-              <p className="text-lg font-semibold">jour{streak > 1 ? "s" : ""}</p>
+              <p className="text-4xl font-black leading-none text-slate-800">{streak}</p>
+              <p className="text-lg font-semibold text-slate-700">jour{streak > 1 ? "s" : ""}</p>
             </div>
-            <p className="text-white/70 text-xs mt-1">
+            <p className="text-slate-400 text-xs mt-1">
               {streak === 0 ? "Complète tout pour démarrer !" : streak >= 7 ? "🔥 En feu !" : "Continue comme ça !"}
             </p>
           </div>
@@ -161,15 +187,15 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
       </div>
 
       {/* Bento Card: Progression + Habitudes */}
-      <div className="md:col-span-2 bento-card bg-white/70 backdrop-blur-sm p-6 rounded-3xl border border-white/50 shadow-lg shadow-orange-900/5">
+      <div className="md:col-span-2 bento-card bg-emerald-50 p-6 rounded-3xl border border-emerald-200">
         {totalCount > 0 ? (
           <div className="space-y-5">
             {/* Barre de progression */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-amber-100 rounded-xl flex items-center justify-center">
-                    <TrendingUp size={16} className="text-amber-600" />
+                  <div className="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <TrendingUp size={16} className="text-emerald-600" />
                   </div>
                   <span className="text-slate-600 font-medium">Progression</span>
                 </div>
@@ -180,7 +206,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
               </div>
               <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-linear-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-500"
+                  className="h-full bg-linear-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -189,28 +215,20 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
             {/* Liste des habitudes */}
             <div className="space-y-2.5 pt-2">
               {habits.map((habit) => (
-                <HabitCheckbox
-                  key={habit.id}
-                  habit={habit}
-                  date={today}
-                  onToggle={() => {
-                    fetchHabitsWithStatus();
-                    onHabitToggle?.();
-                  }}
-                />
+                <HabitCheckbox key={habit.id} habit={habit} date={today} onToggle={(newCompleted) => handleHabitToggle(habit.id, newCompleted)} />
               ))}
             </div>
           </div>
         ) : (
           <div className="text-center py-8 px-4">
-            <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Sparkles size={24} className="text-amber-500" />
+            <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Sparkles size={24} className="text-emerald-500" />
             </div>
             <h3 className="text-lg font-semibold text-slate-800 mb-2">Pas encore d'habitudes</h3>
             <p className="text-slate-500 text-sm mb-5">Commence par créer tes premières habitudes à suivre !</p>
             <button
               onClick={onOpenSettings}
-              className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-xl transition-colors cursor-pointer"
+              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-colors cursor-pointer"
             >
               Configurer mes habitudes
             </button>
