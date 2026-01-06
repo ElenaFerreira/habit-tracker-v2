@@ -5,11 +5,197 @@ import { createClient } from "@/lib/supabase/client";
 import { Habit } from "@/lib/types";
 import { X, Plus, Trash2, GripVertical, ListChecks, Pencil, Save } from "lucide-react";
 import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface HabitSettingsProps {
   isOpen: boolean;
   onClose: () => void;
   onHabitsChange: () => void;
+}
+
+interface SortableHabitItemProps {
+  habit: Habit;
+  isEditing: boolean;
+  editingHabitName: string;
+  editingIconFor: string | null;
+  activeCategory: number;
+  onStartEdit: (habit: Habit) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: (habitId: string) => void;
+  onDelete: (habitId: string) => void;
+  onUpdateHabit: (habitId: string, updates: Partial<Habit>) => void;
+  onEditingHabitNameChange: (name: string) => void;
+  onEditingIconForChange: (id: string | null) => void;
+  onActiveCategoryChange: (idx: number) => void;
+  onShowIconPickerChange: (show: boolean) => void;
+}
+
+function SortableHabitItem({
+  habit,
+  isEditing,
+  editingHabitName,
+  editingIconFor,
+  activeCategory,
+  onStartEdit,
+  onCancelEdit,
+  onSaveEdit,
+  onDelete,
+  onUpdateHabit,
+  onEditingHabitNameChange,
+  onEditingIconForChange,
+  onActiveCategoryChange,
+  onShowIconPickerChange,
+}: SortableHabitItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: habit.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+        <GripVertical size={16} className="text-slate-300" />
+      </div>
+
+      {/* Icône */}
+      <div className="relative">
+        {isEditing ? (
+          <>
+            <button
+              onClick={() => {
+                onEditingIconForChange(editingIconFor === habit.id ? null : habit.id);
+                onShowIconPickerChange(false);
+              }}
+              className="w-10 h-10 bg-amber-100 hover:bg-amber-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+              title="Changer l'icône"
+            >
+              <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+            </button>
+
+            {/* Mini picker pour modifier l'icône */}
+            {editingIconFor === habit.id && (
+              <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-30 w-80 max-w-[calc(100vw-3rem)]">
+                {/* Bouton de fermeture */}
+                <button
+                  onClick={() => onEditingIconForChange(null)}
+                  className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  aria-label="Fermer le choix d'icône"
+                >
+                  <X size={14} />
+                </button>
+
+                {/* Catégories */}
+                <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
+                  {ICON_CATEGORIES.map((cat, idx) => (
+                    <button
+                      key={cat.name}
+                      onClick={() => onActiveCategoryChange(idx)}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
+                        activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      }`}
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Icônes */}
+                <div className="grid grid-cols-4 gap-2">
+                  {ICON_CATEGORIES[activeCategory].icons.map((item) => {
+                    const IconComp = item.icon;
+                    return (
+                      <button
+                        key={item.name}
+                        onClick={() => {
+                          onUpdateHabit(habit.id, { emoji: item.name });
+                          onEditingIconForChange(null);
+                        }}
+                        className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
+                          habit.emoji === item.name ? "bg-amber-500 text-white" : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
+                        }`}
+                      >
+                        <IconComp size={22} />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+            <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+          </div>
+        )}
+      </div>
+
+      {/* Nom - en mode édition ou affichage */}
+      {isEditing ? (
+        <input
+          type="text"
+          value={editingHabitName}
+          onChange={(e) => onEditingHabitNameChange(e.target.value)}
+          onBlur={() => onSaveEdit(habit.id)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              onSaveEdit(habit.id);
+            } else if (e.key === "Escape") {
+              onCancelEdit();
+            }
+          }}
+          className="flex-1 min-w-0 px-3 py-2 bg-white border border-amber-500/30 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+          placeholder="Nom de l'habitude"
+          autoFocus
+        />
+      ) : (
+        <p className="flex-1 min-w-0 text-slate-700 font-medium truncate">{habit.name}</p>
+      )}
+
+      {/* Boutons d'action */}
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {isEditing ? (
+          <>
+            <button
+              onClick={() => onSaveEdit(habit.id)}
+              className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+              title="Sauvegarder"
+            >
+              <Save size={16} />
+            </button>
+            <button
+              onClick={onCancelEdit}
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              title="Annuler"
+            >
+              <X size={16} />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => onStartEdit(habit)}
+              className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+              title="Modifier"
+            >
+              <Pencil size={16} />
+            </button>
+            <button
+              onClick={() => onDelete(habit.id)}
+              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+              title="Supprimer"
+            >
+              <Trash2 size={16} />
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function HabitSettings({ isOpen, onClose, onHabitsChange }: HabitSettingsProps) {
@@ -23,6 +209,14 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   const [editingHabitName, setEditingHabitName] = useState<string>(""); // Nom temporaire en cours d'édition
   const [activeCategory, setActiveCategory] = useState(0);
   const supabase = createClient();
+
+  // Configuration des sensors pour le drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Fermer les pickers avec la touche Échap
   useEffect(() => {
@@ -129,6 +323,43 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     }
   }
 
+  async function updateHabitsOrder(newOrder: Habit[]) {
+    // Mise à jour optimiste de l'ordre local
+    setHabits(newOrder);
+
+    // Mettre à jour les order_index dans la base de données
+    const updates = newOrder.map((habit, index) => ({
+      id: habit.id,
+      order_index: index,
+    }));
+
+    // Mettre à jour toutes les habitudes
+    for (const update of updates) {
+      const { error } = await supabase.from("habits").update({ order_index: update.order_index }).eq("id", update.id);
+      if (error) {
+        console.error("Erreur lors de la mise à jour de l'ordre:", error);
+        // En cas d'erreur, recharger depuis la base de données
+        await fetchHabits();
+        return;
+      }
+    }
+
+    // Notifier le changement (sans recharger car on a déjà mis à jour le state)
+    onHabitsChange();
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = habits.findIndex((item) => item.id === active.id);
+      const newIndex = habits.findIndex((item) => item.id === over.id);
+      const newOrder = arrayMove(habits, oldIndex, newIndex);
+      // Mettre à jour l'ordre dans la base de données
+      await updateHabitsOrder(newOrder);
+    }
+  }
+
   function startEditHabit(habit: Habit) {
     setEditingHabitId(habit.id);
     setEditingHabitName(habit.name);
@@ -174,151 +405,34 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
           {/* Liste des habitudes existantes */}
           {habits.length > 0 ? (
-            <div className="space-y-3 mb-8">
-              {habits.map((habit) => {
-                const isEditing = editingHabitId === habit.id;
-                return (
-                  <div key={habit.id} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
-                    <GripVertical size={16} className="text-slate-300 cursor-grab" />
-
-                    {/* Icône */}
-                    <div className="relative">
-                      {isEditing ? (
-                        <>
-                          <button
-                            onClick={() => {
-                              setEditingIconFor(editingIconFor === habit.id ? null : habit.id);
-                              setShowIconPicker(false);
-                            }}
-                            className="w-10 h-10 bg-amber-100 hover:bg-amber-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
-                            title="Changer l'icône"
-                          >
-                            <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
-                          </button>
-
-                          {/* Mini picker pour modifier l'icône */}
-                          {editingIconFor === habit.id && (
-                            <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-30 w-80 max-w-[calc(100vw-3rem)]">
-                              {/* Bouton de fermeture */}
-                              <button
-                                onClick={() => setEditingIconFor(null)}
-                                className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
-                                aria-label="Fermer le choix d'icône"
-                              >
-                                <X size={14} />
-                              </button>
-
-                              {/* Catégories */}
-                              <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
-                                {ICON_CATEGORIES.map((cat, idx) => (
-                                  <button
-                                    key={cat.name}
-                                    onClick={() => setActiveCategory(idx)}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                                      activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                                    }`}
-                                  >
-                                    {cat.name}
-                                  </button>
-                                ))}
-                              </div>
-
-                              {/* Icônes */}
-                              <div className="grid grid-cols-4 gap-2">
-                                {ICON_CATEGORIES[activeCategory].icons.map((item) => {
-                                  const IconComp = item.icon;
-                                  return (
-                                    <button
-                                      key={item.name}
-                                      onClick={() => {
-                                        updateHabit(habit.id, { emoji: item.name });
-                                        setEditingIconFor(null);
-                                      }}
-                                      className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
-                                        habit.emoji === item.name
-                                          ? "bg-amber-500 text-white"
-                                          : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
-                                      }`}
-                                    >
-                                      <IconComp size={22} />
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      ) : (
-                        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                          <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Nom - en mode édition ou affichage */}
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        value={editingHabitName}
-                        onChange={(e) => setEditingHabitName(e.target.value)}
-                        onBlur={() => saveEditHabit(habit.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            saveEditHabit(habit.id);
-                          } else if (e.key === "Escape") {
-                            cancelEditHabit();
-                          }
-                        }}
-                        className="flex-1 min-w-0 px-3 py-2 bg-white border border-amber-500/30 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
-                        placeholder="Nom de l'habitude"
-                        autoFocus
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={habits.map((h) => h.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-3 mb-8">
+                  {habits.map((habit) => {
+                    const isEditing = editingHabitId === habit.id;
+                    return (
+                      <SortableHabitItem
+                        key={habit.id}
+                        habit={habit}
+                        isEditing={isEditing}
+                        editingHabitName={editingHabitName}
+                        editingIconFor={editingIconFor}
+                        activeCategory={activeCategory}
+                        onStartEdit={startEditHabit}
+                        onCancelEdit={cancelEditHabit}
+                        onSaveEdit={saveEditHabit}
+                        onDelete={deleteHabit}
+                        onUpdateHabit={updateHabit}
+                        onEditingHabitNameChange={setEditingHabitName}
+                        onEditingIconForChange={setEditingIconFor}
+                        onActiveCategoryChange={setActiveCategory}
+                        onShowIconPickerChange={setShowIconPicker}
                       />
-                    ) : (
-                      <p className="flex-1 min-w-0 text-slate-700 font-medium truncate">{habit.name}</p>
-                    )}
-
-                    {/* Boutons d'action */}
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {isEditing ? (
-                        <>
-                          <button
-                            onClick={() => saveEditHabit(habit.id)}
-                            className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                            title="Sauvegarder"
-                          >
-                            <Save size={16} />
-                          </button>
-                          <button
-                            onClick={cancelEditHabit}
-                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
-                            title="Annuler"
-                          >
-                            <X size={16} />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => startEditHabit(habit)}
-                            className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                            title="Modifier"
-                          >
-                            <Pencil size={16} />
-                          </button>
-                          <button
-                            onClick={() => deleteHabit(habit.id)}
-                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                            title="Supprimer"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                    );
+                  })}
+                </div>
+              </SortableContext>
+            </DndContext>
           ) : (
             <div className="text-center py-12 mb-8">
               <div className="text-5xl mb-4">📝</div>
