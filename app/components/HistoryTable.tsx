@@ -6,6 +6,7 @@ import { Habit, StepEntry, MoodType, MoodEntry, MOOD_CONFIG } from "@/lib/types"
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { HabitIcon } from "@/lib/icons";
 import { Check, ChevronLeft, ChevronRight, Footprints, Calendar, Loader2, Sparkles, Home } from "lucide-react";
+import MonthlyStats from "./MonthlyStats";
 
 // Ordre des moods pour l'affichage dans le sélecteur
 const MOOD_ORDER: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
@@ -496,6 +497,9 @@ export default function HistoryTable() {
 
       {/* Note d'info */}
       <p className="text-center text-slate-400 text-sm">Clique sur une case pour modifier l'état d'une habitude ou éditer tes pas.</p>
+
+      {/* Statistiques mensuelles */}
+      <MonthlyStats />
     </div>
   );
 }
