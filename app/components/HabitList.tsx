@@ -33,6 +33,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
   const [habits, setHabits] = useState<HabitWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
   const today = useToday();
   const supabase = createClient();
 
@@ -43,6 +44,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
     if (!habitsData || habitsData.length === 0) {
       setHabits([]);
       setStreak(0);
+      setLongestStreak(0);
       setLoading(false);
       return;
     }
@@ -83,7 +85,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       completionsByDate.get(c.date)!.add(c.habit_id);
     });
 
-    // Calculer le streak en remontant dans le temps
+    // Calculer le streak actuel en remontant dans le temps
     let currentStreak = 0;
     let checkDate = todayCompleted ? today : getPreviousDate(today);
 
@@ -97,7 +99,41 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       }
     }
 
+    // Calculer la série la plus longue
+    let maxStreak = 0;
+
+    // Créer un Set des dates parfaites pour un accès rapide
+    const perfectDaysSet = new Set<string>();
+    completionsByDate.forEach((habitIds, date) => {
+      if (habitIds.size === totalHabits) {
+        perfectDaysSet.add(date);
+      }
+    });
+
+    // Parcourir toutes les dates depuis 90 jours en arrière jusqu'à aujourd'hui
+    // pour trouver la série la plus longue
+    let currentMaxStreak = 0;
+    let checkDateForMax = formatDateLocal(ninetyDaysAgo);
+
+    while (checkDateForMax <= today) {
+      if (perfectDaysSet.has(checkDateForMax)) {
+        currentMaxStreak++;
+        maxStreak = Math.max(maxStreak, currentMaxStreak);
+      } else {
+        currentMaxStreak = 0;
+      }
+
+      // Passer à la date suivante
+      const nextDate = new Date(checkDateForMax + "T00:00:00");
+      nextDate.setDate(nextDate.getDate() + 1);
+      checkDateForMax = formatDateLocal(nextDate);
+    }
+
+    // Vérifier aussi le streak actuel qui pourrait être plus long
+    maxStreak = Math.max(maxStreak, currentStreak);
+
     setStreak(currentStreak);
+    setLongestStreak(maxStreak);
     setLoading(false);
   }, [supabase, today]);
 
@@ -173,13 +209,26 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
           </div>
           <div className="relative z-10">
             <p className="text-amber-600 text-xs font-medium uppercase tracking-wider mb-1">Streaks</p>
-            <div className="flex items-baseline gap-2">
-              <p className="text-4xl font-black leading-none text-slate-800">{streak}</p>
-              <p className="text-lg font-semibold text-slate-700">jour{streak > 1 ? "s" : ""}</p>
+            <div className="space-y-3">
+              {/* Streak actuel */}
+              <div>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-4xl font-black leading-none text-slate-800">{streak}</p>
+                  <p className="text-lg font-semibold text-slate-700">jour{streak > 1 ? "s" : ""}</p>
+                </div>
+                <p className="text-slate-400 text-xs mt-1">
+                  {streak === 0 ? "Complète tout pour démarrer !" : streak >= 7 ? "🔥 En feu !" : "Continue comme ça !"}
+                </p>
+              </div>
+
+              {/* Série la plus longue */}
+              <div className="pt-2 border-t border-amber-200">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs text-amber-600 font-medium">Série la plus longue</p>
+                  <p className="text-lg font-bold text-slate-800">{longestStreak}</p>
+                </div>
+              </div>
             </div>
-            <p className="text-slate-400 text-xs mt-1">
-              {streak === 0 ? "Complète tout pour démarrer !" : streak >= 7 ? "🔥 En feu !" : "Continue comme ça !"}
-            </p>
           </div>
         </div>
 
