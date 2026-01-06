@@ -56,6 +56,23 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     };
   }, [showIconPicker]);
 
+  // Fermer la modale avec la touche Échap
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && !showIconPicker) {
+        onClose();
+      }
+    }
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, showIconPicker, onClose]);
+
   async function fetchHabits() {
     const { data } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
     if (data) setHabits(data);
@@ -223,7 +240,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
           {/* Liste des goals existants */}
           {goals.length > 0 ? (
             <div className="space-y-3 mb-8">
@@ -361,7 +378,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               </div>
 
               {/* Nom + Icône pour one_time sans habitude */}
-              <div className="flex gap-2 items-end">
+              <div className="flex gap-2 items-end min-w-0">
                 {goalType === "one_time" && !selectedHabit && (
                   <div className="relative">
                     <label className="block text-xs font-medium text-slate-600 mb-2">Icône</label>
@@ -373,7 +390,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                     </button>
 
                     {showIconPicker && (
-                      <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80">
+                      <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80 max-w-[calc(100vw-3rem)]">
                         {/* Bouton de fermeture */}
                         <button
                           onClick={() => setShowIconPicker(false)}
@@ -422,7 +439,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   </div>
                 )}
 
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <label className="block text-xs font-medium text-slate-600 mb-2">
                     Nom de l'objectif <span className="text-rose-500">*</span>
                   </label>

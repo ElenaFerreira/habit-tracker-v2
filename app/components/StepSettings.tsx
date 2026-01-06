@@ -25,6 +25,23 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
     }
   }, [isOpen]);
 
+  // Fermer la modale avec la touche Échap
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    }
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   async function fetchSettings() {
     setLoading(true);
     const {
@@ -105,20 +122,13 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-pulse text-slate-400">Chargement...</div>
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Description */}
-              <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                <p className="text-sm text-slate-700">
-                  Définis ton objectif quotidien de pas. Cet objectif sera utilisé pour calculer ta progression et ta moyenne hebdomadaire.
-                </p>
-              </div>
-
               {/* Formulaire */}
               <div className="space-y-4">
                 <div>
@@ -160,7 +170,7 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
                 <button
                   onClick={saveSettings}
                   disabled={saving || dailyStepGoal < 1}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:cursor-not-allowed cursor-pointer text-white font-semibold rounded-xl transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-200 disabled:cursor-not-allowed cursor-pointer text-white font-semibold rounded-xl transition-all"
                 >
                   <Save size={18} />
                   {saving ? "Enregistrement..." : "Enregistrer"}

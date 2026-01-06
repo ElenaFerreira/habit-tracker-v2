@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Habit } from "@/lib/types";
-import { X, Plus, Trash2, GripVertical, ListChecks } from "lucide-react";
+import { X, Plus, Trash2, GripVertical, ListChecks, Pencil, Save } from "lucide-react";
 import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
 
 interface HabitSettingsProps {
@@ -19,6 +19,8 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   const [loading, setLoading] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [editingIconFor, setEditingIconFor] = useState<string | null>(null); // ID de l'habitude en édition
+  const [editingHabitId, setEditingHabitId] = useState<string | null>(null); // ID de l'habitude en mode édition (nom + icône)
+  const [editingHabitName, setEditingHabitName] = useState<string>(""); // Nom temporaire en cours d'édition
   const [activeCategory, setActiveCategory] = useState(0);
   const supabase = createClient();
 
@@ -39,6 +41,23 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [showIconPicker, editingIconFor]);
+
+  // Fermer la modale avec la touche Échap
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && !showIconPicker && !editingIconFor) {
+        onClose();
+      }
+    }
+
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, showIconPicker, editingIconFor, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -110,6 +129,25 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     }
   }
 
+  function startEditHabit(habit: Habit) {
+    setEditingHabitId(habit.id);
+    setEditingHabitName(habit.name);
+    setShowIconPicker(false); // Fermer le picker de nouvelle habitude
+  }
+
+  function cancelEditHabit() {
+    setEditingHabitId(null);
+    setEditingHabitName("");
+    setEditingIconFor(null);
+  }
+
+  async function saveEditHabit(habitId: string) {
+    if (!editingHabitName.trim()) return;
+
+    await updateHabit(habitId, { name: editingHabitName.trim() });
+    cancelEditHabit();
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -133,94 +171,153 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
           {/* Liste des habitudes existantes */}
           {habits.length > 0 ? (
             <div className="space-y-3 mb-8">
-              {habits.map((habit) => (
-                <div key={habit.id} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
-                  <GripVertical size={16} className="text-slate-300 cursor-grab" />
+              {habits.map((habit) => {
+                const isEditing = editingHabitId === habit.id;
+                return (
+                  <div key={habit.id} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
+                    <GripVertical size={16} className="text-slate-300 cursor-grab" />
 
-                  {/* Icône cliquable */}
-                  <div className="relative">
-                    <button
-                      onClick={() => {
-                        setEditingIconFor(editingIconFor === habit.id ? null : habit.id);
-                        setShowIconPicker(false); // Fermer le picker de nouvelle habitude
-                      }}
-                      className="w-10 h-10 bg-amber-100 hover:bg-amber-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
-                      title="Changer l'icône"
-                    >
-                      <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
-                    </button>
+                    {/* Icône */}
+                    <div className="relative">
+                      {isEditing ? (
+                        <>
+                          <button
+                            onClick={() => {
+                              setEditingIconFor(editingIconFor === habit.id ? null : habit.id);
+                              setShowIconPicker(false);
+                            }}
+                            className="w-10 h-10 bg-amber-100 hover:bg-amber-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+                            title="Changer l'icône"
+                          >
+                            <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+                          </button>
 
-                    {/* Mini picker pour modifier l'icône */}
-                    {editingIconFor === habit.id && (
-                      <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-30 w-80">
-                        {/* Bouton de fermeture */}
-                        <button
-                          onClick={() => setEditingIconFor(null)}
-                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
-                          aria-label="Fermer le choix d'icône"
-                        >
-                          <X size={14} />
-                        </button>
-
-                        {/* Catégories */}
-                        <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
-                          {ICON_CATEGORIES.map((cat, idx) => (
-                            <button
-                              key={cat.name}
-                              onClick={() => setActiveCategory(idx)}
-                              className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                                activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                              }`}
-                            >
-                              {cat.name}
-                            </button>
-                          ))}
-                        </div>
-
-                        {/* Icônes */}
-                        <div className="grid grid-cols-4 gap-2">
-                          {ICON_CATEGORIES[activeCategory].icons.map((item) => {
-                            const IconComp = item.icon;
-                            return (
+                          {/* Mini picker pour modifier l'icône */}
+                          {editingIconFor === habit.id && (
+                            <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-30 w-80 max-w-[calc(100vw-3rem)]">
+                              {/* Bouton de fermeture */}
                               <button
-                                key={item.name}
-                                onClick={() => {
-                                  updateHabit(habit.id, { emoji: item.name });
-                                  setEditingIconFor(null);
-                                }}
-                                className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
-                                  habit.emoji === item.name
-                                    ? "bg-amber-500 text-white"
-                                    : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
-                                }`}
+                                onClick={() => setEditingIconFor(null)}
+                                className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                                aria-label="Fermer le choix d'icône"
                               >
-                                <IconComp size={22} />
+                                <X size={14} />
                               </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
 
-                  <input
-                    type="text"
-                    value={habit.name}
-                    onChange={(e) => updateHabit(habit.id, { name: e.target.value })}
-                    className="flex-1 bg-transparent text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 rounded-lg px-2 py-1"
-                  />
-                  <button
-                    onClick={() => deleteHabit(habit.id)}
-                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
+                              {/* Catégories */}
+                              <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
+                                {ICON_CATEGORIES.map((cat, idx) => (
+                                  <button
+                                    key={cat.name}
+                                    onClick={() => setActiveCategory(idx)}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
+                                      activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                    }`}
+                                  >
+                                    {cat.name}
+                                  </button>
+                                ))}
+                              </div>
+
+                              {/* Icônes */}
+                              <div className="grid grid-cols-4 gap-2">
+                                {ICON_CATEGORIES[activeCategory].icons.map((item) => {
+                                  const IconComp = item.icon;
+                                  return (
+                                    <button
+                                      key={item.name}
+                                      onClick={() => {
+                                        updateHabit(habit.id, { emoji: item.name });
+                                        setEditingIconFor(null);
+                                      }}
+                                      className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
+                                        habit.emoji === item.name
+                                          ? "bg-amber-500 text-white"
+                                          : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
+                                      }`}
+                                    >
+                                      <IconComp size={22} />
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                          <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Nom - en mode édition ou affichage */}
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editingHabitName}
+                        onChange={(e) => setEditingHabitName(e.target.value)}
+                        onBlur={() => saveEditHabit(habit.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            saveEditHabit(habit.id);
+                          } else if (e.key === "Escape") {
+                            cancelEditHabit();
+                          }
+                        }}
+                        className="flex-1 min-w-0 px-3 py-2 bg-white border border-amber-500/30 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                        placeholder="Nom de l'habitude"
+                        autoFocus
+                      />
+                    ) : (
+                      <p className="flex-1 min-w-0 text-slate-700 font-medium truncate">{habit.name}</p>
+                    )}
+
+                    {/* Boutons d'action */}
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {isEditing ? (
+                        <>
+                          <button
+                            onClick={() => saveEditHabit(habit.id)}
+                            className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            title="Sauvegarder"
+                          >
+                            <Save size={16} />
+                          </button>
+                          <button
+                            onClick={cancelEditHabit}
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                            title="Annuler"
+                          >
+                            <X size={16} />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => startEditHabit(habit)}
+                            className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+                            title="Modifier"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={() => deleteHabit(habit.id)}
+                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                            title="Supprimer"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 mb-8">
@@ -233,7 +330,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
           {/* Ajouter une habitude */}
           <div className="border-t border-slate-100 pt-6">
             <p className="text-sm font-semibold text-slate-700 mb-4">Nouvelle habitude</p>
-            <div className="flex gap-2">
+            <div className="flex gap-2 min-w-0">
               {/* Icon picker button */}
               <div className="relative">
                 <button
@@ -247,7 +344,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 </button>
 
                 {showIconPicker && (
-                  <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80">
+                  <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80 max-w-[calc(100vw-3rem)]">
                     {/* Bouton de fermeture */}
                     <button
                       onClick={() => setShowIconPicker(false)}
@@ -305,14 +402,14 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 onChange={(e) => setNewHabitName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addHabit()}
                 placeholder="Ex: Méditer 10 min"
-                className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                className="flex-1 min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
               />
 
               {/* Add button */}
               <button
                 onClick={addHabit}
                 disabled={loading || !newHabitName.trim()}
-                className="px-4 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-200 disabled:cursor-not-allowed cursor-pointer text-white rounded-xl transition-colors"
+                className="px-4 py-3 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-200 disabled:cursor-not-allowed cursor-pointer text-white rounded-xl transition-colors"
               >
                 <Plus size={20} />
               </button>
