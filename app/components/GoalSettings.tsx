@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Goal, GoalType, GoalPeriod, Habit } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { X, Plus, Trash2, Target, Flame, Calendar, Star, Gift, Pencil, Save } from "lucide-react";
-import { HabitIcon, ICON_CATEGORIES } from "./HabitSettings";
+import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
 
 interface GoalSettingsProps {
   isOpen: boolean;
@@ -38,6 +38,23 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
       fetchHabits();
     }
   }, [isOpen]);
+
+  // Fermer le picker d'icône avec la touche Échap
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setShowIconPicker(false);
+      }
+    }
+
+    if (showIconPicker) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showIconPicker]);
 
   async function fetchHabits() {
     const { data } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
@@ -309,7 +326,9 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
             <div className="space-y-4">
               {/* Type d'objectif */}
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-2">Type d'objectif</label>
+                <label className="block text-xs font-medium text-slate-600 mb-2">
+                  Type d'objectif <span className="text-rose-500">*</span>
+                </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setGoalType("one_time")}
@@ -354,8 +373,17 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                     </button>
 
                     {showIconPicker && (
-                      <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-20 w-72">
-                        <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1">
+                      <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80 relative">
+                        {/* Bouton de fermeture */}
+                        <button
+                          onClick={() => setShowIconPicker(false)}
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          aria-label="Fermer le choix d'icône"
+                        >
+                          <X size={14} />
+                        </button>
+
+                        <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
                           {ICON_CATEGORIES.map((cat, idx) => (
                             <button
                               key={cat.name}
@@ -395,7 +423,9 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 )}
 
                 <div className="flex-1">
-                  <label className="block text-xs font-medium text-slate-600 mb-2">Nom de l'objectif</label>
+                  <label className="block text-xs font-medium text-slate-600 mb-2">
+                    Nom de l'objectif <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     type="text"
                     value={goalName}
@@ -416,7 +446,8 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               {(needsHabit || (goalType === "one_time" && habits.length > 0)) && (
                 <div>
                   <label className="block text-xs font-medium text-slate-600 mb-2">
-                    Habitude concernée {goalType === "one_time" && <span className="text-slate-400">(optionnel)</span>}
+                    Habitude concernée{" "}
+                    {goalType === "one_time" ? <span className="text-slate-400">(optionnel)</span> : <span className="text-rose-500">*</span>}
                   </label>
                   <select
                     value={selectedHabit}
@@ -438,7 +469,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-medium text-slate-600 mb-2">
-                      {goalType === "streak" ? "Jours consécutifs" : "Nombre de fois"}
+                      {goalType === "streak" ? "Jours consécutifs" : "Nombre de fois"} <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -451,7 +482,9 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
 
                   {goalType === "quantitative" && (
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-2">Période</label>
+                      <label className="block text-xs font-medium text-slate-600 mb-2">
+                        Période <span className="text-rose-500">*</span>
+                      </label>
                       <select
                         value={period}
                         onChange={(e) => setPeriod(e.target.value as GoalPeriod)}
@@ -471,7 +504,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 <label className="block text-xs font-medium text-slate-600 mb-2">
                   <span className="flex items-center gap-1">
                     <Calendar size={12} />
-                    Date limite (optionnel)
+                    Date limite <span className="text-slate-400">(optionnel)</span>
                   </span>
                 </label>
                 <input
@@ -487,7 +520,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 <label className="block text-xs font-medium text-slate-600 mb-2">
                   <span className="flex items-center gap-1">
                     <Gift size={12} />
-                    Récompense (optionnel)
+                    Récompense <span className="text-slate-400">(optionnel)</span>
                   </span>
                 </label>
                 <input

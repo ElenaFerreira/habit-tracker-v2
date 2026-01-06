@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { HabitWithStatus } from "@/lib/types";
 import { Check } from "lucide-react";
-import { HabitIcon } from "./HabitSettings";
+import { HabitIcon } from "@/lib/icons";
 
 interface HabitCheckboxProps {
   habit: HabitWithStatus;

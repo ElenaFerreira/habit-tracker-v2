@@ -4,34 +4,54 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Habit, StepEntry, MoodType, MoodEntry, MOOD_CONFIG } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
-import { HabitIcon } from "./HabitSettings";
-import { Check, ChevronLeft, ChevronRight, Footprints, Calendar, Loader2, Sparkles } from "lucide-react";
+import { HabitIcon } from "@/lib/icons";
+import { Check, ChevronLeft, ChevronRight, Footprints, Calendar, Loader2, Sparkles, Home } from "lucide-react";
 
 // Ordre des moods pour l'affichage dans le sélecteur
 const MOOD_ORDER: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
 
-// Génère les N derniers jours (excluant aujourd'hui)
-function getPastDays(count: number, offset: number = 0): { date: string; dayName: string; dayNum: string; monthName: string }[] {
+// Génère les jours d'une semaine (lundi -> dimanche), weekOffset = 0 = semaine actuelle, 1 = semaine précédente, etc.
+function getWeekDays(weekOffset: number = 0): { date: string; dayName: string; dayNum: string; monthName: string }[] {
   const days: { date: string; dayName: string; dayNum: string; monthName: string }[] = [];
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const dayNames = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+  // Trouver le lundi de la semaine courante
+  const currentWeekMonday = new Date(today);
+  const day = currentWeekMonday.getDay(); // 0 = dimanche, 1 = lundi, ...
+  const diffToMonday = (day + 6) % 7; // 0 si lundi, 1 si mardi, etc.
+  currentWeekMonday.setDate(currentWeekMonday.getDate() - diffToMonday);
+
+  // Appliquer l'offset de semaine (en arrière uniquement)
+  const startOfWeek = new Date(currentWeekMonday);
+  startOfWeek.setDate(startOfWeek.getDate() - weekOffset * 7);
+
+  const dayNames = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
   const monthNames = ["jan", "fév", "mar", "avr", "mai", "juin", "juil", "août", "sep", "oct", "nov", "déc"];
 
-  for (let i = 1 + offset; i <= count + offset; i++) {
-    const date = new Date(today);
-    date.setDate(today.getDate() - i);
+  for (let i = 0; i < 7; i++) {
+    const date = new Date(startOfWeek);
+    date.setDate(startOfWeek.getDate() + i);
+
+    // dayNames commence à Lundi = index 0
+    const dayNameIndex = i % 7;
 
     days.push({
       date: formatDateLocal(date),
-      dayName: dayNames[date.getDay()],
+      dayName: dayNames[dayNameIndex],
       dayNum: date.getDate().toString(),
       monthName: monthNames[date.getMonth()],
     });
   }
 
-  return days.reverse();
+  return days;
+}
+
+// Indique si une date (YYYY-MM-DD) est dans le futur par rapport à aujourd'hui (en se basant sur la date locale formatée)
+function isFutureDate(dateStr: string): boolean {
+  const todayStr = formatDateLocal(new Date()); // ex: "2026-01-06"
+  return dateStr > todayStr;
 }
 
 export default function HistoryTable() {
@@ -44,11 +64,10 @@ export default function HistoryTable() {
   const [stepValue, setStepValue] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [savingCells, setSavingCells] = useState<Set<string>>(new Set());
-  const [pageOffset, setPageOffset] = useState(0);
+  const [pageOffset, setPageOffset] = useState(0); // 0 = semaine actuelle (lundi -> dimanche), 1 = semaine précédente, etc.
   const [userId, setUserId] = useState<string | null>(null);
 
-  const DAYS_PER_PAGE = 7;
-  const days = getPastDays(DAYS_PER_PAGE, pageOffset);
+  const days = getWeekDays(pageOffset);
   const supabase = createClient();
 
   const fetchData = useCallback(async () => {
@@ -64,7 +83,7 @@ export default function HistoryTable() {
     }
     setUserId(user.id);
 
-    const pastDays = getPastDays(DAYS_PER_PAGE, pageOffset);
+    const pastDays = getWeekDays(pageOffset);
     const startDate = pastDays[0]?.date;
     const endDate = pastDays[pastDays.length - 1]?.date;
 
@@ -247,31 +266,48 @@ export default function HistoryTable() {
   return (
     <div className="space-y-4">
       {/* Navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {/* Semaine précédente */}
         <button
-          onClick={() => setPageOffset((p) => p + DAYS_PER_PAGE)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200 transition-all text-slate-600 hover:text-slate-800 cursor-pointer"
+          onClick={() => setPageOffset((p) => p + 1)}
+          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-xs sm:text-sm sm:px-4 sm:py-2.5 hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer"
         >
-          <ChevronLeft size={18} />
-          <span className="text-sm font-medium">Semaine précédente</span>
+          <ChevronLeft size={16} />
+          <span className="font-medium">Semaine précédente</span>
         </button>
 
-        <div className="flex items-center gap-2 text-slate-500">
-          <Calendar size={16} />
-          <span className="text-sm">
-            {days[0]?.dayNum} {days[0]?.monthName} - {days[days.length - 1]?.dayNum} {days[days.length - 1]?.monthName}
-          </span>
+        {/* Période affichée + retour aujourd'hui */}
+        <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-3">
+          <div className="flex items-center justify-center gap-2 text-slate-500 text-xs sm:text-sm">
+            <Calendar size={16} />
+            <span>
+              {days[0]?.dayNum} {days[0]?.monthName} - {days[days.length - 1]?.dayNum} {days[days.length - 1]?.monthName}
+            </span>
+          </div>
+          {pageOffset > 0 && (
+            <button
+              onClick={() => setPageOffset(0)}
+              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 text-xs font-medium transition-all cursor-pointer"
+              title="Retour à aujourd'hui"
+            >
+              <Home size={14} />
+              <span>Aujourd'hui</span>
+            </button>
+          )}
         </div>
 
+        {/* Semaine suivante */}
         <button
-          onClick={() => setPageOffset((p) => Math.max(0, p - DAYS_PER_PAGE))}
+          onClick={() => setPageOffset((p) => Math.max(0, p - 1))}
           disabled={pageOffset === 0}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 transition-all cursor-pointer ${
-            pageOffset === 0 ? "bg-slate-100 text-slate-400 cursor-not-allowed" : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800"
+          className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm sm:px-4 sm:py-2.5 transition-all ${
+            pageOffset === 0
+              ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+              : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 cursor-pointer"
           }`}
         >
-          <span className="text-sm font-medium">Semaine suivante</span>
-          <ChevronRight size={18} />
+          <span className="font-medium">Semaine suivante</span>
+          <ChevronRight size={16} />
         </button>
       </div>
 
@@ -303,6 +339,7 @@ export default function HistoryTable() {
                   </div>
                 </td>
                 {days.map((day) => {
+                  const isFuture = isFutureDate(day.date);
                   const dayMood = moods.get(day.date);
                   const isEditing = editingMood === day.date;
                   const isSaving = savingCells.has(`mood-${day.date}`);
@@ -339,12 +376,12 @@ export default function HistoryTable() {
                       ) : (
                         <button
                           onClick={() => setEditingMood(day.date)}
-                          disabled={isSaving}
-                          className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto transition-all cursor-pointer ${
+                          disabled={isSaving || isFuture}
+                          className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto transition-all ${
                             dayMood
                               ? `${MOOD_CONFIG[dayMood].bgColor} hover:opacity-80`
                               : "bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-200 hover:border-slate-300"
-                          } ${isSaving ? "opacity-50" : ""}`}
+                          } ${isSaving || isFuture ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           {isSaving ? (
                             <Loader2 size={16} className="animate-spin text-slate-400" />
@@ -371,6 +408,7 @@ export default function HistoryTable() {
                   </div>
                 </td>
                 {days.map((day) => {
+                  const isFuture = isFutureDate(day.date);
                   const daySteps = steps.get(day.date) || 0;
                   const isEditing = editingStep === day.date;
                   const isSaving = savingCells.has(`steps-${day.date}`);
@@ -400,10 +438,10 @@ export default function HistoryTable() {
                       ) : (
                         <button
                           onClick={() => startEditingStep(day.date)}
-                          disabled={isSaving}
-                          className={`w-16 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                          disabled={isSaving || isFuture}
+                          className={`w-16 py-2 rounded-xl text-sm font-semibold transition-all ${
                             daySteps > 0 ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
-                          } ${isSaving ? "opacity-50" : ""}`}
+                          } ${isSaving || isFuture ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           {isSaving ? "..." : daySteps > 0 ? daySteps.toLocaleString("fr-FR") : "—"}
                         </button>
@@ -425,6 +463,7 @@ export default function HistoryTable() {
                     </div>
                   </td>
                   {days.map((day) => {
+                    const isFuture = isFutureDate(day.date);
                     const isCompleted = completions.get(day.date)?.has(habit.id) || false;
                     const isSaving = savingCells.has(`${habit.id}-${day.date}`);
 
@@ -432,12 +471,12 @@ export default function HistoryTable() {
                       <td key={day.date} className="py-3 px-2 text-center">
                         <button
                           onClick={() => toggleHabit(habit.id, day.date)}
-                          disabled={isSaving}
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto transition-all cursor-pointer ${
+                          disabled={isSaving || isFuture}
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto transition-all ${
                             isCompleted
                               ? "bg-linear-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/30"
                               : "bg-slate-100 hover:bg-slate-200 border-2 border-dashed border-slate-200 hover:border-slate-300"
-                          } ${isSaving ? "opacity-50 cursor-wait" : ""}`}
+                          } ${isSaving || isFuture ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           {isSaving ? (
                             <Loader2 size={16} className="animate-spin text-slate-400" />

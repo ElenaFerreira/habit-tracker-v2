@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Goal, GoalWithProgress, Habit } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import GoalCard from "./GoalCard";
-import { Target, Plus } from "lucide-react";
+import { Target, Plus, CheckCircle2 } from "lucide-react";
 
 interface GoalsListProps {
   onOpenSettings: () => void;
@@ -246,7 +246,10 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
       {/* Goals complétés */}
       {completedGoals.length > 0 && (
         <div className="pt-3 border-t border-slate-100">
-          <p className="text-xs font-medium text-slate-500 mb-3 uppercase tracking-wider">✅ Objectifs atteints</p>
+          <p className="text-xs font-medium text-slate-500 mb-3 uppercase tracking-wider flex items-center gap-1.5">
+            <CheckCircle2 size={14} className="text-emerald-500" />
+            <span>Objectifs atteints</span>
+          </p>
           <div className="space-y-3 opacity-70">
             {completedGoals.slice(0, 2).map((goal) => (
               <GoalCard key={goal.id} goal={goal} onUpdate={calculateGoalProgress} />

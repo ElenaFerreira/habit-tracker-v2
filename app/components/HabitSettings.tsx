@@ -3,161 +3,8 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Habit } from "@/lib/types";
-import {
-  X,
-  Plus,
-  Trash2,
-  GripVertical,
-  ListChecks,
-  // Icons pour le picker
-  Check,
-  Star,
-  Heart,
-  Zap,
-  Target,
-  Trophy,
-  Flame,
-  Sun,
-  Moon,
-  CloudSun,
-  Sparkles,
-  Dumbbell,
-  Bike,
-  PersonStanding,
-  Footprints,
-  Droplets,
-  Apple,
-  Coffee,
-  Utensils,
-  Cookie,
-  Salad,
-  BookOpen,
-  PenLine,
-  GraduationCap,
-  Brain,
-  Lightbulb,
-  Pill,
-  Stethoscope,
-  BedDouble,
-  Clock,
-  AlarmClock,
-  Music,
-  Palette,
-  Camera,
-  Gamepad2,
-  Home,
-  Briefcase,
-  Wallet,
-  PiggyBank,
-  Users,
-  MessageCircle,
-  Phone,
-  Mail,
-  Leaf,
-  TreePine,
-  Flower2,
-  Dog,
-  Cat,
-  Smile,
-  ThumbsUp,
-  PartyPopper,
-  Gift,
-  type LucideIcon,
-} from "lucide-react";
-
-// Catégories d'icônes (exporté pour réutilisation dans GoalSettings)
-export const ICON_CATEGORIES: { name: string; icons: { name: string; icon: LucideIcon }[] }[] = [
-  {
-    name: "Général",
-    icons: [
-      { name: "Check", icon: Check },
-      { name: "Star", icon: Star },
-      { name: "Heart", icon: Heart },
-      { name: "Zap", icon: Zap },
-      { name: "Target", icon: Target },
-      { name: "Trophy", icon: Trophy },
-      { name: "Flame", icon: Flame },
-      { name: "Sparkles", icon: Sparkles },
-    ],
-  },
-  {
-    name: "Sport",
-    icons: [
-      { name: "Dumbbell", icon: Dumbbell },
-      { name: "Bike", icon: Bike },
-      { name: "PersonStanding", icon: PersonStanding },
-      { name: "Footprints", icon: Footprints },
-    ],
-  },
-  {
-    name: "Santé",
-    icons: [
-      { name: "Droplets", icon: Droplets },
-      { name: "Apple", icon: Apple },
-      { name: "Salad", icon: Salad },
-      { name: "Pill", icon: Pill },
-      { name: "Stethoscope", icon: Stethoscope },
-      { name: "BedDouble", icon: BedDouble },
-    ],
-  },
-  {
-    name: "Travail",
-    icons: [
-      { name: "BookOpen", icon: BookOpen },
-      { name: "PenLine", icon: PenLine },
-      { name: "GraduationCap", icon: GraduationCap },
-      { name: "Brain", icon: Brain },
-      { name: "Lightbulb", icon: Lightbulb },
-      { name: "Briefcase", icon: Briefcase },
-    ],
-  },
-  {
-    name: "Lifestyle",
-    icons: [
-      { name: "Coffee", icon: Coffee },
-      { name: "Utensils", icon: Utensils },
-      { name: "Sun", icon: Sun },
-      { name: "Moon", icon: Moon },
-      { name: "Clock", icon: Clock },
-      { name: "AlarmClock", icon: AlarmClock },
-      { name: "Music", icon: Music },
-      { name: "Palette", icon: Palette },
-    ],
-  },
-  {
-    name: "Social",
-    icons: [
-      { name: "Users", icon: Users },
-      { name: "MessageCircle", icon: MessageCircle },
-      { name: "Phone", icon: Phone },
-      { name: "Mail", icon: Mail },
-      { name: "Home", icon: Home },
-      { name: "Wallet", icon: Wallet },
-    ],
-  },
-  {
-    name: "Fun",
-    icons: [
-      { name: "Smile", icon: Smile },
-      { name: "ThumbsUp", icon: ThumbsUp },
-      { name: "PartyPopper", icon: PartyPopper },
-      { name: "Gift", icon: Gift },
-      { name: "Gamepad2", icon: Gamepad2 },
-      { name: "Camera", icon: Camera },
-      { name: "Dog", icon: Dog },
-      { name: "Cat", icon: Cat },
-    ],
-  },
-];
-
-// Map pour récupérer l'icône par nom
-const ICON_MAP: Record<string, LucideIcon> = Object.fromEntries(ICON_CATEGORIES.flatMap((cat) => cat.icons.map((i) => [i.name, i.icon])));
-
-// Composant pour afficher une icône par son nom
-export function HabitIcon({ name, size = 20, className = "" }: { name: string; size?: number; className?: string }) {
-  const IconComponent = ICON_MAP[name] || Check;
-  return <IconComponent size={size} className={className} />;
-}
+import { X, Plus, Trash2, GripVertical, ListChecks } from "lucide-react";
+import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
 
 interface HabitSettingsProps {
   isOpen: boolean;
@@ -174,6 +21,24 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   const [editingIconFor, setEditingIconFor] = useState<string | null>(null); // ID de l'habitude en édition
   const [activeCategory, setActiveCategory] = useState(0);
   const supabase = createClient();
+
+  // Fermer les pickers avec la touche Échap
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setShowIconPicker(false);
+        setEditingIconFor(null);
+      }
+    }
+
+    if (showIconPicker || editingIconFor) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showIconPicker, editingIconFor]);
 
   useEffect(() => {
     if (isOpen) {
@@ -291,9 +156,18 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
 
                     {/* Mini picker pour modifier l'icône */}
                     {editingIconFor === habit.id && (
-                      <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-30 w-72">
+                      <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-30 w-80">
+                        {/* Bouton de fermeture */}
+                        <button
+                          onClick={() => setEditingIconFor(null)}
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          aria-label="Fermer le choix d'icône"
+                        >
+                          <X size={14} />
+                        </button>
+
                         {/* Catégories */}
-                        <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1">
+                        <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
                           {ICON_CATEGORIES.map((cat, idx) => (
                             <button
                               key={cat.name}
@@ -373,9 +247,18 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 </button>
 
                 {showIconPicker && (
-                  <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 p-4 z-20 w-72">
+                  <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80">
+                    {/* Bouton de fermeture */}
+                    <button
+                      onClick={() => setShowIconPicker(false)}
+                      className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      aria-label="Fermer le choix d'icône"
+                    >
+                      <X size={14} />
+                    </button>
+
                     {/* Catégories */}
-                    <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1">
+                    <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
                       {ICON_CATEGORIES.map((cat, idx) => (
                         <button
                           key={cat.name}

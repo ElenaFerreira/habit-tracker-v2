@@ -2,7 +2,7 @@
 
 import { GoalWithProgress } from "@/lib/types";
 import { Target, Flame, Trophy, Calendar, TrendingUp, Star, Check, Gift } from "lucide-react";
-import { HabitIcon } from "./HabitSettings";
+import { HabitIcon } from "@/lib/icons";
 import { createClient } from "@/lib/supabase/client";
 
 interface GoalCardProps {
