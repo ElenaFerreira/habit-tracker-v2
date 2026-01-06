@@ -5,6 +5,7 @@
   --foreground: #1c1917;
 }
 
+/* @theme est une directive Tailwind CSS v4 valide */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -16,6 +17,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Désactiver les outlines par défaut sur les boutons */
+button {
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+button:focus-visible,
+button:active {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Animations */

@@ -26,9 +26,10 @@ function getPreviousDate(dateStr: string): string {
 interface HabitListProps {
   onOpenSettings: () => void;
   onHabitToggle?: () => void; // Callback quand une habitude est cochée/décochée
+  stepCounterKey?: number; // Key pour forcer le refresh de StepCounter
 }
 
-export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListProps) {
+export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKey }: HabitListProps) {
   const [habits, setHabits] = useState<HabitWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [streak, setStreak] = useState(0);
@@ -171,7 +172,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
             <Flame size={40} strokeWidth={1.5} className={streak >= 1 ? "text-orange-500" : "text-amber-800"} />
           </div>
           <div className="relative z-10">
-            <p className="text-amber-600 text-xs font-medium uppercase tracking-wider mb-1">Série</p>
+            <p className="text-amber-600 text-xs font-medium uppercase tracking-wider mb-1">Streaks</p>
             <div className="flex items-baseline gap-2">
               <p className="text-4xl font-black leading-none text-slate-800">{streak}</p>
               <p className="text-lg font-semibold text-slate-700">jour{streak > 1 ? "s" : ""}</p>
@@ -183,7 +184,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle }: HabitListPr
         </div>
 
         {/* Bento Card: Compteur de pas */}
-        <StepCounter />
+        <StepCounter key={`steps-${stepCounterKey || 0}`} />
       </div>
 
       {/* Bento Card: Progression + Habitudes */}

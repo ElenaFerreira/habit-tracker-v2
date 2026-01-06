@@ -55,15 +55,20 @@ export default function HabitCheckbox({ habit, date, onToggle }: HabitCheckboxPr
     <button
       onClick={toggleCompletion}
       disabled={isLoading}
+      onMouseDown={(e) => e.preventDefault()}
       className={`
-        group flex items-center gap-3 w-full p-4 rounded-2xl transition-all duration-200
+        group flex items-center gap-3 w-full p-4 rounded-2xl
+        transition-[background,shadow,transform] duration-200
+        focus:outline-none focus-visible:outline-none focus:ring-0 focus-visible:ring-0
+        active:outline-none active:ring-0
         ${
           isCompleted
-            ? "bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25"
+            ? "bg-linear-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25 border-2 border-transparent"
             : "bg-white border-2 border-slate-200 hover:border-amber-300 hover:shadow-md"
         }
         ${isLoading ? "opacity-70 cursor-wait" : "cursor-pointer"}
       `}
+      style={{ WebkitTapHighlightColor: "transparent", borderColor: isCompleted ? "transparent" : undefined }}
     >
       {/* Checkbox visuel */}
       <div

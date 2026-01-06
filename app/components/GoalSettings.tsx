@@ -373,7 +373,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                     </button>
 
                     {showIconPicker && (
-                      <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80 relative">
+                      <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80">
                         {/* Bouton de fermeture */}
                         <button
                           onClick={() => setShowIconPicker(false)}

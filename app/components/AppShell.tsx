@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, ListChecks, LogOut, History, Target } from "lucide-react";
+import { User, ListChecks, LogOut, History, Target, Footprints } from "lucide-react";
 import Link from "next/link";
 import HabitList from "./HabitList";
 import HabitSettings from "./HabitSettings";
 import GoalSettings from "./GoalSettings";
+import StepSettings from "./StepSettings";
 import GoalsList, { GoalsListRef } from "./GoalsList";
 import MoodPicker from "./MoodPicker";
 import { createClient } from "@/lib/supabase/client";
@@ -18,7 +19,9 @@ interface AppShellProps {
 export default function AppShell({ userEmail }: AppShellProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [goalsSettingsOpen, setGoalsSettingsOpen] = useState(false);
+  const [stepSettingsOpen, setStepSettingsOpen] = useState(false);
   const [habitsKey, setHabitsKey] = useState(0);
+  const [stepCounterKey, setStepCounterKey] = useState(0);
   const goalsListRef = useRef<GoalsListRef>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -50,6 +53,15 @@ export default function AppShell({ userEmail }: AppShellProps) {
             <Link href="/history" className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors" title="Historique">
               <History size={18} className="text-slate-600" />
             </Link>
+
+            {/* Steps button */}
+            <button
+              onClick={() => setStepSettingsOpen(true)}
+              className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              title="Objectif de pas"
+            >
+              <Footprints size={18} className="text-slate-600" />
+            </button>
 
             {/* Goals button */}
             <button
@@ -90,7 +102,12 @@ export default function AppShell({ userEmail }: AppShellProps) {
         {/* Section Mood */}
         <MoodPicker />
 
-        <HabitList key={`habits-${habitsKey}`} onOpenSettings={() => setSettingsOpen(true)} onHabitToggle={refreshGoals} />
+        <HabitList
+          key={`habits-${habitsKey}`}
+          onOpenSettings={() => setSettingsOpen(true)}
+          onHabitToggle={refreshGoals}
+          stepCounterKey={stepCounterKey}
+        />
 
         {/* Section Objectifs */}
         <GoalsList ref={goalsListRef} onOpenSettings={() => setGoalsSettingsOpen(true)} />
@@ -101,6 +118,9 @@ export default function AppShell({ userEmail }: AppShellProps) {
 
       {/* Goals Settings Modal */}
       <GoalSettings isOpen={goalsSettingsOpen} onClose={() => setGoalsSettingsOpen(false)} onGoalsChange={refreshGoals} />
+
+      {/* Step Settings Modal */}
+      <StepSettings isOpen={stepSettingsOpen} onClose={() => setStepSettingsOpen(false)} onStepGoalChange={() => setStepCounterKey((k) => k + 1)} />
     </>
   );
 }

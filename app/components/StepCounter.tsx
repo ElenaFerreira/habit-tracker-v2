@@ -6,7 +6,7 @@ import { StepEntry } from "@/lib/types";
 import { useToday, formatDateLocal } from "@/lib/hooks/useToday";
 import { Footprints, TrendingUp, Minus, Target, CheckCircle } from "lucide-react";
 
-const DAILY_GOAL = 15000;
+const DEFAULT_DAILY_GOAL = 15000;
 
 // Récupère le lundi de la semaine courante
 function getMondayOfWeek(date: Date): Date {
@@ -51,9 +51,32 @@ export default function StepCounter() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [dailyGoal, setDailyGoal] = useState<number>(DEFAULT_DAILY_GOAL);
   const today = useToday();
   const weekDays = getWeekDays();
   const supabase = createClient();
+
+  const fetchUserSettings = useCallback(async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return DEFAULT_DAILY_GOAL;
+
+    const { data } = await supabase.from("user_settings").select("daily_step_goal").eq("user_id", user.id).maybeSingle();
+
+    if (data) {
+      return data.daily_step_goal;
+    } else {
+      // Créer les paramètres par défaut si ils n'existent pas
+      const { data: newSettings } = await supabase
+        .from("user_settings")
+        .insert({ user_id: user.id, daily_step_goal: DEFAULT_DAILY_GOAL })
+        .select()
+        .single();
+
+      return newSettings?.daily_step_goal || DEFAULT_DAILY_GOAL;
+    }
+  }, [supabase]);
 
   const fetchWeekSteps = useCallback(async () => {
     // Récupérer l'utilisateur connecté
@@ -65,6 +88,10 @@ export default function StepCounter() {
       return;
     }
     setUserId(user.id);
+
+    // Récupérer l'objectif personnalisé
+    const goal = await fetchUserSettings();
+    setDailyGoal(goal);
 
     const monday = getMondayOfWeek(new Date());
     const mondayStr = getDateString(monday);
@@ -79,7 +106,7 @@ export default function StepCounter() {
     setWeekSteps(stepsMap);
     setTodaySteps(stepsMap.get(today)?.toString() || "");
     setLoading(false);
-  }, [supabase, today]);
+  }, [supabase, today, fetchUserSettings]);
 
   useEffect(() => {
     fetchWeekSteps();
@@ -123,32 +150,32 @@ export default function StepCounter() {
   const todayValue = weekSteps.get(today) || 0;
 
   // Progression du jour vers l'objectif journalier
-  const todayProgressPercent = Math.min(100, Math.round((todayValue / DAILY_GOAL) * 100));
-  const todayGoalReached = todayValue >= DAILY_GOAL;
+  const todayProgressPercent = Math.min(100, Math.round((todayValue / dailyGoal) * 100));
+  const todayGoalReached = todayValue >= dailyGoal;
 
   if (loading) {
-    return <div className="bento-card h-full bg-blue-50 rounded-3xl animate-pulse min-h-[200px] border border-blue-200" />;
+    return <div className="bento-card h-full bg-blue-50 rounded-3xl animate-pulse min-h-[200px] border border-blue-400" />;
   }
 
   return (
-    <div className="bento-card bg-blue-50 p-5 rounded-3xl border border-blue-200 relative overflow-hidden">
-      <div className="absolute top-3 right-3 opacity-10">
-        <Footprints size={40} strokeWidth={1.5} className="text-blue-800" />
+    <div className="bento-card bg-blue-50 p-5 rounded-3xl border border-blue-400 relative overflow-hidden">
+      <div className={`absolute top-3 right-3 ${todayGoalReached ? "opacity-30" : "opacity-10"}`}>
+        <Footprints size={40} strokeWidth={1.5} className={todayGoalReached ? "text-blue-500" : "text-blue-800"} />
       </div>
 
       <div className="relative z-10 space-y-3">
-        {/* Header */}
-        <p className="text-blue-600 text-xs font-medium uppercase tracking-wider">Pas du jour</p>
-
-        {/* Bouton modifier */}
-        {!isEditing && (
-          <button
-            onClick={() => setIsEditing(true)}
-            className="px-2.5 py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 text-xs font-medium rounded-lg transition-colors cursor-pointer"
-          >
-            Modifier
-          </button>
-        )}
+        {/* Header + bouton modifier aligné juste à côté du titre */}
+        <div className="flex items-center gap-2">
+          <p className="text-blue-600 text-xs font-medium uppercase tracking-wider">steps</p>
+          {!isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-2.5 py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 text-xs font-medium rounded-lg transition-colors cursor-pointer"
+            >
+              Modifier
+            </button>
+          )}
+        </div>
 
         {/* Input ou affichage */}
         {isEditing ? (
@@ -181,11 +208,11 @@ export default function StepCounter() {
           <div className="flex items-center justify-between text-xs text-slate-500">
             <div className="flex items-center gap-1.5">
               <Target size={12} />
-              <span>Objectif : {DAILY_GOAL.toLocaleString("fr-FR")}/jour</span>
+              <span>Objectif : {dailyGoal.toLocaleString("fr-FR")}/jour</span>
             </div>
             <span className="font-semibold text-slate-700">{todayProgressPercent}%</span>
           </div>
-          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-blue-100 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 bg-linear-to-r from-emerald-400 to-teal-500`}
               style={{ width: `${todayProgressPercent}%` }}
@@ -206,10 +233,10 @@ export default function StepCounter() {
             <span>Moyenne</span>
           </div>
           <div className="text-right">
-            <span className={`text-lg font-bold ${average >= DAILY_GOAL ? "text-emerald-600" : "text-slate-700"}`}>
+            <span className={`text-lg font-bold ${average >= dailyGoal ? "text-emerald-600" : "text-slate-700"}`}>
               {average.toLocaleString("fr-FR")}
             </span>
-            <span className="text-slate-400 text-xs ml-1">/ {DAILY_GOAL.toLocaleString("fr-FR")}</span>
+            <span className="text-slate-400 text-xs ml-1">/ {dailyGoal.toLocaleString("fr-FR")}</span>
           </div>
         </div>
 
