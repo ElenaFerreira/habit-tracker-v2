@@ -67,6 +67,7 @@ export default function HistoryTable() {
   const [savingCells, setSavingCells] = useState<Set<string>>(new Set());
   const [pageOffset, setPageOffset] = useState(0); // 0 = semaine actuelle (lundi -> dimanche), 1 = semaine précédente, etc.
   const [userId, setUserId] = useState<string | null>(null);
+  const [statsRefreshKey, setStatsRefreshKey] = useState(0);
 
   const days = getWeekDays(pageOffset);
   const supabase = createClient();
@@ -168,6 +169,9 @@ export default function HistoryTable() {
     newCompletions.set(date, newDateCompletions);
     setCompletions(newCompletions);
 
+    // Rafraîchir les stats mensuelles
+    setStatsRefreshKey((prev) => prev + 1);
+
     setSavingCells((prev) => {
       const newSet = new Set(prev);
       newSet.delete(cellKey);
@@ -199,6 +203,9 @@ export default function HistoryTable() {
       newSteps.delete(date);
     }
     setSteps(newSteps);
+
+    // Rafraîchir les stats mensuelles
+    setStatsRefreshKey((prev) => prev + 1);
 
     setSavingCells((prev) => {
       const newSet = new Set(prev);
@@ -235,6 +242,9 @@ export default function HistoryTable() {
 
     setMoods(newMoods);
     setEditingMood(null);
+
+    // Rafraîchir les stats mensuelles
+    setStatsRefreshKey((prev) => prev + 1);
 
     setSavingCells((prev) => {
       const newSet = new Set(prev);
@@ -499,7 +509,7 @@ export default function HistoryTable() {
       <p className="text-center text-slate-400 text-sm">Clique sur une case pour modifier l'état d'une habitude ou éditer tes pas.</p>
 
       {/* Statistiques mensuelles */}
-      <MonthlyStats />
+      <MonthlyStats refreshKey={statsRefreshKey} />
     </div>
   );
 }

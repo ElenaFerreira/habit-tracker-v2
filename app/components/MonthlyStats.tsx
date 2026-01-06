@@ -46,7 +46,11 @@ function getMonthRange(monthOffset: number): { start: string; end: string; month
   };
 }
 
-export default function MonthlyStats() {
+interface MonthlyStatsProps {
+  refreshKey?: number; // Clé pour forcer le rafraîchissement
+}
+
+export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [habitStats, setHabitStats] = useState<HabitStats[]>([]);
   const [moodStats, setMoodStats] = useState<MoodStats[]>([]);
@@ -108,7 +112,9 @@ export default function MonthlyStats() {
 
     // Créer un tableau avec tous les jours du mois (ou jusqu'à aujourd'hui pour le mois actuel)
     const startDate = new Date(start);
+    startDate.setHours(0, 0, 0, 0);
     const endDateForLoop = isCurrentMonth ? today : new Date(end);
+    endDateForLoop.setHours(23, 59, 59, 999); // Inclure toute la journée
     const dailyData: { date: string; steps: number }[] = [];
 
     for (let d = new Date(startDate); d <= endDateForLoop; d.setDate(d.getDate() + 1)) {
@@ -152,8 +158,12 @@ export default function MonthlyStats() {
       // Calculer les stats par habitude
       const stats: HabitStats[] = [];
       const habitStartDate = new Date(monthStart);
-      const habitEndDate = isCurrentMonth ? today : new Date(end);
-      const totalDays = Math.ceil((habitEndDate.getTime() - habitStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      habitStartDate.setHours(0, 0, 0, 0);
+      const habitEndDate = isCurrentMonth ? new Date(today) : new Date(end);
+      habitEndDate.setHours(23, 59, 59, 999);
+      // Calculer le nombre de jours inclus (de startDate à endDate inclus)
+      // Pour le mois actuel, on compte du 1er du mois jusqu'à aujourd'hui inclus
+      const totalDays = Math.floor((habitEndDate.getTime() - habitStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
       habitsData.forEach((habit) => {
         const completions = completionsData?.filter((c) => c.habit_id === habit.id).length || 0;
@@ -222,7 +232,7 @@ export default function MonthlyStats() {
     }
 
     setLoading(false);
-  }, [supabase, fetchUserSettings, monthOffset]);
+  }, [supabase, fetchUserSettings, monthOffset, refreshKey]);
 
   useEffect(() => {
     fetchMonthlyData();
