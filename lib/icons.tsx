@@ -47,6 +47,7 @@ import {
   ThumbsUp,
   PartyPopper,
   Gift,
+  Bubbles,
   type LucideIcon,
 } from "lucide-react";
 
@@ -107,6 +108,7 @@ export const ICON_CATEGORIES: { name: string; icons: { name: string; icon: Lucid
       { name: "AlarmClock", icon: AlarmClock },
       { name: "Music", icon: Music },
       { name: "Palette", icon: Palette },
+      { name: "Skincare", icon: Bubbles },
     ],
   },
   {

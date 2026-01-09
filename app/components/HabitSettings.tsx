@@ -62,74 +62,86 @@ function SortableHabitItem({
         <GripVertical size={16} className="text-slate-300" />
       </div>
 
-      {/* Icône */}
+      {/* Icône - cliquable directement sauf en mode édition */}
       <div className="relative">
         {isEditing ? (
-          <>
-            <button
-              onClick={() => {
-                onEditingIconForChange(editingIconFor === habit.id ? null : habit.id);
-                onShowIconPickerChange(false);
-              }}
-              className="w-10 h-10 bg-amber-100 hover:bg-amber-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
-              title="Changer l'icône"
-            >
-              <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
-            </button>
-
-            {/* Mini picker pour modifier l'icône */}
-            {editingIconFor === habit.id && (
-              <div className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-30 w-80 max-w-[calc(100vw-3rem)]">
-                {/* Bouton de fermeture */}
-                <button
-                  onClick={() => onEditingIconForChange(null)}
-                  className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
-                  aria-label="Fermer le choix d'icône"
-                >
-                  <X size={14} />
-                </button>
-
-                {/* Catégories */}
-                <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
-                  {ICON_CATEGORIES.map((cat, idx) => (
-                    <button
-                      key={cat.name}
-                      onClick={() => onActiveCategoryChange(idx)}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                        activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                      }`}
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Icônes */}
-                <div className="grid grid-cols-4 gap-2">
-                  {ICON_CATEGORIES[activeCategory].icons.map((item) => {
-                    const IconComp = item.icon;
-                    return (
-                      <button
-                        key={item.name}
-                        onClick={() => {
-                          onUpdateHabit(habit.id, { emoji: item.name });
-                          onEditingIconForChange(null);
-                        }}
-                        className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
-                          habit.emoji === item.name ? "bg-amber-500 text-white" : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
-                        }`}
-                      >
-                        <IconComp size={22} />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </>
-        ) : (
+          // En mode édition, l'icône n'est pas cliquable
           <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
             <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+          </div>
+        ) : (
+          // Hors mode édition, l'icône est cliquable
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEditingIconForChange(editingIconFor === habit.id ? null : habit.id);
+              onShowIconPickerChange(false);
+            }}
+            className="w-10 h-10 bg-amber-100 hover:bg-amber-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+            title="Changer l'icône"
+          >
+            <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+          </button>
+        )}
+
+        {/* Mini picker pour modifier l'icône - seulement si pas en mode édition */}
+        {!isEditing && editingIconFor === habit.id && (
+          <div
+            className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-50 w-80 max-w-[calc(100vw-3rem)]"
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            {/* Bouton de fermeture */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditingIconForChange(null);
+              }}
+              className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+              aria-label="Fermer le choix d'icône"
+            >
+              <X size={14} />
+            </button>
+
+            {/* Catégories */}
+            <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
+              {ICON_CATEGORIES.map((cat, idx) => (
+                <button
+                  key={cat.name}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onActiveCategoryChange(idx);
+                  }}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
+                    activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Icônes */}
+            <div className="grid grid-cols-4 gap-2">
+              {ICON_CATEGORIES[activeCategory].icons.map((item) => {
+                const IconComp = item.icon;
+                return (
+                  <button
+                    key={item.name}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onUpdateHabit(habit.id, { emoji: item.name });
+                      onEditingIconForChange(null);
+                    }}
+                    className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
+                      habit.emoji === item.name ? "bg-amber-500 text-white" : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
+                    }`}
+                  >
+                    <IconComp size={22} />
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
       </div>
@@ -318,8 +330,11 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   async function updateHabit(habitId: string, updates: Partial<Habit>) {
     const { error } = await supabase.from("habits").update(updates).eq("id", habitId);
     if (!error) {
-      await fetchHabits();
+      // Mise à jour optimiste du state local
+      setHabits((prev) => prev.map((h) => (h.id === habitId ? { ...h, ...updates } : h)));
       onHabitsChange();
+      // Recharger en arrière-plan sans bloquer
+      fetchHabits();
     }
   }
 
@@ -364,6 +379,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     setEditingHabitId(habit.id);
     setEditingHabitName(habit.name);
     setShowIconPicker(false); // Fermer le picker de nouvelle habitude
+    setEditingIconFor(null); // Fermer le picker d'icône si ouvert
   }
 
   function cancelEditHabit() {
@@ -382,12 +398,24 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={(e) => {
+        // Fermer seulement si on clique directement sur le backdrop (pas sur la modale)
+        if (e.target === e.currentTarget && !showIconPicker && !editingIconFor) {
+          onClose();
+        }
+      }}
+    >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer" onClick={onClose} />
+      <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${showIconPicker || editingIconFor ? "pointer-events-none" : ""}`} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+      <div
+        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden z-10"
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
           <div className="flex items-center gap-3">
@@ -458,10 +486,17 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 </button>
 
                 {showIconPicker && (
-                  <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80 max-w-[calc(100vw-3rem)]">
+                  <div
+                    className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-50 w-80 max-w-[calc(100vw-3rem)]"
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                  >
                     {/* Bouton de fermeture */}
                     <button
-                      onClick={() => setShowIconPicker(false)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowIconPicker(false);
+                      }}
                       className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
                       aria-label="Fermer le choix d'icône"
                     >
@@ -473,7 +508,10 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                       {ICON_CATEGORIES.map((cat, idx) => (
                         <button
                           key={cat.name}
-                          onClick={() => setActiveCategory(idx)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveCategory(idx);
+                          }}
                           className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                             activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                           }`}
@@ -490,7 +528,8 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                         return (
                           <button
                             key={item.name}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setNewHabitIcon(item.name);
                               setShowIconPicker(false);
                             }}
