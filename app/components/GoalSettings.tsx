@@ -302,7 +302,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => startEdit(goal)}
                       className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"

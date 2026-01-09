@@ -281,82 +281,88 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
   return (
     <div className="space-y-6 mt-8">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="text-slate-600" size={20} />
-          <h2 className="text-xl font-bold text-slate-800">Statistiques mensuelles</h2>
-        </div>
+      {/* Titre */}
+      <div className="flex items-center gap-2">
+        <TrendingUp className="text-slate-600" size={20} />
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800">Statistiques mensuelles</h2>
+      </div>
 
-        {/* Navigation entre les mois */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setMonthOffset((prev) => prev + 1)}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-sm hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer"
-            title="Mois précédent"
-          >
-            <ChevronLeft size={16} />
-            <span className="font-medium">Précédent</span>
-          </button>
+      {/* Navigation entre les mois */}
+      <div className="flex items-center justify-between gap-2">
+        {/* Mois précédent */}
+        <button
+          onClick={() => setMonthOffset((prev) => prev + 1)}
+          className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer"
+          title="Mois précédent"
+        >
+          <ChevronLeft size={16} />
+          <span className="font-medium text-xs sm:text-sm hidden sm:inline">Mois précédent</span>
+        </button>
 
-          <div className="flex items-center gap-2 text-slate-600 text-sm font-medium min-w-[120px] justify-center">
+        {/* Mois affiché */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
+          <div className="flex items-center justify-center gap-2 text-slate-500 text-xs sm:text-sm">
             <Calendar size={16} />
-            <span className="capitalize">{selectedMonth}</span>
-            {isCurrentMonth && <span className="text-xs text-slate-400">(en cours)</span>}
+            <span className="capitalize">
+              {selectedMonth}
+              {isCurrentMonth && <span className="text-slate-400"> (en cours)</span>}
+            </span>
           </div>
-
-          <button
-            onClick={() => setMonthOffset((prev) => Math.max(0, prev - 1))}
-            disabled={isCurrentMonth}
-            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-sm transition-all ${
-              isCurrentMonth
-                ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 cursor-pointer"
-            }`}
-            title="Mois suivant"
-          >
-            <span className="font-medium">Suivant</span>
-            <ChevronRight size={16} />
-          </button>
         </div>
+
+        {/* Mois suivant */}
+        <button
+          onClick={() => setMonthOffset((prev) => Math.max(0, prev - 1))}
+          disabled={isCurrentMonth}
+          className={`flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 transition-all ${
+            isCurrentMonth
+              ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+              : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 cursor-pointer"
+          }`}
+          title="Mois suivant"
+        >
+          <span className="font-medium text-xs sm:text-sm hidden sm:inline">Mois suivant</span>
+          <ChevronRight size={16} />
+        </button>
       </div>
 
       {/* Statistiques du mois sélectionné */}
       {monthlyData[0] && (
-        <div className="bento-card bg-blue-50 p-6 rounded-3xl border border-blue-200">
+        <div className="bento-card bg-blue-50 p-4 sm:p-6 rounded-3xl border border-blue-200">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="text-blue-600" size={18} />
-            <h3 className="text-lg font-semibold text-slate-800 capitalize">
+            <Calendar className="text-blue-600 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+            <h3 className="text-base sm:text-lg font-semibold text-slate-800 capitalize">
               {monthlyData[0].month}
-              {isCurrentMonth && <span className="text-sm font-normal text-slate-500 ml-2">(en cours)</span>}
+              {isCurrentMonth && <span className="text-xs sm:text-sm font-normal text-slate-500 ml-1 sm:ml-2">(en cours)</span>}
             </h3>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-white/60 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-slate-600 text-xs mb-1">
-                <Footprints size={14} />
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+            <div className="bg-white/60 rounded-xl p-2 sm:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 text-[10px] sm:text-xs mb-1">
+                <Footprints size={12} className="sm:w-3.5 sm:h-3.5" />
                 <span>Total</span>
               </div>
-              <p className="text-2xl font-bold text-slate-800">{monthlyData[0].total.toLocaleString("fr-FR")}</p>
-              <p className="text-xs text-slate-400 mt-1">pas ce mois</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-800">{monthlyData[0].total.toLocaleString("fr-FR")}</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 mt-1">pas ce mois</p>
             </div>
 
-            <div className="bg-white/60 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-slate-600 text-xs mb-1">
-                <TrendingUp size={14} />
+            <div className="bg-white/60 rounded-xl p-2 sm:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 text-[10px] sm:text-xs mb-1">
+                <TrendingUp size={12} className="sm:w-3.5 sm:h-3.5" />
                 <span>Moyenne</span>
               </div>
-              <p className="text-2xl font-bold text-slate-800">{monthlyData[0].average.toLocaleString("fr-FR")}</p>
-              <p className="text-xs text-slate-400 mt-1">pas/jour</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-800">{monthlyData[0].average.toLocaleString("fr-FR")}</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 mt-1">pas/jour</p>
             </div>
 
-            <div className="bg-white/60 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-slate-600 text-xs mb-1">
-                <Target size={14} />
+            <div className="bg-white/60 rounded-xl p-2 sm:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 text-[10px] sm:text-xs mb-1">
+                <Target size={12} className="sm:w-3.5 sm:h-3.5" />
                 <span>Jours</span>
               </div>
-              <p className="text-2xl font-bold text-slate-800">{monthlyData[0].daysWithData}</p>
-              <p className="text-xs text-slate-400 mt-1">avec données</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-800">{monthlyData[0].daysWithData}</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 mt-1">avec données</p>
             </div>
           </div>
 

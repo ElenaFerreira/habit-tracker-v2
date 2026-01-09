@@ -67,9 +67,9 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
   // Badge type
   const getBadge = () => {
-    if (isOneTime) return { icon: <Star size={12} />, label: "Accomplissement" };
-    if (isStreak) return { icon: <Flame size={12} />, label: "Streak" };
-    return { icon: <Target size={12} />, label: "Quantité" };
+    if (isOneTime) return { icon: <Star size={14} className="text-slate-600" />, label: "Accomplissement" };
+    if (isStreak) return { icon: <Flame size={14} className="text-slate-600" />, label: "Streak" };
+    return { icon: <Target size={14} className="text-slate-600" />, label: "Quantité" };
   };
 
   const badge = getBadge();
@@ -91,9 +91,9 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
         </div>
 
         {/* Badge type */}
-        <div className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium ${colors.badgeBg} ${colors.badgeText}`}>
-          {badge.icon}
-          {badge.label}
+        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${colors.badgeBg} ${colors.badgeText}`}>
+          <span className="shrink-0">{badge.icon}</span>
+          <span>{badge.label}</span>
         </div>
       </div>
 
@@ -121,8 +121,8 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
           {/* Date de fin si définie */}
           {goal.end_date && !goal.is_completed && (
-            <div className="flex items-center justify-center gap-1 text-xs text-slate-400">
-              <Calendar size={11} />
+            <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400">
+              <Calendar size={14} className="text-slate-500 shrink-0" />
               <span>Objectif: {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>
             </div>
           )}
@@ -154,17 +154,17 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
           {/* Footer infos */}
           <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               {isStreak ? (
                 <>
-                  <TrendingUp size={12} />
+                  <TrendingUp size={14} className="text-slate-600 shrink-0" />
                   <span>
                     {goal.target_value} jour{goal.target_value > 1 ? "s" : ""} consécutif{goal.target_value > 1 ? "s" : ""}
                   </span>
                 </>
               ) : (
                 <>
-                  <Calendar size={12} />
+                  <Calendar size={14} className="text-slate-600 shrink-0" />
                   <span>
                     {goal.target_value} fois {getPeriodLabel(goal.period)}
                   </span>
@@ -177,8 +177,8 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
           {/* Date de fin si définie */}
           {goal.end_date && (
-            <div className="flex items-center gap-1 text-xs text-slate-400 pt-1">
-              <Calendar size={11} />
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 pt-1">
+              <Calendar size={14} className="text-slate-500 shrink-0" />
               <span>Fin: {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>
             </div>
           )}
@@ -189,7 +189,7 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
       {goal.reward && (
         <div className="mt-3 pt-3 border-t border-slate-100">
           <div className="flex items-center gap-2 text-xs">
-            <Gift size={14} className="text-slate-500" />
+            <Gift size={16} className="text-slate-500 shrink-0" />
             <span className="text-slate-600">
               <span className="font-medium text-slate-700">Récompense :</span> {goal.reward}
             </span>

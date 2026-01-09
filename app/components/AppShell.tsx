@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, ListChecks, LogOut, History, Target, Footprints } from "lucide-react";
+import { User, ListChecks, LogOut, History, Target, Footprints, Menu, X } from "lucide-react";
 import Link from "next/link";
 import HabitList from "./HabitList";
 import HabitSettings from "./HabitSettings";
@@ -20,6 +20,7 @@ export default function AppShell({ userEmail }: AppShellProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [goalsSettingsOpen, setGoalsSettingsOpen] = useState(false);
   const [stepSettingsOpen, setStepSettingsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [habitsKey, setHabitsKey] = useState(0);
   const [stepCounterKey, setStepCounterKey] = useState(0);
   const goalsListRef = useRef<GoalsListRef>(null);
@@ -45,10 +46,11 @@ export default function AppShell({ userEmail }: AppShellProps) {
     <>
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-2xl mx-auto px-6 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">Habit Tracker</h1>
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-800">Habit Tracker</h1>
 
-          <div className="flex items-center gap-2">
+          {/* Desktop menu */}
+          <div className="hidden sm:flex items-center gap-2">
             {/* History button */}
             <Link href="/history" className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors" title="Historique">
               <History size={18} className="text-slate-600" />
@@ -86,7 +88,7 @@ export default function AppShell({ userEmail }: AppShellProps) {
               <div className="w-7 h-7 bg-violet-100 rounded-full flex items-center justify-center">
                 <User size={14} className="text-violet-600" />
               </div>
-              <span className="text-sm text-slate-600 hidden sm:inline max-w-32 truncate">{userEmail}</span>
+              <span className="text-sm text-slate-600 max-w-32 truncate">{userEmail}</span>
             </div>
 
             {/* Sign out */}
@@ -94,7 +96,92 @@ export default function AppShell({ userEmail }: AppShellProps) {
               <LogOut size={18} className="text-slate-400 group-hover:text-red-500" />
             </button>
           </div>
+
+          {/* Mobile burger menu button */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="sm:hidden p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            title="Menu"
+          >
+            {menuOpen ? <X size={20} className="text-slate-600" /> : <Menu size={20} className="text-slate-600" />}
+          </button>
         </div>
+
+        {/* Mobile menu dropdown */}
+        {menuOpen && (
+          <div className="sm:hidden border-t border-slate-200 bg-white">
+            <div className="max-w-2xl mx-auto px-4 py-3 space-y-2">
+              {/* History button */}
+              <Link
+                href="/history"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              >
+                <History size={20} className="text-slate-600" />
+                <span className="text-slate-700 font-medium">Historique</span>
+              </Link>
+
+              {/* Steps button */}
+              <button
+                onClick={() => {
+                  setStepSettingsOpen(true);
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-left"
+              >
+                <Footprints size={20} className="text-slate-600" />
+                <span className="text-slate-700 font-medium">Objectif de pas</span>
+              </button>
+
+              {/* Goals button */}
+              <button
+                onClick={() => {
+                  setGoalsSettingsOpen(true);
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-left"
+              >
+                <Target size={20} className="text-slate-600" />
+                <span className="text-slate-700 font-medium">Objectifs</span>
+              </button>
+
+              {/* Habits settings button */}
+              <button
+                onClick={() => {
+                  setSettingsOpen(true);
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-left"
+              >
+                <ListChecks size={20} className="text-slate-600" />
+                <span className="text-slate-700 font-medium">Gérer mes habitudes</span>
+              </button>
+
+              {/* Divider */}
+              <div className="border-t border-slate-200 my-2"></div>
+
+              {/* User info */}
+              <div className="flex items-center gap-3 px-3 py-2 bg-slate-100 rounded-xl">
+                <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center">
+                  <User size={16} className="text-violet-600" />
+                </div>
+                <span className="text-sm text-slate-600 flex-1 truncate">{userEmail}</span>
+              </div>
+
+              {/* Sign out */}
+              <button
+                onClick={() => {
+                  handleSignOut();
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-xl transition-colors cursor-pointer text-left"
+              >
+                <LogOut size={20} className="text-red-500" />
+                <span className="text-red-600 font-medium">Déconnexion</span>
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Content - Bento Layout */}

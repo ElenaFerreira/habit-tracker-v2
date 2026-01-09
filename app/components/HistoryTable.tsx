@@ -277,18 +277,18 @@ export default function HistoryTable() {
   return (
     <div className="space-y-4">
       {/* Navigation */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between gap-2">
         {/* Semaine précédente */}
         <button
           onClick={() => setPageOffset((p) => p + 1)}
-          className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-xs sm:text-sm sm:px-4 sm:py-2.5 hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer"
+          className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer"
         >
           <ChevronLeft size={16} />
-          <span className="font-medium">Semaine précédente</span>
+          <span className="font-medium text-xs sm:text-sm hidden sm:inline">Semaine précédente</span>
         </button>
 
         {/* Période affichée + retour aujourd'hui */}
-        <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
           <div className="flex items-center justify-center gap-2 text-slate-500 text-xs sm:text-sm">
             <Calendar size={16} />
             <span>
@@ -298,11 +298,11 @@ export default function HistoryTable() {
           {pageOffset > 0 && (
             <button
               onClick={() => setPageOffset(0)}
-              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 text-xs font-medium transition-all cursor-pointer"
+              className="flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 text-xs font-medium transition-all cursor-pointer"
               title="Retour à aujourd'hui"
             >
               <Home size={14} />
-              <span>Aujourd'hui</span>
+              <span className="hidden sm:inline">Aujourd'hui</span>
             </button>
           )}
         </div>
@@ -311,13 +311,13 @@ export default function HistoryTable() {
         <button
           onClick={() => setPageOffset((p) => Math.max(0, p - 1))}
           disabled={pageOffset === 0}
-          className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm sm:px-4 sm:py-2.5 transition-all ${
+          className={`flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 transition-all ${
             pageOffset === 0
               ? "bg-slate-100 text-slate-400 cursor-not-allowed"
               : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 cursor-pointer"
           }`}
         >
-          <span className="font-medium">Semaine suivante</span>
+          <span className="font-medium text-xs sm:text-sm hidden sm:inline">Semaine suivante</span>
           <ChevronRight size={16} />
         </button>
       </div>
