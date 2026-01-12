@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { StepEntry, Habit, MoodEntry, MoodType, MOOD_CONFIG } from "@/lib/types";
+import { StepEntry, Habit } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Calendar, Footprints, Target, CheckCircle, Sparkles, ChevronLeft, ChevronRight, ChartColumn } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { TrendingUp, Calendar, Footprints, Target, CheckCircle, ChevronLeft, ChevronRight, ChartColumn } from "lucide-react";
 import { HabitIcon } from "@/lib/icons";
 import { useTheme } from "@/lib/hooks/useTheme";
 import MonthPicker from "./MonthPicker";
@@ -23,12 +23,6 @@ interface HabitStats {
   completions: number;
   totalDays: number;
   completionRate: number;
-}
-
-interface MoodStats {
-  mood: MoodType;
-  count: number;
-  percentage: number;
 }
 
 function getMonthRange(monthOffset: number): { start: string; end: string; monthName: string } {
@@ -70,8 +64,6 @@ interface MonthlyStatsProps {
 export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [habitStats, setHabitStats] = useState<HabitStats[]>([]);
-  const [moodStats, setMoodStats] = useState<MoodStats[]>([]);
-  const [moodDailyData, setMoodDailyData] = useState<{ date: string; mood: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [dailyGoal, setDailyGoal] = useState<number>(15000);
@@ -191,51 +183,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
       setHabitStats(stats);
     }
 
-    const { data: moodsData } = await supabase
-      .from("mood_entries")
-      .select("*")
-      .eq("user_id", user.id)
-      .gte("date", monthStart)
-      .lte("date", habitQueryEndDate)
-      .order("date", { ascending: true });
-
-    if (moodsData && moodsData.length > 0) {
-      const moodCounts = new Map<MoodType, number>();
-      moodsData.forEach((entry: MoodEntry) => {
-        const count = moodCounts.get(entry.mood) || 0;
-        moodCounts.set(entry.mood, count + 1);
-      });
-
-      const totalMoods = moodsData.length;
-      const stats: MoodStats[] = [];
-      moodCounts.forEach((count, mood) => {
-        stats.push({
-          mood,
-          count,
-          percentage: Math.round((count / totalMoods) * 100),
-        });
-      });
-
-      const moodOrder: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
-      stats.sort((a, b) => moodOrder.indexOf(a.mood) - moodOrder.indexOf(b.mood));
-      setMoodStats(stats);
-
-      const moodStartDate = new Date(monthStart);
-      const moodEndDate = isCurrentMonth ? today : new Date(end);
-      const dailyMoodData: { date: string; mood: string }[] = [];
-      for (let d = new Date(moodStartDate); d <= moodEndDate; d.setDate(d.getDate() + 1)) {
-        const dateStr = formatDateLocal(d);
-        const day = d.getDate();
-        const moodEntry = moodsData.find((m: MoodEntry) => m.date === dateStr);
-        const moodType = moodEntry?.mood as MoodType | undefined;
-        dailyMoodData.push({
-          date: `${day}`,
-          mood: moodType ? MOOD_CONFIG[moodType].label : "",
-        });
-      }
-      setMoodDailyData(dailyMoodData);
-    }
-
     setLoading(false);
   }, [supabase, fetchUserSettings, monthOffset, refreshKey]);
 
@@ -265,22 +212,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
   }
 
   const currentMonthData = monthlyData[0]?.dailyData || [];
-  const selectedMonth = monthlyData[0]?.month || "";
   const isCurrentMonth = monthOffset === 0;
-
-  const MOOD_COLORS: Record<MoodType, string> = {
-    best_day: "#10b981",
-    good: "#3b82f6",
-    moody: "#64748b",
-    bad: "#f59e0b",
-    awful: "#ef4444",
-  };
-
-  const pieData = moodStats.map((stat) => ({
-    name: MOOD_CONFIG[stat.mood].label,
-    value: stat.count,
-    color: MOOD_COLORS[stat.mood],
-  }));
 
   const chartColors = {
     grid: isDark ? "#3f3f46" : "#e2e8f0",
@@ -426,90 +358,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
               </div>
             ))}
           </div>
-        </div>
-      )}
-
-      {moodStats.length > 0 && (
-        <div className="bento-card bg-violet-50 dark:bg-violet-950/30 p-6 rounded-3xl border border-violet-200 dark:border-violet-900/50">
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="text-violet-600 dark:text-violet-400" size={18} />
-            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Humeur</h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Répartition</h4>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: chartColors.tooltipBg,
-                      border: `1px solid ${chartColors.tooltipBorder}`,
-                      borderRadius: "8px",
-                      fontSize: "12px",
-                      color: isDark ? "#f1f5f9" : "#1e293b",
-                    }}
-                    formatter={(value: number | undefined) => [`${value} jour${(value || 0) > 1 ? "s" : ""}`, "Humeur"]}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Détails</h4>
-              <div className="space-y-2">
-                {moodStats.map((stat) => (
-                  <div key={stat.mood} className="flex items-center justify-between bg-white/60 dark:bg-zinc-800/60 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{MOOD_CONFIG[stat.mood].emoji}</span>
-                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{MOOD_CONFIG[stat.mood].label}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-sm font-bold text-slate-800 dark:text-slate-100">{stat.count}</span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500 ml-1">({stat.percentage}%)</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {moodDailyData.length > 0 && (
-            <div className="mt-6">
-              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Évolution quotidienne</h4>
-              <div className="flex flex-wrap gap-1">
-                {moodDailyData.map((item, idx) => {
-                  const moodStat = moodStats.find((s) => MOOD_CONFIG[s.mood].label === item.mood);
-                  const bgColor = moodStat ? MOOD_CONFIG[moodStat.mood].bgColor : "bg-slate-100 dark:bg-zinc-800";
-                  const emoji = moodStat ? MOOD_CONFIG[moodStat.mood].emoji : "—";
-                  return (
-                    <div
-                      key={idx}
-                      className={`${bgColor} rounded-lg p-2 min-w-[32px] text-center text-xs flex flex-col items-center justify-center`}
-                      title={item.mood || "Non renseigné"}
-                    >
-                      <span className="text-sm">{emoji}</span>
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{item.date}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

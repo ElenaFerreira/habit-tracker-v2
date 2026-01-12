@@ -45,10 +45,13 @@ export default function AppShell({ userEmail }: AppShellProps) {
   return (
     <>
       <header className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-40">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">Habit Tracker</h1>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          {/* Titre - aligné à gauche */}
+          <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 hidden sm:block flex-1">Habit Tracker</h1>
+          <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100 sm:hidden">Habit Tracker</h1>
 
-          <div className="hidden sm:flex items-center gap-2">
+          {/* Actions - centrées */}
+          <div className="hidden sm:flex items-center gap-1 justify-center">
             <Link href="/history" className="p-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors" title="Historique">
               <History size={18} className="text-slate-600 dark:text-slate-400" />
             </Link>
@@ -76,7 +79,10 @@ export default function AppShell({ userEmail }: AppShellProps) {
             >
               <TrendingUp size={18} className="text-slate-600 dark:text-slate-400" />
             </button>
+          </div>
 
+          {/* Compte & paramètres - alignés à droite */}
+          <div className="hidden sm:flex items-center gap-2 justify-end flex-1">
             <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl">
               <div className="w-7 h-7 bg-violet-100 dark:bg-violet-900/50 rounded-full flex items-center justify-center">
                 <User size={14} className="text-violet-600 dark:text-violet-400" />
@@ -110,7 +116,7 @@ export default function AppShell({ userEmail }: AppShellProps) {
 
         {menuOpen && (
           <div className="sm:hidden border-t border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md">
-            <div className="max-w-2xl mx-auto px-4 py-3 space-y-2">
+            <div className="max-w-5xl mx-auto px-4 py-3 space-y-2">
               <Link
                 href="/history"
                 onClick={() => setMenuOpen(false)}
