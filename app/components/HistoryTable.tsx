@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/client";
 import { Habit, StepEntry, MoodType, MoodEntry, MOOD_CONFIG } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { HabitIcon } from "@/lib/icons";
-import { Check, ChevronLeft, ChevronRight, Footprints, Calendar, Loader2, Sparkles, Home } from "lucide-react";
+import { Check, ChevronLeft, ChevronRight, Footprints, Loader2, Sparkles, Home, Calendar } from "lucide-react";
 import MonthlyStats from "./MonthlyStats";
+import WeekPicker from "./WeekPicker";
 
 const MOOD_ORDER: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
 
@@ -44,6 +45,27 @@ function getWeekDays(weekOffset: number = 0): { date: string; dayName: string; d
 function isFutureDate(dateStr: string): boolean {
   const todayStr = formatDateLocal(new Date()); // ex: "2026-01-06"
   return dateStr > todayStr;
+}
+
+function getCurrentWeekMonday(): Date {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const day = today.getDay();
+  const diff = (day + 6) % 7;
+  today.setDate(today.getDate() - diff);
+  return today;
+}
+
+function getWeekStartFromOffset(offset: number): Date {
+  const monday = getCurrentWeekMonday();
+  monday.setDate(monday.getDate() - offset * 7);
+  return monday;
+}
+
+function getOffsetFromWeekStart(weekStart: Date): number {
+  const currentMonday = getCurrentWeekMonday();
+  const diff = currentMonday.getTime() - weekStart.getTime();
+  return Math.round(diff / (7 * 24 * 60 * 60 * 1000));
 }
 
 export default function HistoryTable() {
@@ -255,12 +277,10 @@ export default function HistoryTable() {
         </button>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
-          <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-            <Calendar size={16} />
-            <span>
-              {days[0]?.dayNum} {days[0]?.monthName} - {days[days.length - 1]?.dayNum} {days[days.length - 1]?.monthName}
-            </span>
-          </div>
+          <WeekPicker
+            currentWeekStart={getWeekStartFromOffset(pageOffset)}
+            onWeekSelect={(weekStart) => setPageOffset(getOffsetFromWeekStart(weekStart))}
+          />
           {pageOffset > 0 && (
             <button
               onClick={() => setPageOffset(0)}

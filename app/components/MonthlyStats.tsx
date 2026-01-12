@@ -8,6 +8,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { TrendingUp, Calendar, Footprints, Target, CheckCircle, Sparkles, ChevronLeft, ChevronRight, ChartColumn } from "lucide-react";
 import { HabitIcon } from "@/lib/icons";
 import { useTheme } from "@/lib/hooks/useTheme";
+import MonthPicker from "./MonthPicker";
 
 interface MonthlyData {
   month: string;
@@ -44,6 +45,22 @@ function getMonthRange(monthOffset: number): { start: string; end: string; month
     end: formatDateLocal(end),
     monthName: monthNames[targetMonth.getMonth()],
   };
+}
+
+function getMonthFromOffset(offset: number): Date {
+  const today = new Date();
+  return new Date(today.getFullYear(), today.getMonth() - offset, 1);
+}
+
+function getOffsetFromMonth(month: Date): number {
+  const today = new Date();
+  const currentMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const targetMonthStart = new Date(month.getFullYear(), month.getMonth(), 1);
+
+  const diffYears = currentMonthStart.getFullYear() - targetMonthStart.getFullYear();
+  const diffMonths = currentMonthStart.getMonth() - targetMonthStart.getMonth();
+
+  return diffYears * 12 + diffMonths;
 }
 
 interface MonthlyStatsProps {
@@ -290,13 +307,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         </button>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
-          <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
-            <Calendar size={16} />
-            <span className="capitalize">
-              {selectedMonth}
-              {isCurrentMonth && <span className="text-slate-400 dark:text-slate-500"> (en cours)</span>}
-            </span>
-          </div>
+          <MonthPicker currentMonth={getMonthFromOffset(monthOffset)} onMonthSelect={(month) => setMonthOffset(getOffsetFromMonth(month))} />
         </div>
 
         <button
