@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { UserSettings } from "@/lib/types";
 import { X, Footprints, Save } from "lucide-react";
 
 interface StepSettingsProps {

@@ -27,7 +27,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
   const supabase = createClient();
   const isStreak = goal.type === "streak";
   const isOneTime = goal.type === "one_time";
-  const isQuantitative = goal.type === "quantitative";
   const progressClamp = Math.min(goal.progress_percent, 100);
 
   // Couleurs selon le type - cohérent avec HabitSettings

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { StepEntry, Habit, HabitCompletion, MoodEntry, MoodType, MOOD_CONFIG } from "@/lib/types";
+import { StepEntry, Habit, MoodEntry, MoodType, MOOD_CONFIG } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { TrendingUp, Calendar, Footprints, Target, CheckCircle, Sparkles, ChevronLeft, ChevronRight, ChartColumn } from "lucide-react";
