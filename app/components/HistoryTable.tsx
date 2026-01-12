@@ -255,10 +255,10 @@ export default function HistoryTable() {
 
   if (loading) {
     return (
-      <div className="bento-card bg-slate-50 p-8 rounded-3xl border border-slate-200">
+      <div className="bento-card bg-slate-50 dark:bg-zinc-900 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800">
         <div className="flex items-center justify-center gap-3">
-          <Loader2 className="animate-spin text-slate-500" size={24} />
-          <span className="text-slate-600">Chargement de l'historique...</span>
+          <Loader2 className="animate-spin text-slate-500 dark:text-slate-400" size={24} />
+          <span className="text-slate-600 dark:text-slate-400">Chargement de l'historique...</span>
         </div>
       </div>
     );
@@ -266,10 +266,10 @@ export default function HistoryTable() {
 
   if (habits.length === 0) {
     return (
-      <div className="bento-card bg-slate-50 p-8 rounded-3xl border border-slate-200 text-center">
+      <div className="bento-card bg-slate-50 dark:bg-zinc-900 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 text-center">
         <Calendar className="mx-auto text-slate-400 mb-4" size={48} />
-        <h2 className="text-xl font-semibold text-slate-800 mb-2">Pas encore d'historique</h2>
-        <p className="text-slate-500">Commence par créer des habitudes pour voir ton historique ici.</p>
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">Pas encore d'historique</h2>
+        <p className="text-slate-500 dark:text-slate-400">Commence par créer des habitudes pour voir ton historique ici.</p>
       </div>
     );
   }
@@ -281,7 +281,7 @@ export default function HistoryTable() {
         {/* Semaine précédente */}
         <button
           onClick={() => setPageOffset((p) => p + 1)}
-          className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer"
+          className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-700 hover:text-slate-800 dark:hover:text-slate-100 transition-all cursor-pointer"
         >
           <ChevronLeft size={16} />
           <span className="font-medium text-xs sm:text-sm hidden sm:inline">Semaine précédente</span>
@@ -289,7 +289,7 @@ export default function HistoryTable() {
 
         {/* Période affichée + retour aujourd'hui */}
         <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
-          <div className="flex items-center justify-center gap-2 text-slate-500 text-xs sm:text-sm">
+          <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
             <Calendar size={16} />
             <span>
               {days[0]?.dayNum} {days[0]?.monthName} - {days[days.length - 1]?.dayNum} {days[days.length - 1]?.monthName}
@@ -298,7 +298,7 @@ export default function HistoryTable() {
           {pageOffset > 0 && (
             <button
               onClick={() => setPageOffset(0)}
-              className="flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 rounded-lg border border-slate-200 text-xs font-medium transition-all cursor-pointer"
+              className="flex items-center justify-center gap-1.5 px-2 py-1.5 sm:px-3 bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-medium transition-all cursor-pointer"
               title="Retour à aujourd'hui"
             >
               <Home size={14} />
@@ -311,10 +311,10 @@ export default function HistoryTable() {
         <button
           onClick={() => setPageOffset((p) => Math.max(0, p - 1))}
           disabled={pageOffset === 0}
-          className={`flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 transition-all ${
+          className={`flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 transition-all ${
             pageOffset === 0
-              ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-              : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 cursor-pointer"
+              ? "bg-slate-100 dark:bg-zinc-900 text-slate-400 dark:text-zinc-600 cursor-not-allowed"
+              : "bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 cursor-pointer"
           }`}
         >
           <span className="font-medium text-xs sm:text-sm hidden sm:inline">Semaine suivante</span>
@@ -323,30 +323,32 @@ export default function HistoryTable() {
       </div>
 
       {/* Tableau */}
-      <div className="bento-card bg-white rounded-3xl border border-slate-200 overflow-hidden">
+      <div className="bento-card bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="text-left py-4 px-5 text-slate-600 font-semibold text-sm sticky left-0 bg-slate-50 z-10">Habitude</th>
+              <tr className="bg-slate-50 dark:bg-zinc-800 border-b border-slate-200 dark:border-zinc-700">
+                <th className="text-left py-4 px-5 text-slate-600 dark:text-slate-300 font-semibold text-sm sticky left-0 bg-slate-50 dark:bg-zinc-800 z-10">
+                  Habitude
+                </th>
                 {days.map((day) => (
                   <th key={day.date} className="py-4 px-3 text-center min-w-[70px]">
-                    <div className="text-xs text-slate-400 font-medium">{day.dayName}</div>
-                    <div className="text-lg font-bold text-slate-700">{day.dayNum}</div>
-                    <div className="text-[10px] text-slate-400 uppercase">{day.monthName}</div>
+                    <div className="text-xs text-slate-400 dark:text-slate-500 font-medium">{day.dayName}</div>
+                    <div className="text-lg font-bold text-slate-700 dark:text-slate-200">{day.dayNum}</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase">{day.monthName}</div>
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {/* Ligne pour le mood */}
-              <tr className="border-b border-slate-100 bg-violet-50/50">
-                <td className="py-4 px-5 sticky left-0 bg-violet-50/80 z-10">
+              <tr className="border-b border-slate-100 dark:border-zinc-800 bg-violet-50/50 dark:bg-violet-950/20">
+                <td className="py-4 px-5 sticky left-0 bg-violet-50/80 dark:bg-violet-950/30 z-10">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center">
-                      <Sparkles size={18} className="text-violet-600" />
+                    <div className="w-9 h-9 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center">
+                      <Sparkles size={18} className="text-violet-600 dark:text-violet-400" />
                     </div>
-                    <span className="font-medium text-slate-700">Humeur</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-200">Humeur</span>
                   </div>
                 </td>
                 {days.map((day) => {
@@ -368,7 +370,9 @@ export default function HistoryTable() {
                                   key={mood}
                                   onClick={() => saveMood(day.date, isSelected ? null : mood)}
                                   className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-                                    isSelected ? `${config.bgColor} ring-2 ring-violet-400` : "bg-white/80 hover:bg-white border border-slate-200"
+                                    isSelected
+                                      ? `${config.bgColor} ring-2 ring-violet-400`
+                                      : "bg-white/80 dark:bg-zinc-800 hover:bg-white dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700"
                                   }`}
                                   title={config.label}
                                 >
@@ -379,7 +383,7 @@ export default function HistoryTable() {
                           </div>
                           <button
                             onClick={() => setEditingMood(null)}
-                            className="text-xs text-slate-500 hover:text-slate-700 font-medium cursor-pointer"
+                            className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 font-medium cursor-pointer"
                           >
                             Fermer
                           </button>
@@ -391,7 +395,7 @@ export default function HistoryTable() {
                           className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto transition-all ${
                             dayMood
                               ? `${MOOD_CONFIG[dayMood].bgColor} hover:opacity-80`
-                              : "bg-slate-50 hover:bg-slate-100 border-2 border-dashed border-slate-200 hover:border-slate-300"
+                              : "bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 border-2 border-dashed border-slate-200 dark:border-zinc-600 hover:border-slate-300 dark:hover:border-zinc-500"
                           } ${isSaving || isFuture ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           {isSaving ? (
@@ -399,7 +403,7 @@ export default function HistoryTable() {
                           ) : dayMood ? (
                             <span className="text-xl">{MOOD_CONFIG[dayMood].emoji}</span>
                           ) : (
-                            <span className="text-slate-400 text-xs">—</span>
+                            <span className="text-slate-400 dark:text-slate-500 text-xs">—</span>
                           )}
                         </button>
                       )}
@@ -409,13 +413,13 @@ export default function HistoryTable() {
               </tr>
 
               {/* Ligne pour les pas */}
-              <tr className="border-b border-slate-100 bg-blue-50/50">
-                <td className="py-4 px-5 sticky left-0 bg-blue-50/80 z-10">
+              <tr className="border-b border-slate-100 dark:border-zinc-800 bg-blue-50/50 dark:bg-blue-950/20">
+                <td className="py-4 px-5 sticky left-0 bg-blue-50/80 dark:bg-blue-950/30 z-10">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
-                      <Footprints size={18} className="text-blue-600" />
+                    <div className="w-9 h-9 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center">
+                      <Footprints size={18} className="text-blue-600 dark:text-blue-400" />
                     </div>
-                    <span className="font-medium text-slate-700">Pas</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-200">Pas</span>
                   </div>
                 </td>
                 {days.map((day) => {
@@ -436,12 +440,12 @@ export default function HistoryTable() {
                               if (e.key === "Enter") saveSteps(day.date);
                               if (e.key === "Escape") setEditingStep(null);
                             }}
-                            className="w-16 px-2 py-1.5 text-center text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="w-16 px-2 py-1.5 text-center text-sm border border-blue-300 dark:border-blue-600 bg-white dark:bg-zinc-800 text-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500"
                             autoFocus
                           />
                           <button
                             onClick={() => saveSteps(day.date)}
-                            className="text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium cursor-pointer"
                           >
                             OK
                           </button>
@@ -451,7 +455,9 @@ export default function HistoryTable() {
                           onClick={() => startEditingStep(day.date)}
                           disabled={isSaving || isFuture}
                           className={`w-16 py-2 rounded-xl text-sm font-semibold transition-all ${
-                            daySteps > 0 ? "bg-blue-100 text-blue-700 hover:bg-blue-200" : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                            daySteps > 0
+                              ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50"
+                              : "bg-slate-50 dark:bg-zinc-800 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-700"
                           } ${isSaving || isFuture ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           {isSaving ? "..." : daySteps > 0 ? daySteps.toLocaleString("fr-FR") : "—"}
@@ -464,13 +470,22 @@ export default function HistoryTable() {
 
               {/* Lignes pour chaque habitude */}
               {habits.map((habit, idx) => (
-                <tr key={habit.id} className={`border-b border-slate-100 ${idx % 2 === 0 ? "bg-emerald-50/30" : "bg-emerald-50/50"}`}>
-                  <td className={`py-4 px-5 sticky left-0 z-10 ${idx % 2 === 0 ? "bg-emerald-50/50" : "bg-emerald-50/70"}`}>
+                <tr
+                  key={habit.id}
+                  className={`border-b border-slate-100 dark:border-zinc-800 ${
+                    idx % 2 === 0 ? "bg-emerald-50/30 dark:bg-emerald-950/10" : "bg-emerald-50/50 dark:bg-emerald-950/20"
+                  }`}
+                >
+                  <td
+                    className={`py-4 px-5 sticky left-0 z-10 ${
+                      idx % 2 === 0 ? "bg-emerald-50/50 dark:bg-emerald-950/20" : "bg-emerald-50/70 dark:bg-emerald-950/30"
+                    }`}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
-                        <HabitIcon name={habit.emoji} size={18} className="text-emerald-600" />
+                      <div className="w-9 h-9 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center">
+                        <HabitIcon name={habit.emoji} size={18} className="text-emerald-600 dark:text-emerald-400" />
                       </div>
-                      <span className="font-medium text-slate-700">{habit.name}</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{habit.name}</span>
                     </div>
                   </td>
                   {days.map((day) => {
@@ -485,8 +500,8 @@ export default function HistoryTable() {
                           disabled={isSaving || isFuture}
                           className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto transition-all ${
                             isCompleted
-                              ? "bg-linear-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/30"
-                              : "bg-slate-100 hover:bg-slate-200 border-2 border-dashed border-slate-200 hover:border-slate-300"
+                              ? "bg-linear-to-br from-emerald-400 to-teal-500 shadow-md shadow-emerald-500/30 dark:shadow-emerald-500/20"
+                              : "bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 border-2 border-dashed border-slate-200 dark:border-zinc-600 hover:border-slate-300 dark:hover:border-zinc-500"
                           } ${isSaving || isFuture ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                         >
                           {isSaving ? (
@@ -506,7 +521,9 @@ export default function HistoryTable() {
       </div>
 
       {/* Note d'info */}
-      <p className="text-center text-slate-400 text-sm">Clique sur une case pour modifier l'état d'une habitude ou éditer tes pas.</p>
+      <p className="text-center text-slate-400 dark:text-slate-500 text-sm">
+        Clique sur une case pour modifier l'état d'une habitude ou éditer tes pas.
+      </p>
 
       {/* Statistiques mensuelles */}
       <MonthlyStats refreshKey={statsRefreshKey} />

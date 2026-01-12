@@ -9,6 +9,7 @@ import GoalSettings from "./GoalSettings";
 import StepSettings from "./StepSettings";
 import GoalsList, { GoalsListRef } from "./GoalsList";
 import MoodPicker from "./MoodPicker";
+import ThemeToggle from "./ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -45,54 +46,61 @@ export default function AppShell({ userEmail }: AppShellProps) {
   return (
     <>
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+      <header className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-40">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg sm:text-xl font-bold text-slate-800">Habit Tracker</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">Habit Tracker</h1>
 
           {/* Desktop menu */}
           <div className="hidden sm:flex items-center gap-2">
             {/* History button */}
-            <Link href="/history" className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors" title="Historique">
-              <History size={18} className="text-slate-600" />
+            <Link href="/history" className="p-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors" title="Historique">
+              <History size={18} className="text-slate-600 dark:text-slate-400" />
             </Link>
 
             {/* Steps button */}
             <button
               onClick={() => setStepSettingsOpen(true)}
-              className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="p-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
               title="Objectif de pas"
             >
-              <Footprints size={18} className="text-slate-600" />
+              <Footprints size={18} className="text-slate-600 dark:text-slate-400" />
             </button>
 
             {/* Goals button */}
             <button
               onClick={() => setGoalsSettingsOpen(true)}
-              className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="p-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
               title="Objectifs"
             >
-              <Target size={18} className="text-slate-600" />
+              <Target size={18} className="text-slate-600 dark:text-slate-400" />
             </button>
 
             {/* Habits settings button */}
             <button
               onClick={() => setSettingsOpen(true)}
-              className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+              className="p-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
               title="Gérer mes habitudes"
             >
-              <TrendingUp size={18} className="text-slate-600" />
+              <TrendingUp size={18} className="text-slate-600 dark:text-slate-400" />
             </button>
 
             {/* User info */}
-            <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-xl">
-              <div className="w-7 h-7 bg-violet-100 rounded-full flex items-center justify-center">
-                <User size={14} className="text-violet-600" />
+            <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl">
+              <div className="w-7 h-7 bg-violet-100 dark:bg-violet-900/50 rounded-full flex items-center justify-center">
+                <User size={14} className="text-violet-600 dark:text-violet-400" />
               </div>
-              <span className="text-sm text-slate-600 max-w-32 truncate">{userEmail}</span>
+              <span className="text-sm text-slate-600 dark:text-slate-400 max-w-32 truncate">{userEmail}</span>
             </div>
 
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
             {/* Sign out */}
-            <button onClick={handleSignOut} className="p-2.5 hover:bg-red-50 rounded-xl transition-colors cursor-pointer group" title="Déconnexion">
+            <button
+              onClick={handleSignOut}
+              className="p-2.5 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-xl transition-colors cursor-pointer group"
+              title="Déconnexion"
+            >
               <LogOut size={18} className="text-slate-400 group-hover:text-red-500" />
             </button>
           </div>
@@ -100,25 +108,29 @@ export default function AppShell({ userEmail }: AppShellProps) {
           {/* Mobile burger menu button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="sm:hidden p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+            className="sm:hidden p-2.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
             title="Menu"
           >
-            {menuOpen ? <X size={20} className="text-slate-600" /> : <Menu size={20} className="text-slate-600" />}
+            {menuOpen ? (
+              <X size={20} className="text-slate-600 dark:text-slate-400" />
+            ) : (
+              <Menu size={20} className="text-slate-600 dark:text-slate-400" />
+            )}
           </button>
         </div>
 
         {/* Mobile menu dropdown */}
         {menuOpen && (
-          <div className="sm:hidden border-t border-slate-200 bg-white">
+          <div className="sm:hidden border-t border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md">
             <div className="max-w-2xl mx-auto px-4 py-3 space-y-2">
               {/* History button */}
               <Link
                 href="/history"
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                className="flex items-center gap-3 p-3 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer"
               >
-                <History size={20} className="text-slate-600" />
-                <span className="text-slate-700 font-medium">Historique</span>
+                <History size={20} className="text-slate-600 dark:text-slate-400" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">Historique</span>
               </Link>
 
               {/* Steps button */}
@@ -127,10 +139,10 @@ export default function AppShell({ userEmail }: AppShellProps) {
                   setStepSettingsOpen(true);
                   setMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer text-left"
               >
-                <Footprints size={20} className="text-slate-600" />
-                <span className="text-slate-700 font-medium">Objectif de pas</span>
+                <Footprints size={20} className="text-slate-600 dark:text-slate-400" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">Objectif de pas</span>
               </button>
 
               {/* Goals button */}
@@ -139,10 +151,10 @@ export default function AppShell({ userEmail }: AppShellProps) {
                   setGoalsSettingsOpen(true);
                   setMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer text-left"
               >
-                <Target size={20} className="text-slate-600" />
-                <span className="text-slate-700 font-medium">Objectifs</span>
+                <Target size={20} className="text-slate-600 dark:text-slate-400" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">Objectifs</span>
               </button>
 
               {/* Habits settings button */}
@@ -151,22 +163,25 @@ export default function AppShell({ userEmail }: AppShellProps) {
                   setSettingsOpen(true);
                   setMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer text-left"
               >
-                <TrendingUp size={20} className="text-slate-600" />
-                <span className="text-slate-700 font-medium">Gérer mes habitudes</span>
+                <TrendingUp size={20} className="text-slate-600 dark:text-slate-400" />
+                <span className="text-slate-700 dark:text-slate-300 font-medium">Gérer mes habitudes</span>
               </button>
 
               {/* Divider */}
-              <div className="border-t border-slate-200 my-2"></div>
+              <div className="border-t border-slate-200 dark:border-zinc-700 my-2"></div>
 
               {/* User info */}
-              <div className="flex items-center gap-3 px-3 py-2 bg-slate-100 rounded-xl">
-                <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center">
-                  <User size={16} className="text-violet-600" />
+              <div className="flex items-center gap-3 px-3 py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl">
+                <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-full flex items-center justify-center">
+                  <User size={16} className="text-violet-600 dark:text-violet-400" />
                 </div>
-                <span className="text-sm text-slate-600 flex-1 truncate">{userEmail}</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400 flex-1 truncate">{userEmail}</span>
               </div>
+
+              {/* Theme Toggle */}
+              <ThemeToggle variant="full" className="w-full" />
 
               {/* Sign out */}
               <button
@@ -174,10 +189,10 @@ export default function AppShell({ userEmail }: AppShellProps) {
                   handleSignOut();
                   setMenuOpen(false);
                 }}
-                className="w-full flex items-center gap-3 p-3 hover:bg-red-50 rounded-xl transition-colors cursor-pointer text-left"
+                className="w-full flex items-center gap-3 p-3 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-xl transition-colors cursor-pointer text-left"
               >
                 <LogOut size={20} className="text-red-500" />
-                <span className="text-red-600 font-medium">Déconnexion</span>
+                <span className="text-red-600 dark:text-red-400 font-medium">Déconnexion</span>
               </button>
             </div>
           </div>

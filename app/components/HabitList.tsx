@@ -176,11 +176,11 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="flex flex-col gap-4">
-          <div className="h-36 bg-slate-200/50 rounded-3xl animate-pulse" />
-          <div className="h-28 bg-slate-200/50 rounded-3xl animate-pulse" />
-          <div className="h-48 bg-slate-200/50 rounded-3xl animate-pulse" />
+          <div className="h-36 bg-slate-200/50 dark:bg-zinc-800/50 rounded-3xl animate-pulse" />
+          <div className="h-28 bg-slate-200/50 dark:bg-zinc-800/50 rounded-3xl animate-pulse" />
+          <div className="h-48 bg-slate-200/50 dark:bg-zinc-800/50 rounded-3xl animate-pulse" />
         </div>
-        <div className="md:col-span-2 h-64 bg-slate-200/50 rounded-3xl animate-pulse" />
+        <div className="md:col-span-2 h-64 bg-slate-200/50 dark:bg-zinc-800/50 rounded-3xl animate-pulse" />
       </div>
     );
   }
@@ -190,42 +190,42 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       {/* Colonne gauche : Date + Streak */}
       <div className="flex flex-col gap-4">
         {/* Bento Card: Date d'aujourd'hui */}
-        <div className="bento-card bg-slate-50 p-5 rounded-3xl border border-slate-200 relative overflow-hidden">
+        <div className="bento-card bg-slate-50 dark:bg-zinc-900 p-5 rounded-3xl border border-slate-200 dark:border-zinc-800 relative overflow-hidden">
           <div className="absolute top-3 right-3 opacity-10">
-            <Calendar size={40} strokeWidth={1.5} className="text-slate-800" />
+            <Calendar size={40} strokeWidth={1.5} className="text-slate-800 dark:text-slate-200" />
           </div>
           <div className="relative z-10">
-            <p className="text-slate-500 text-xs font-medium uppercase tracking-wider mb-1">Aujourd'hui</p>
-            <p className="text-4xl font-black leading-none mb-0.5 text-slate-800">{dateInfo.day}</p>
-            <p className="text-lg font-semibold capitalize text-slate-700">{dateInfo.month}</p>
-            <p className="text-slate-400 text-xs capitalize mt-1">{dateInfo.weekday}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Aujourd'hui</p>
+            <p className="text-4xl font-black leading-none mb-0.5 text-slate-800 dark:text-slate-100">{dateInfo.day}</p>
+            <p className="text-lg font-semibold capitalize text-slate-700 dark:text-slate-300">{dateInfo.month}</p>
+            <p className="text-slate-400 dark:text-slate-500 text-xs capitalize mt-1">{dateInfo.weekday}</p>
           </div>
         </div>
 
         {/* Bento Card: Streak */}
-        <div className="bento-card bg-amber-50 p-5 rounded-3xl border border-amber-200 relative overflow-hidden">
+        <div className="bento-card bg-amber-50 dark:bg-amber-950/30 p-5 rounded-3xl border border-amber-200 dark:border-amber-900/50 relative overflow-hidden">
           <div className={`absolute top-3 right-3 ${streak >= 1 ? "opacity-30" : "opacity-10"}`}>
-            <Flame size={40} strokeWidth={1.5} className={streak >= 1 ? "text-orange-500" : "text-amber-800"} />
+            <Flame size={40} strokeWidth={1.5} className={streak >= 1 ? "text-orange-500" : "text-amber-800 dark:text-amber-200"} />
           </div>
           <div className="relative z-10">
-            <p className="text-amber-600 text-xs font-medium uppercase tracking-wider mb-1">Streaks</p>
+            <p className="text-amber-600 dark:text-amber-400 text-xs font-medium uppercase tracking-wider mb-1">Streaks</p>
             <div className="space-y-3">
               {/* Streak actuel */}
               <div>
                 <div className="flex items-baseline gap-2">
-                  <p className="text-4xl font-black leading-none text-slate-800">{streak}</p>
-                  <p className="text-lg font-semibold text-slate-700">jour{streak > 1 ? "s" : ""}</p>
+                  <p className="text-4xl font-black leading-none text-slate-800 dark:text-slate-100">{streak}</p>
+                  <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">jour{streak > 1 ? "s" : ""}</p>
                 </div>
-                <p className="text-slate-400 text-xs mt-1">
+                <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
                   {streak === 0 ? "Complète tout pour démarrer !" : streak >= 7 ? "🔥 En feu !" : "Continue comme ça !"}
                 </p>
               </div>
 
               {/* Série la plus longue */}
-              <div className="pt-2 border-t border-amber-200">
+              <div className="pt-2 border-t border-amber-200 dark:border-amber-800/50">
                 <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs text-amber-600 font-medium">Série la plus longue</p>
-                  <p className="text-lg font-bold text-slate-800">{longestStreak}</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Série la plus longue</p>
+                  <p className="text-lg font-bold text-slate-800 dark:text-slate-100">{longestStreak}</p>
                 </div>
               </div>
             </div>
@@ -237,24 +237,24 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       </div>
 
       {/* Bento Card: Progression + Habitudes */}
-      <div className="md:col-span-2 bento-card bg-emerald-50 p-6 rounded-3xl border border-emerald-200">
+      <div className="md:col-span-2 bento-card bg-emerald-50 dark:bg-emerald-950/30 p-6 rounded-3xl border border-emerald-200 dark:border-emerald-900/50">
         {totalCount > 0 ? (
           <div className="space-y-5">
             {/* Barre de progression */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
-                    <TrendingUp size={16} className="text-emerald-600" />
+                  <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center">
+                    <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <span className="text-slate-600 font-medium">Progression</span>
+                  <span className="text-slate-600 dark:text-slate-300 font-medium">Progression</span>
                 </div>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-slate-800">{completedCount}</span>
-                  <span className="text-slate-400">/ {totalCount}</span>
+                  <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">{completedCount}</span>
+                  <span className="text-slate-400 dark:text-slate-500">/ {totalCount}</span>
                 </div>
               </div>
-              <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-3 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-linear-to-r from-emerald-400 to-teal-500 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
@@ -271,14 +271,14 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
           </div>
         ) : (
           <div className="text-center py-8 px-4">
-            <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Sparkles size={24} className="text-emerald-500" />
+            <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Sparkles size={24} className="text-emerald-500 dark:text-emerald-400" />
             </div>
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Pas encore d'habitudes</h3>
-            <p className="text-slate-500 text-sm mb-5">Commence par créer tes premières habitudes à suivre !</p>
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Pas encore d'habitudes</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Commence par créer tes premières habitudes à suivre !</p>
             <button
               onClick={onOpenSettings}
-              className="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-colors cursor-pointer"
+              className="px-5 py-2.5 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 font-semibold rounded-xl transition-colors cursor-pointer"
             >
               Configurer mes habitudes
             </button>

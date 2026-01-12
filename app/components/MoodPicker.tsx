@@ -70,23 +70,23 @@ export default function MoodPicker() {
 
   if (loading) {
     return (
-      <div className="bento-card bg-violet-50 p-6 rounded-3xl border border-violet-200">
+      <div className="bento-card bg-violet-50 dark:bg-violet-950/30 p-6 rounded-3xl border border-violet-200 dark:border-violet-900/50">
         <div className="flex items-center justify-center gap-2">
-          <Loader2 className="animate-spin text-violet-500" size={20} />
-          <span className="text-violet-600">Chargement...</span>
+          <Loader2 className="animate-spin text-violet-500 dark:text-violet-400" size={20} />
+          <span className="text-violet-600 dark:text-violet-400">Chargement...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bento-card bg-violet-50 p-6 rounded-3xl border border-violet-200">
+    <div className="bento-card bg-violet-50 dark:bg-violet-950/30 p-6 rounded-3xl border border-violet-200 dark:border-violet-900/50">
       {/* Header */}
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 bg-violet-100 rounded-xl flex items-center justify-center">
-          <Sparkles size={16} className="text-violet-600" />
+        <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center">
+          <Sparkles size={16} className="text-violet-600 dark:text-violet-400" />
         </div>
-        <h2 className="text-lg font-semibold text-slate-800">Comment tu te sens aujourd'hui ?</h2>
+        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Comment tu te sens aujourd'hui ?</h2>
       </div>
 
       {/* Mood buttons */}
@@ -104,14 +104,14 @@ export default function MoodPicker() {
                 flex flex-col items-center justify-center gap-1 w-[72px] h-[72px] rounded-2xl transition-all cursor-pointer
                 ${
                   isSelected
-                    ? `${config.bgColor} ring-2 ring-offset-2 ring-slate-400 scale-105`
-                    : "bg-slate-50 hover:bg-slate-100 border border-slate-200"
+                    ? `${config.bgColor} ring-2 ring-offset-2 ring-slate-400 dark:ring-slate-500 dark:ring-offset-zinc-900 scale-105`
+                    : "bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 border border-slate-200 dark:border-zinc-700"
                 }
                 ${saving ? "opacity-50 cursor-wait" : ""}
               `}
             >
               <span className="text-2xl">{config.emoji}</span>
-              <span className={`text-xs font-medium ${isSelected ? config.color : "text-slate-500"}`}>{config.label}</span>
+              <span className={`text-xs font-medium ${isSelected ? config.color : "text-slate-500 dark:text-slate-400"}`}>{config.label}</span>
             </button>
           );
         })}

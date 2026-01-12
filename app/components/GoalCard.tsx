@@ -32,11 +32,11 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
   // Couleurs selon le type - cohérent avec HabitSettings
   const getColors = () => {
     return {
-      bgLight: "bg-amber-100",
-      textAccent: "text-amber-600",
+      bgLight: "bg-amber-100 dark:bg-amber-900/50",
+      textAccent: "text-amber-600 dark:text-amber-400",
       progressGradient: "from-emerald-400 to-teal-500",
-      badgeBg: "bg-slate-100",
-      badgeText: "text-slate-600",
+      badgeBg: "bg-slate-100 dark:bg-zinc-800",
+      badgeText: "text-slate-600 dark:text-slate-400",
     };
   };
 
@@ -75,25 +75,25 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
   // Badge type
   const getBadge = () => {
-    if (isOneTime) return { icon: <Star size={14} className="text-slate-600" />, label: "Accomplissement" };
-    if (isStreak) return { icon: <Flame size={14} className="text-slate-600" />, label: "Streak" };
-    return { icon: <Target size={14} className="text-slate-600" />, label: "Quantité" };
+    if (isOneTime) return { icon: <Star size={14} className="text-slate-600 dark:text-slate-400" />, label: "Accomplissement" };
+    if (isStreak) return { icon: <Flame size={14} className="text-slate-600 dark:text-slate-400" />, label: "Streak" };
+    return { icon: <Target size={14} className="text-slate-600 dark:text-slate-400" />, label: "Quantité" };
   };
 
   const badge = getBadge();
 
   return (
-    <div className="bg-white rounded-2xl border border-rose-200 p-4">
+    <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-rose-200 dark:border-rose-900/50 p-4">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 ${colors.bgLight} rounded-xl flex items-center justify-center`}>{getIcon()}</div>
           <div>
-            <p className="font-semibold text-slate-800 text-sm">{goal.name}</p>
+            <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{goal.name}</p>
             {goal.habit_name ? (
-              <p className="text-xs text-slate-500">{goal.habit_name}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{goal.habit_name}</p>
             ) : (
-              <p className="text-xs text-slate-400 italic">Objectif personnel</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 italic">Objectif personnel</p>
             )}
           </div>
         </div>
@@ -111,16 +111,18 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
         <div className="space-y-3">
           {goal.is_completed ? (
             <div className="space-y-2">
-              <div className="flex items-center justify-center gap-2 py-4 bg-emerald-50 rounded-xl">
-                <Trophy size={24} className="text-emerald-500" />
+              <div className="flex items-center justify-center gap-2 py-4 bg-emerald-50 dark:bg-emerald-950/50 rounded-xl">
+                <Trophy size={24} className="text-emerald-500 dark:text-emerald-400" />
                 <div>
-                  <p className="font-semibold text-emerald-700">Objectif atteint !</p>
-                  {goal.completed_at && <p className="text-xs text-emerald-600">Le {new Date(goal.completed_at).toLocaleDateString("fr-FR")}</p>}
+                  <p className="font-semibold text-emerald-700 dark:text-emerald-400">Objectif atteint !</p>
+                  {goal.completed_at && (
+                    <p className="text-xs text-emerald-600 dark:text-emerald-500">Le {new Date(goal.completed_at).toLocaleDateString("fr-FR")}</p>
+                  )}
                 </div>
               </div>
               <button
                 onClick={markAsNotCompleted}
-                className="w-full flex items-center justify-center gap-2 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 text-sm font-medium rounded-xl transition-all cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-800 text-sm font-medium rounded-xl transition-all cursor-pointer"
               >
                 Annuler
               </button>
@@ -128,7 +130,7 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           ) : (
             <button
               onClick={markAsCompleted}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-800 font-semibold rounded-xl transition-all cursor-pointer"
             >
               <Check size={18} />
               Marquer comme accompli
@@ -137,8 +139,8 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
           {/* Date de fin si définie */}
           {goal.end_date && !goal.is_completed && (
-            <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400">
-              <Calendar size={14} className="text-slate-500 shrink-0" />
+            <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+              <Calendar size={14} className="text-slate-500 dark:text-slate-400 shrink-0" />
               <span>Objectif: {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>
             </div>
           )}
@@ -148,12 +150,12 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
         <div className="space-y-2">
           <div className="flex items-end justify-between">
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold text-slate-800">{goal.current_value}</span>
-              <span className="text-slate-400 text-sm">/ {goal.target_value}</span>
+              <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">{goal.current_value}</span>
+              <span className="text-slate-400 dark:text-slate-500 text-sm">/ {goal.target_value}</span>
             </div>
 
             {goal.is_completed && (
-              <div className="flex items-center gap-1 text-emerald-500">
+              <div className="flex items-center gap-1 text-emerald-500 dark:text-emerald-400">
                 <Trophy size={16} />
                 <span className="text-xs font-semibold">Objectif atteint !</span>
               </div>
@@ -161,7 +163,7 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           </div>
 
           {/* Barre de progression */}
-          <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
             <div
               className={`h-full bg-linear-to-r ${colors.progressGradient} rounded-full transition-all duration-500`}
               style={{ width: `${progressClamp}%` }}
@@ -169,18 +171,18 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           </div>
 
           {/* Footer infos */}
-          <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
             <div className="flex items-center gap-1.5">
               {isStreak ? (
                 <>
-                  <TrendingUp size={14} className="text-slate-600 shrink-0" />
+                  <TrendingUp size={14} className="text-slate-600 dark:text-slate-400 shrink-0" />
                   <span>
                     {goal.target_value} jour{goal.target_value > 1 ? "s" : ""} consécutif{goal.target_value > 1 ? "s" : ""}
                   </span>
                 </>
               ) : (
                 <>
-                  <Calendar size={14} className="text-slate-600 shrink-0" />
+                  <Calendar size={14} className="text-slate-600 dark:text-slate-400 shrink-0" />
                   <span>
                     {goal.target_value} fois {getPeriodLabel(goal.period)}
                   </span>
@@ -188,13 +190,13 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
               )}
             </div>
 
-            <span className="font-medium text-slate-600">{Math.round(progressClamp)}%</span>
+            <span className="font-medium text-slate-600 dark:text-slate-300">{Math.round(progressClamp)}%</span>
           </div>
 
           {/* Date de fin si définie */}
           {goal.end_date && (
-            <div className="flex items-center gap-1.5 text-xs text-slate-400 pt-1">
-              <Calendar size={14} className="text-slate-500 shrink-0" />
+            <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 pt-1">
+              <Calendar size={14} className="text-slate-500 dark:text-slate-400 shrink-0" />
               <span>Fin: {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>
             </div>
           )}
@@ -203,11 +205,11 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
       {/* Récompense si définie */}
       {goal.reward && (
-        <div className="mt-3 pt-3 border-t border-slate-100">
+        <div className="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-2 text-xs">
-            <Gift size={16} className="text-slate-500 shrink-0" />
-            <span className="text-slate-600">
-              <span className="font-medium text-slate-700">Récompense :</span> {goal.reward}
+            <Gift size={16} className="text-slate-500 dark:text-slate-400 shrink-0" />
+            <span className="text-slate-600 dark:text-slate-400">
+              <span className="font-medium text-slate-700 dark:text-slate-300">Récompense :</span> {goal.reward}
             </span>
           </div>
         </div>

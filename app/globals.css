@@ -1,14 +1,41 @@
 @import "tailwindcss";
 
+/* Configuration du dark mode avec la classe .dark */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #1c1917;
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --muted-bg: #f8fafc;
+  --muted-fg: #64748b;
+  --accent-bg: #f1f5f9;
+  --scrollbar-thumb: #e2e8f0;
+  --scrollbar-thumb-hover: #cbd5e1;
+}
+
+.dark {
+  --background: #0f0f12;
+  --foreground: #f1f5f9;
+  --card-bg: #18181b;
+  --card-border: #27272a;
+  --muted-bg: #1c1c1f;
+  --muted-fg: #a1a1aa;
+  --accent-bg: #27272a;
+  --scrollbar-thumb: #3f3f46;
+  --scrollbar-thumb-hover: #52525b;
 }
 
 /* @theme est une directive Tailwind CSS v4 valide */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card-bg: var(--card-bg);
+  --color-card-border: var(--card-border);
+  --color-muted-bg: var(--muted-bg);
+  --color-muted-fg: var(--muted-fg);
+  --color-accent-bg: var(--accent-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -17,6 +44,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Désactiver les outlines par défaut sur les boutons */
@@ -74,12 +102,12 @@ button:active {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #e2e8f0;
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #cbd5e1;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Bento Cards */

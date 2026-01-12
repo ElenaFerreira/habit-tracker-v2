@@ -57,17 +57,17 @@ function SortableHabitItem({
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-zinc-800 rounded-xl group">
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
-        <GripVertical size={16} className="text-slate-300" />
+        <GripVertical size={16} className="text-slate-300 dark:text-zinc-600" />
       </div>
 
       {/* Icône - cliquable directement sauf en mode édition */}
       <div className="relative">
         {isEditing ? (
           // En mode édition, l'icône n'est pas cliquable
-          <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-            <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+          <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center">
+            <HabitIcon name={habit.emoji} size={22} className="text-amber-600 dark:text-amber-400" />
           </div>
         ) : (
           // Hors mode édition, l'icône est cliquable
@@ -77,17 +77,17 @@ function SortableHabitItem({
               onEditingIconForChange(editingIconFor === habit.id ? null : habit.id);
               onShowIconPickerChange(false);
             }}
-            className="w-10 h-10 bg-amber-100 hover:bg-amber-200 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
+            className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800/50 rounded-xl flex items-center justify-center transition-colors cursor-pointer"
             title="Changer l'icône"
           >
-            <HabitIcon name={habit.emoji} size={22} className="text-amber-600" />
+            <HabitIcon name={habit.emoji} size={22} className="text-amber-600 dark:text-amber-400" />
           </button>
         )}
 
         {/* Mini picker pour modifier l'icône - seulement si pas en mode édition */}
         {!isEditing && editingIconFor === habit.id && (
           <div
-            className="absolute top-12 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-50 w-80 max-w-[calc(100vw-3rem)]"
+            className="absolute top-12 left-0 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-700 pt-6 pb-4 px-4 z-50 w-80 max-w-[calc(100vw-3rem)]"
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
@@ -97,7 +97,7 @@ function SortableHabitItem({
                 e.stopPropagation();
                 onEditingIconForChange(null);
               }}
-              className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+              className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
               aria-label="Fermer le choix d'icône"
             >
               <X size={14} />
@@ -113,7 +113,9 @@ function SortableHabitItem({
                     onActiveCategoryChange(idx);
                   }}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                    activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    activeCategory === idx
+                      ? "bg-amber-500 text-white"
+                      : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
                   }`}
                 >
                   {cat.name}
@@ -134,7 +136,9 @@ function SortableHabitItem({
                       onEditingIconForChange(null);
                     }}
                     className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
-                      habit.emoji === item.name ? "bg-amber-500 text-white" : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
+                      habit.emoji === item.name
+                        ? "bg-amber-500 text-white"
+                        : "bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400"
                     }`}
                   >
                     <IconComp size={22} />
@@ -160,12 +164,12 @@ function SortableHabitItem({
               onCancelEdit();
             }
           }}
-          className="flex-1 min-w-0 px-3 py-2 bg-white border border-amber-500/30 rounded-xl text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+          className="flex-1 min-w-0 px-3 py-2 bg-white dark:bg-zinc-900 border border-amber-500/30 rounded-xl text-slate-700 dark:text-slate-200 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
           placeholder="Nom de l'habitude"
           autoFocus
         />
       ) : (
-        <p className="flex-1 min-w-0 text-slate-700 font-medium truncate">{habit.name}</p>
+        <p className="flex-1 min-w-0 text-slate-700 dark:text-slate-200 font-medium truncate">{habit.name}</p>
       )}
 
       {/* Boutons d'action */}
@@ -174,14 +178,14 @@ function SortableHabitItem({
           <>
             <button
               onClick={() => onSaveEdit(habit.id)}
-              className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+              className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
               title="Sauvegarder"
             >
               <Save size={16} />
             </button>
             <button
               onClick={onCancelEdit}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+              className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-zinc-700 rounded-lg transition-colors cursor-pointer"
               title="Annuler"
             >
               <X size={16} />
@@ -191,14 +195,14 @@ function SortableHabitItem({
           <>
             <button
               onClick={() => onStartEdit(habit)}
-              className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+              className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
               title="Modifier"
             >
               <Pencil size={16} />
             </button>
             <button
               onClick={() => onDelete(habit.id)}
-              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
               title="Supprimer"
             >
               <Trash2 size={16} />
@@ -412,20 +416,20 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
 
       {/* Modal */}
       <div
-        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden z-10"
+        className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden z-10"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-              <TrendingUp size={20} className="text-emerald-600" />
+            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center">
+              <TrendingUp size={20} className="text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Mes habitudes</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Mes habitudes</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer">
-            <X size={20} className="text-slate-500" />
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer">
+            <X size={20} className="text-slate-500 dark:text-slate-400" />
           </button>
         </div>
 
@@ -464,14 +468,14 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
           ) : (
             <div className="text-center py-12 mb-8">
               <div className="text-5xl mb-4">📝</div>
-              <p className="text-slate-500 text-base">Aucune habitude pour l'instant</p>
-              <p className="text-slate-400 text-sm mt-1">Ajoute ta première habitude ci-dessous !</p>
+              <p className="text-slate-500 dark:text-slate-400 text-base">Aucune habitude pour l'instant</p>
+              <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Ajoute ta première habitude ci-dessous !</p>
             </div>
           )}
 
           {/* Ajouter une habitude */}
-          <div className="border-t border-slate-100 pt-6">
-            <p className="text-sm font-semibold text-slate-700 mb-4">Nouvelle habitude</p>
+          <div className="border-t border-slate-100 dark:border-zinc-800 pt-6">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Nouvelle habitude</p>
             <div className="flex gap-2 min-w-0">
               {/* Icon picker button */}
               <div className="relative">
@@ -480,14 +484,14 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                     setShowIconPicker(!showIconPicker);
                     setEditingIconFor(null); // Fermer le picker d'édition si ouvert
                   }}
-                  className="w-12 h-12 flex items-center justify-center bg-amber-100 hover:bg-amber-200 rounded-xl transition-colors cursor-pointer"
+                  className="w-12 h-12 flex items-center justify-center bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800/50 rounded-xl transition-colors cursor-pointer"
                 >
-                  <HabitIcon name={newHabitIcon} size={24} className="text-amber-600" />
+                  <HabitIcon name={newHabitIcon} size={24} className="text-amber-600 dark:text-amber-400" />
                 </button>
 
                 {showIconPicker && (
                   <div
-                    className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-50 w-80 max-w-[calc(100vw-3rem)]"
+                    className="absolute bottom-14 left-0 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-700 pt-6 pb-4 px-4 z-50 w-80 max-w-[calc(100vw-3rem)]"
                     onClick={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
@@ -497,7 +501,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                         e.stopPropagation();
                         setShowIconPicker(false);
                       }}
-                      className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                      className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
                       aria-label="Fermer le choix d'icône"
                     >
                       <X size={14} />
@@ -513,7 +517,9 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                             setActiveCategory(idx);
                           }}
                           className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                            activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                            activeCategory === idx
+                              ? "bg-amber-500 text-white"
+                              : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
                           }`}
                         >
                           {cat.name}
@@ -536,7 +542,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                             className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
                               newHabitIcon === item.name
                                 ? "bg-amber-500 text-white"
-                                : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
+                                : "bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400"
                             }`}
                           >
                             <IconComp size={22} />
@@ -555,14 +561,14 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 onChange={(e) => setNewHabitName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addHabit()}
                 placeholder="Ex: Méditer 10 min"
-                className="flex-1 min-w-0 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
+                className="flex-1 min-w-0 px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
               />
 
               {/* Add button */}
               <button
                 onClick={addHabit}
                 disabled={loading || !newHabitName.trim()}
-                className="px-4 py-3 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-200 disabled:cursor-not-allowed cursor-pointer text-white rounded-xl transition-colors"
+                className="px-4 py-3 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white disabled:bg-slate-200 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed cursor-pointer text-white dark:text-slate-900 rounded-xl transition-colors"
               >
                 <Plus size={20} />
               </button>

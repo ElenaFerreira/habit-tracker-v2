@@ -175,11 +175,11 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
 
   if (loading) {
     return (
-      <div className="bento-card bg-rose-50 p-6 rounded-3xl border border-rose-200">
+      <div className="bento-card bg-rose-50 dark:bg-rose-950/30 p-6 rounded-3xl border border-rose-200 dark:border-rose-900/50">
         <div className="animate-pulse space-y-4">
-          <div className="h-6 bg-rose-100 rounded w-32" />
-          <div className="h-24 bg-rose-100 rounded-xl" />
-          <div className="h-24 bg-rose-100 rounded-xl" />
+          <div className="h-6 bg-rose-100 dark:bg-rose-900/50 rounded w-32" />
+          <div className="h-24 bg-rose-100 dark:bg-rose-900/50 rounded-xl" />
+          <div className="h-24 bg-rose-100 dark:bg-rose-900/50 rounded-xl" />
         </div>
       </div>
     );
@@ -187,16 +187,16 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
 
   if (goals.length === 0) {
     return (
-      <div className="bento-card bg-rose-50 p-6 rounded-3xl border border-rose-200">
+      <div className="bento-card bg-rose-50 dark:bg-rose-950/30 p-6 rounded-3xl border border-rose-200 dark:border-rose-900/50">
         <div className="text-center py-6">
-          <div className="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Target size={24} className="text-rose-500" />
+          <div className="w-14 h-14 bg-rose-100 dark:bg-rose-900/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Target size={24} className="text-rose-500 dark:text-rose-400" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-800 mb-2">Pas encore d'objectifs</h3>
-          <p className="text-slate-500 text-sm mb-5">Définis des objectifs pour te motiver !</p>
+          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-2">Pas encore d'objectifs</h3>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">Définis des objectifs pour te motiver !</p>
           <button
             onClick={onOpenSettings}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-xl transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white text-white dark:text-slate-900 font-semibold rounded-xl transition-colors cursor-pointer"
           >
             <Plus size={18} />
             Créer un objectif
@@ -211,23 +211,23 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
   const completedGoals = goals.filter((g) => g.is_completed);
 
   return (
-    <div className="bento-card bg-rose-50 p-6 rounded-3xl border border-rose-200">
+    <div className="bento-card bg-rose-50 dark:bg-rose-950/30 p-6 rounded-3xl border border-rose-200 dark:border-rose-900/50">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
-            <Target size={20} className="text-rose-600" />
+          <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center">
+            <Target size={20} className="text-rose-600 dark:text-rose-400" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Mes objectifs</h3>
-            <p className="text-xs text-slate-500">
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">Mes objectifs</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               {activeGoals.length} en cours · {completedGoals.length} atteint{completedGoals.length > 1 ? "s" : ""}
             </p>
           </div>
         </div>
         <button
           onClick={onOpenSettings}
-          className="p-2.5 hover:bg-rose-100 rounded-xl transition-colors cursor-pointer text-rose-600"
+          className="p-2.5 hover:bg-rose-100 dark:hover:bg-rose-900/50 rounded-xl transition-colors cursor-pointer text-rose-600 dark:text-rose-400"
           title="Gérer mes objectifs"
         >
           <Plus size={18} />
@@ -245,9 +245,9 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
 
       {/* Goals complétés */}
       {completedGoals.length > 0 && (
-        <div className="pt-3 border-t border-slate-100">
-          <p className="text-xs font-medium text-slate-500 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-            <CheckCircle2 size={14} className="text-emerald-500" />
+        <div className="pt-3 border-t border-slate-100 dark:border-zinc-800">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider flex items-center gap-1.5">
+            <CheckCircle2 size={14} className="text-emerald-500 dark:text-emerald-400" />
             <span>Objectifs atteints</span>
           </p>
           <div className="space-y-3 opacity-70">
@@ -256,7 +256,7 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
             ))}
           </div>
           {completedGoals.length > 2 && (
-            <p className="text-xs text-slate-400 mt-3 text-center">+{completedGoals.length - 2} autres objectifs atteints</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 text-center">+{completedGoals.length - 2} autres objectifs atteints</p>
           )}
         </div>
       )}

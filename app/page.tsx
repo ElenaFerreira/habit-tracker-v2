@@ -9,7 +9,7 @@ export default async function AppPage() {
   if (!data.user) redirect("/login");
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white dark:bg-zinc-950">
       <AppShell userEmail={data.user.email || ""} />
     </main>
   );

@@ -154,23 +154,25 @@ export default function StepCounter() {
   const todayGoalReached = todayValue >= dailyGoal;
 
   if (loading) {
-    return <div className="bento-card h-full bg-blue-50 rounded-3xl animate-pulse min-h-[200px] border border-blue-400" />;
+    return (
+      <div className="bento-card h-full bg-blue-50 dark:bg-blue-950/30 rounded-3xl animate-pulse min-h-[200px] border border-blue-400 dark:border-blue-900/50" />
+    );
   }
 
   return (
-    <div className="bento-card bg-blue-50 p-5 rounded-3xl border border-blue-400 relative overflow-hidden">
+    <div className="bento-card bg-blue-50 dark:bg-blue-950/30 p-5 rounded-3xl border border-blue-400 dark:border-blue-900/50 relative overflow-hidden">
       <div className={`absolute top-3 right-3 ${todayGoalReached ? "opacity-30" : "opacity-10"}`}>
-        <Footprints size={40} strokeWidth={1.5} className={todayGoalReached ? "text-blue-500" : "text-blue-800"} />
+        <Footprints size={40} strokeWidth={1.5} className={todayGoalReached ? "text-blue-500" : "text-blue-800 dark:text-blue-200"} />
       </div>
 
       <div className="relative z-10 space-y-3">
         {/* Header + bouton modifier aligné juste à côté du titre */}
         <div className="flex items-center gap-2">
-          <p className="text-blue-600 text-xs font-medium uppercase tracking-wider">steps</p>
+          <p className="text-blue-600 dark:text-blue-400 text-xs font-medium uppercase tracking-wider">steps</p>
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-2.5 py-1 bg-blue-100 hover:bg-blue-200 text-blue-600 text-xs font-medium rounded-lg transition-colors cursor-pointer"
+              className="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-lg transition-colors cursor-pointer"
             >
               Modifier
             </button>
@@ -185,7 +187,7 @@ export default function StepCounter() {
               value={todaySteps}
               onChange={(e) => setTodaySteps(e.target.value)}
               placeholder="0"
-              className="w-full px-3 py-2 bg-blue-100 rounded-xl text-slate-800 placeholder-blue-300 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="w-full px-3 py-2 bg-blue-100 dark:bg-blue-900/50 rounded-xl text-slate-800 dark:text-slate-100 placeholder-blue-300 dark:placeholder-blue-600 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600"
               autoFocus
             />
             <button
@@ -198,28 +200,28 @@ export default function StepCounter() {
           </div>
         ) : (
           <div className="flex items-baseline gap-2">
-            <p className="text-4xl font-black leading-none text-slate-800">{todayValue.toLocaleString("fr-FR")}</p>
-            <p className="text-lg font-semibold text-slate-600">pas</p>
+            <p className="text-4xl font-black leading-none text-slate-800 dark:text-slate-100">{todayValue.toLocaleString("fr-FR")}</p>
+            <p className="text-lg font-semibold text-slate-600 dark:text-slate-400">pas</p>
           </div>
         )}
 
         {/* Barre de progression du jour */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-slate-500">
+          <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
               <Target size={12} />
               <span>Objectif : {dailyGoal.toLocaleString("fr-FR")}/jour</span>
             </div>
-            <span className="font-semibold text-slate-700">{todayProgressPercent}%</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-300">{todayProgressPercent}%</span>
           </div>
-          <div className="h-2.5 bg-blue-100 rounded-full overflow-hidden">
+          <div className="h-2.5 bg-blue-100 dark:bg-blue-900/50 rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 bg-linear-to-r from-emerald-400 to-teal-500`}
               style={{ width: `${todayProgressPercent}%` }}
             />
           </div>
           {todayGoalReached && (
-            <div className="flex items-center gap-2 text-emerald-600 text-xs">
+            <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 text-xs">
               <CheckCircle size={12} />
               <span>Objectif du jour atteint ! 🎉</span>
             </div>
@@ -227,21 +229,25 @@ export default function StepCounter() {
         </div>
 
         {/* Moyenne vs Objectif */}
-        <div className="flex items-center justify-between bg-blue-100/50 rounded-xl px-3 py-2.5">
-          <div className="flex items-center gap-2 text-blue-600 text-xs">
+        <div className="flex items-center justify-between bg-blue-100/50 dark:bg-blue-900/30 rounded-xl px-3 py-2.5">
+          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs">
             <TrendingUp size={14} />
             <span>Moyenne</span>
           </div>
           <div className="text-right">
-            <span className={`text-lg font-bold ${average >= dailyGoal ? "text-emerald-600" : "text-slate-700"}`}>
+            <span
+              className={`text-lg font-bold ${
+                average >= dailyGoal ? "text-emerald-600 dark:text-emerald-400" : "text-slate-700 dark:text-slate-300"
+              }`}
+            >
               {average.toLocaleString("fr-FR")}
             </span>
-            <span className="text-slate-400 text-xs ml-1">/ {dailyGoal.toLocaleString("fr-FR")}</span>
+            <span className="text-slate-400 dark:text-slate-500 text-xs ml-1">/ {dailyGoal.toLocaleString("fr-FR")}</span>
           </div>
         </div>
 
         {/* Barre des jours de la semaine */}
-        <div className="pt-2 border-t border-blue-100">
+        <div className="pt-2 border-t border-blue-100 dark:border-blue-900/50">
           <div className="grid grid-cols-7 gap-1">
             {["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((day, idx) => {
               const dayData = weekDays[idx];
@@ -254,16 +260,18 @@ export default function StepCounter() {
                 <div
                   key={day}
                   className={`flex flex-col items-center py-2 rounded-xl transition-all ${
-                    isToday ? "bg-blue-100" : isFuture ? "opacity-30" : hasData ? "bg-blue-100/50" : ""
+                    isToday ? "bg-blue-100 dark:bg-blue-900/50" : isFuture ? "opacity-30" : hasData ? "bg-blue-100/50 dark:bg-blue-900/30" : ""
                   }`}
                 >
-                  <span className="text-[10px] text-blue-400 mb-1">{day}</span>
+                  <span className="text-[10px] text-blue-400 dark:text-blue-500 mb-1">{day}</span>
                   {isFuture ? (
-                    <Minus size={12} className="text-blue-200" />
+                    <Minus size={12} className="text-blue-200 dark:text-blue-700" />
                   ) : hasData ? (
-                    <span className="text-xs font-bold text-slate-700">{steps >= 1000 ? `${Math.round(steps / 1000)}k` : steps}</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {steps >= 1000 ? `${Math.round(steps / 1000)}k` : steps}
+                    </span>
                   ) : (
-                    <span className="text-xs text-blue-200">0</span>
+                    <span className="text-xs text-blue-200 dark:text-blue-700">0</span>
                   )}
                 </div>
               );

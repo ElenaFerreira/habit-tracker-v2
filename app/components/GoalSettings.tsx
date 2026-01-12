@@ -32,46 +32,50 @@ function SortableGoalItem({ goal, onStartEdit, onDelete }: SortableGoalItemProps
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-zinc-800 rounded-xl group">
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
-        <GripVertical size={16} className="text-slate-300" />
+        <GripVertical size={16} className="text-slate-300 dark:text-zinc-600" />
       </div>
 
       {/* Icône type */}
       <div
         className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-          goal.type === "streak" ? "bg-violet-100" : goal.type === "one_time" ? "bg-amber-100" : "bg-emerald-100"
+          goal.type === "streak"
+            ? "bg-violet-100 dark:bg-violet-900/50"
+            : goal.type === "one_time"
+            ? "bg-amber-100 dark:bg-amber-900/50"
+            : "bg-emerald-100 dark:bg-emerald-900/50"
         }`}
       >
         {goal.type === "streak" ? (
-          <Flame size={20} className="text-violet-600" />
+          <Flame size={20} className="text-violet-600 dark:text-violet-400" />
         ) : goal.type === "one_time" ? (
           goal.icon ? (
-            <HabitIcon name={goal.icon} size={20} className="text-amber-600" />
+            <HabitIcon name={goal.icon} size={20} className="text-amber-600 dark:text-amber-400" />
           ) : (
-            <Star size={20} className="text-amber-600" />
+            <Star size={20} className="text-amber-600 dark:text-amber-400" />
           )
         ) : (
-          <Target size={20} className="text-emerald-600" />
+          <Target size={20} className="text-emerald-600 dark:text-emerald-400" />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="font-medium text-slate-800 truncate">{goal.name}</p>
+          <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{goal.name}</p>
           {goal.habit && (
-            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 rounded-lg">
-              <HabitIcon name={goal.habit.emoji} size={12} className="text-amber-600" />
-              <span className="text-xs text-amber-700 truncate max-w-[80px]">{goal.habit.name}</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
+              <HabitIcon name={goal.habit.emoji} size={12} className="text-amber-600 dark:text-amber-400" />
+              <span className="text-xs text-amber-700 dark:text-amber-300 truncate max-w-[80px]">{goal.habit.name}</span>
             </div>
           )}
           {goal.completed_at && (
-            <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 rounded-lg">
-              <span className="text-xs text-green-700">✓ Fait</span>
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 dark:bg-green-900/50 rounded-lg">
+              <span className="text-xs text-green-700 dark:text-green-400">✓ Fait</span>
             </div>
           )}
         </div>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-slate-500 dark:text-slate-400">
           {goal.type === "one_time" ? (
             "Accomplissement unique"
           ) : goal.type === "streak" ? (
@@ -83,10 +87,12 @@ function SortableGoalItem({ goal, onStartEdit, onDelete }: SortableGoalItemProps
               {goal.target_value} fois {goal.period === "week" ? "par semaine" : goal.period === "month" ? "par mois" : "par an"}
             </>
           )}
-          {goal.end_date && <span className="text-slate-400"> · jusqu'au {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>}
+          {goal.end_date && (
+            <span className="text-slate-400 dark:text-slate-500"> · jusqu'au {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>
+          )}
         </p>
         {goal.reward && (
-          <p className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
+          <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1 mt-0.5">
             <Gift size={10} />
             {goal.reward}
           </p>
@@ -96,14 +102,14 @@ function SortableGoalItem({ goal, onStartEdit, onDelete }: SortableGoalItemProps
       <div className="flex items-center gap-1">
         <button
           onClick={() => onStartEdit(goal)}
-          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
           title="Modifier"
         >
           <Pencil size={16} />
         </button>
         <button
           onClick={() => onDelete(goal.id)}
-          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
           title="Supprimer"
         >
           <Trash2 size={16} />
@@ -371,17 +377,17 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-rose-100 rounded-xl flex items-center justify-center">
-              <Target size={20} className="text-rose-600" />
+            <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center">
+              <Target size={20} className="text-rose-600 dark:text-rose-400" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900">Mes objectifs</h2>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">Mes objectifs</h2>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer">
-            <X size={20} className="text-slate-500" />
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors cursor-pointer">
+            <X size={20} className="text-slate-500 dark:text-slate-400" />
           </button>
         </div>
 
@@ -401,17 +407,20 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
           ) : (
             <div className="text-center py-8 mb-8">
               <div className="text-5xl mb-4">🎯</div>
-              <p className="text-slate-500 text-base">Aucun objectif pour l'instant</p>
-              <p className="text-slate-400 text-sm mt-1">Définis ton premier objectif ci-dessous !</p>
+              <p className="text-slate-500 dark:text-slate-400 text-base">Aucun objectif pour l'instant</p>
+              <p className="text-slate-400 dark:text-slate-500 text-sm mt-1">Définis ton premier objectif ci-dessous !</p>
             </div>
           )}
 
           {/* Formulaire objectif */}
-          <div className="border-t border-slate-100 pt-6">
+          <div className="border-t border-slate-100 dark:border-zinc-800 pt-6">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold text-slate-700">{isEditing ? "Modifier l'objectif" : "Nouvel objectif"}</p>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{isEditing ? "Modifier l'objectif" : "Nouvel objectif"}</p>
               {isEditing && (
-                <button onClick={cancelEdit} className="text-xs text-slate-500 hover:text-slate-700 underline cursor-pointer">
+                <button
+                  onClick={cancelEdit}
+                  className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 underline cursor-pointer"
+                >
                   Annuler
                 </button>
               )}
@@ -420,14 +429,16 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
             <div className="space-y-4">
               {/* Type d'objectif */}
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-2">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                   Type d'objectif <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   <button
                     onClick={() => setGoalType("one_time")}
                     className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                      goalType === "one_time" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      goalType === "one_time"
+                        ? "bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900"
+                        : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
                     }`}
                   >
                     <Star size={18} />
@@ -436,7 +447,9 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   <button
                     onClick={() => setGoalType("quantitative")}
                     className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                      goalType === "quantitative" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      goalType === "quantitative"
+                        ? "bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900"
+                        : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
                     }`}
                   >
                     <Target size={18} />
@@ -445,7 +458,9 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   <button
                     onClick={() => setGoalType("streak")}
                     className={`flex flex-col items-center justify-center gap-1 px-3 py-3 rounded-xl font-medium transition-all cursor-pointer ${
-                      goalType === "streak" ? "bg-slate-800 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      goalType === "streak"
+                        ? "bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900"
+                        : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
                     }`}
                   >
                     <Flame size={18} />
@@ -458,20 +473,20 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               <div className="flex gap-2 items-end min-w-0">
                 {goalType === "one_time" && !selectedHabit && (
                   <div className="relative">
-                    <label className="block text-xs font-medium text-slate-600 mb-2">Icône</label>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">Icône</label>
                     <button
                       onClick={() => setShowIconPicker(!showIconPicker)}
-                      className="w-12 h-12 flex items-center justify-center bg-amber-100 hover:bg-amber-200 rounded-xl transition-colors cursor-pointer"
+                      className="w-12 h-12 flex items-center justify-center bg-amber-100 dark:bg-amber-900/50 hover:bg-amber-200 dark:hover:bg-amber-800/50 rounded-xl transition-colors cursor-pointer"
                     >
-                      <HabitIcon name={selectedIcon} size={24} className="text-amber-600" />
+                      <HabitIcon name={selectedIcon} size={24} className="text-amber-600 dark:text-amber-400" />
                     </button>
 
                     {showIconPicker && (
-                      <div className="absolute bottom-14 left-0 bg-white rounded-2xl shadow-xl border border-slate-200 pt-6 pb-4 px-4 z-20 w-80 max-w-[calc(100vw-3rem)]">
+                      <div className="absolute bottom-14 left-0 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-700 pt-6 pb-4 px-4 z-20 w-80 max-w-[calc(100vw-3rem)]">
                         {/* Bouton de fermeture */}
                         <button
                           onClick={() => setShowIconPicker(false)}
-                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
                           aria-label="Fermer le choix d'icône"
                         >
                           <X size={14} />
@@ -483,7 +498,9 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                               key={cat.name}
                               onClick={() => setActiveCategory(idx)}
                               className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                                activeCategory === idx ? "bg-amber-500 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                                activeCategory === idx
+                                  ? "bg-amber-500 text-white"
+                                  : "bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-zinc-700"
                               }`}
                             >
                               {cat.name}
@@ -503,7 +520,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                                 className={`w-12 h-12 flex items-center justify-center rounded-xl transition-colors cursor-pointer ${
                                   selectedIcon === item.name
                                     ? "bg-amber-500 text-white"
-                                    : "bg-slate-50 text-slate-600 hover:bg-amber-100 hover:text-amber-600"
+                                    : "bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-slate-400 hover:bg-amber-100 dark:hover:bg-amber-900/50 hover:text-amber-600 dark:hover:text-amber-400"
                                 }`}
                               >
                                 <IconComp size={22} />
@@ -517,7 +534,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 )}
 
                 <div className="flex-1 min-w-0">
-                  <label className="block text-xs font-medium text-slate-600 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                     Nom de l'objectif <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -531,7 +548,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                         ? "Ex: 14 jours de méditation"
                         : "Ex: 20 séances ce mois"
                     }
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:border-slate-400 dark:focus:border-slate-500"
                   />
                 </div>
               </div>
@@ -539,14 +556,18 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               {/* Sélection habitude (optionnel pour one_time, requis pour autres) */}
               {(needsHabit || (goalType === "one_time" && habits.length > 0)) && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-2">
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                     Habitude concernée{" "}
-                    {goalType === "one_time" ? <span className="text-slate-400">(optionnel)</span> : <span className="text-rose-500">*</span>}
+                    {goalType === "one_time" ? (
+                      <span className="text-slate-400 dark:text-slate-500">(optionnel)</span>
+                    ) : (
+                      <span className="text-rose-500">*</span>
+                    )}
                   </label>
                   <select
                     value={selectedHabit}
                     onChange={(e) => setSelectedHabit(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 cursor-pointer"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:border-slate-400 dark:focus:border-slate-500 cursor-pointer"
                   >
                     <option value="">{goalType === "one_time" ? "Aucune (objectif personnel)" : "Choisir une habitude..."}</option>
                     {habits.map((habit) => (
@@ -562,7 +583,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               {goalType !== "one_time" && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-2">
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                       {goalType === "streak" ? "Jours consécutifs" : "Nombre de fois"} <span className="text-rose-500">*</span>
                     </label>
                     <input
@@ -570,19 +591,19 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                       min={1}
                       value={targetValue}
                       onChange={(e) => setTargetValue(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:border-slate-400 dark:focus:border-slate-500"
                     />
                   </div>
 
                   {goalType === "quantitative" && (
                     <div>
-                      <label className="block text-xs font-medium text-slate-600 mb-2">
+                      <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                         Période <span className="text-rose-500">*</span>
                       </label>
                       <select
                         value={period}
                         onChange={(e) => setPeriod(e.target.value as GoalPeriod)}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400 cursor-pointer"
+                        className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:border-slate-400 dark:focus:border-slate-500 cursor-pointer"
                       >
                         <option value="week">Par semaine</option>
                         <option value="month">Par mois</option>
@@ -595,26 +616,26 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
 
               {/* Date de fin optionnelle */}
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-2">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                   <span className="flex items-center gap-1">
                     <Calendar size={12} />
-                    Date limite <span className="text-slate-400">(optionnel)</span>
+                    Date limite <span className="text-slate-400 dark:text-slate-500">(optionnel)</span>
                   </span>
                 </label>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:border-slate-400 dark:focus:border-slate-500"
                 />
               </div>
 
               {/* Récompense optionnelle */}
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-2">
+                <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                   <span className="flex items-center gap-1">
                     <Gift size={12} />
-                    Récompense <span className="text-slate-400">(optionnel)</span>
+                    Récompense <span className="text-slate-400 dark:text-slate-500">(optionnel)</span>
                   </span>
                 </label>
                 <input
@@ -622,7 +643,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                   value={reward}
                   onChange={(e) => setReward(e.target.value)}
                   placeholder="Ex: M'offrir un resto, Acheter un jeu..."
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 focus:border-slate-400"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:border-slate-400 dark:focus:border-slate-500"
                 />
               </div>
 
@@ -630,7 +651,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
               <button
                 onClick={isEditing ? updateGoal : addGoal}
                 disabled={loading || !isFormValid}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-200 disabled:cursor-not-allowed cursor-pointer text-white font-semibold rounded-xl transition-all"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-800 dark:bg-slate-100 hover:bg-slate-900 dark:hover:bg-white disabled:bg-slate-200 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed cursor-pointer text-white dark:text-slate-900 font-semibold rounded-xl transition-all"
               >
                 {isEditing ? <Save size={18} /> : <Plus size={18} />}
                 {isEditing ? "Enregistrer" : "Créer l'objectif"}

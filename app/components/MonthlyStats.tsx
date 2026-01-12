@@ -7,6 +7,7 @@ import { formatDateLocal } from "@/lib/hooks/useToday";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { TrendingUp, Calendar, Footprints, Target, CheckCircle, Sparkles, ChevronLeft, ChevronRight, ChartColumn } from "lucide-react";
 import { HabitIcon } from "@/lib/icons";
+import { useTheme } from "@/lib/hooks/useTheme";
 
 interface MonthlyData {
   month: string;
@@ -60,6 +61,8 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
   const [dailyGoal, setDailyGoal] = useState<number>(15000);
   const [monthOffset, setMonthOffset] = useState<number>(0); // 0 = mois actuel, 1 = mois précédent, etc.
   const supabase = createClient();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const fetchUserSettings = useCallback(async () => {
     const {
@@ -240,10 +243,10 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
   if (loading) {
     return (
-      <div className="bento-card bg-slate-50 p-8 rounded-3xl border border-slate-200">
+      <div className="bento-card bg-slate-50 dark:bg-zinc-900 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800">
         <div className="flex items-center justify-center gap-3">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-500"></div>
-          <span className="text-slate-600">Chargement des statistiques...</span>
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-500 dark:border-slate-400"></div>
+          <span className="text-slate-600 dark:text-slate-400">Chargement des statistiques...</span>
         </div>
       </div>
     );
@@ -251,10 +254,10 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
   if (monthlyData.length === 0) {
     return (
-      <div className="bento-card bg-slate-50 p-8 rounded-3xl border border-slate-200 text-center">
+      <div className="bento-card bg-slate-50 dark:bg-zinc-900 p-8 rounded-3xl border border-slate-200 dark:border-zinc-800 text-center">
         <Calendar className="mx-auto text-slate-400 mb-4" size={48} />
-        <h2 className="text-xl font-semibold text-slate-800 mb-2">Pas encore de données mensuelles</h2>
-        <p className="text-slate-500">Commence à enregistrer tes pas pour voir les statistiques ici.</p>
+        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100 mb-2">Pas encore de données mensuelles</h2>
+        <p className="text-slate-500 dark:text-slate-400">Commence à enregistrer tes pas pour voir les statistiques ici.</p>
       </div>
     );
   }
@@ -279,12 +282,20 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
     color: MOOD_COLORS[stat.mood],
   }));
 
+  // Couleurs pour les graphiques selon le thème
+  const chartColors = {
+    grid: isDark ? "#3f3f46" : "#e2e8f0",
+    axis: isDark ? "#a1a1aa" : "#64748b",
+    tooltipBg: isDark ? "#18181b" : "white",
+    tooltipBorder: isDark ? "#3f3f46" : "#e2e8f0",
+  };
+
   return (
     <div className="space-y-6 mt-8">
       {/* Titre */}
       <div className="flex items-center gap-2">
-        <ChartColumn className="text-slate-600" size={20} />
-        <h2 className="text-lg sm:text-xl font-bold text-slate-800">Statistiques mensuelles</h2>
+        <ChartColumn className="text-slate-600 dark:text-slate-400" size={20} />
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">Statistiques mensuelles</h2>
       </div>
 
       {/* Navigation entre les mois */}
@@ -292,7 +303,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         {/* Mois précédent */}
         <button
           onClick={() => setMonthOffset((prev) => prev + 1)}
-          className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 transition-all cursor-pointer"
+          className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-700 hover:text-slate-800 dark:hover:text-slate-100 transition-all cursor-pointer"
           title="Mois précédent"
         >
           <ChevronLeft size={16} />
@@ -301,11 +312,11 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
         {/* Mois affiché */}
         <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
-          <div className="flex items-center justify-center gap-2 text-slate-500 text-xs sm:text-sm">
+          <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
             <Calendar size={16} />
             <span className="capitalize">
               {selectedMonth}
-              {isCurrentMonth && <span className="text-slate-400"> (en cours)</span>}
+              {isCurrentMonth && <span className="text-slate-400 dark:text-slate-500"> (en cours)</span>}
             </span>
           </div>
         </div>
@@ -314,10 +325,10 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         <button
           onClick={() => setMonthOffset((prev) => Math.max(0, prev - 1))}
           disabled={isCurrentMonth}
-          className={`flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 transition-all ${
+          className={`flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 transition-all ${
             isCurrentMonth
-              ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-              : "bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-800 cursor-pointer"
+              ? "bg-slate-100 dark:bg-zinc-900 text-slate-400 dark:text-zinc-600 cursor-not-allowed"
+              : "bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 cursor-pointer"
           }`}
           title="Mois suivant"
         >
@@ -328,59 +339,60 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
       {/* Statistiques du mois sélectionné */}
       {monthlyData[0] && (
-        <div className="bento-card bg-blue-50 p-4 sm:p-6 rounded-3xl border border-blue-200">
+        <div className="bento-card bg-blue-50 dark:bg-blue-950/30 p-4 sm:p-6 rounded-3xl border border-blue-200 dark:border-blue-900/50">
           <div className="flex items-center gap-2 mb-4">
-            <Calendar className="text-blue-600 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
-            <h3 className="text-base sm:text-lg font-semibold text-slate-800 capitalize">
+            <Calendar className="text-blue-600 dark:text-blue-400 w-4 h-4 sm:w-[18px] sm:h-[18px]" />
+            <h3 className="text-base sm:text-lg font-semibold text-slate-800 dark:text-slate-100 capitalize">
               {monthlyData[0].month}
-              {isCurrentMonth && <span className="text-xs sm:text-sm font-normal text-slate-500 ml-1 sm:ml-2">(en cours)</span>}
+              {isCurrentMonth && <span className="text-xs sm:text-sm font-normal text-slate-500 dark:text-slate-400 ml-1 sm:ml-2">(en cours)</span>}
             </h3>
           </div>
 
           <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-            <div className="bg-white/60 rounded-xl p-2 sm:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 text-[10px] sm:text-xs mb-1">
+            <div className="bg-white/60 dark:bg-zinc-800/60 rounded-xl p-2 sm:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs mb-1">
                 <Footprints size={12} className="sm:w-3.5 sm:h-3.5" />
                 <span>Total</span>
               </div>
-              <p className="text-lg sm:text-2xl font-bold text-slate-800">{monthlyData[0].total.toLocaleString("fr-FR")}</p>
-              <p className="text-[10px] sm:text-xs text-slate-400 mt-1">pas ce mois</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{monthlyData[0].total.toLocaleString("fr-FR")}</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1">pas ce mois</p>
             </div>
 
-            <div className="bg-white/60 rounded-xl p-2 sm:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 text-[10px] sm:text-xs mb-1">
+            <div className="bg-white/60 dark:bg-zinc-800/60 rounded-xl p-2 sm:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs mb-1">
                 <TrendingUp size={12} className="sm:w-3.5 sm:h-3.5" />
                 <span>Moyenne</span>
               </div>
-              <p className="text-lg sm:text-2xl font-bold text-slate-800">{monthlyData[0].average.toLocaleString("fr-FR")}</p>
-              <p className="text-[10px] sm:text-xs text-slate-400 mt-1">pas/jour</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{monthlyData[0].average.toLocaleString("fr-FR")}</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1">pas/jour</p>
             </div>
 
-            <div className="bg-white/60 rounded-xl p-2 sm:p-4">
-              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 text-[10px] sm:text-xs mb-1">
+            <div className="bg-white/60 dark:bg-zinc-800/60 rounded-xl p-2 sm:p-4">
+              <div className="flex items-center gap-1.5 sm:gap-2 text-slate-600 dark:text-slate-400 text-[10px] sm:text-xs mb-1">
                 <Target size={12} className="sm:w-3.5 sm:h-3.5" />
                 <span>Jours</span>
               </div>
-              <p className="text-lg sm:text-2xl font-bold text-slate-800">{monthlyData[0].daysWithData}</p>
-              <p className="text-[10px] sm:text-xs text-slate-400 mt-1">avec données</p>
+              <p className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-slate-100">{monthlyData[0].daysWithData}</p>
+              <p className="text-[10px] sm:text-xs text-slate-400 dark:text-slate-500 mt-1">avec données</p>
             </div>
           </div>
 
           {/* Graphique journalier du mois actuel */}
           {currentMonthData.length > 0 && (
             <div className="mt-6">
-              <h4 className="text-sm font-semibold text-slate-700 mb-3">Évolution quotidienne</h4>
+              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Évolution quotidienne</h4>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={currentMonthData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
-                  <YAxis stroke="#64748b" fontSize={12} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                  <XAxis dataKey="date" stroke={chartColors.axis} fontSize={12} />
+                  <YAxis stroke={chartColors.axis} fontSize={12} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "white",
-                      border: "1px solid #e2e8f0",
+                      backgroundColor: chartColors.tooltipBg,
+                      border: `1px solid ${chartColors.tooltipBorder}`,
                       borderRadius: "8px",
                       fontSize: "12px",
+                      color: isDark ? "#f1f5f9" : "#1e293b",
                     }}
                     formatter={(value: number | undefined) => [`${(value || 0).toLocaleString("fr-FR")} pas`, "Pas"]}
                   />
@@ -394,33 +406,33 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
       {/* Statistiques des habitudes */}
       {habitStats.length > 0 && (
-        <div className="bento-card bg-emerald-50 p-6 rounded-3xl border border-emerald-200">
+        <div className="bento-card bg-emerald-50 dark:bg-emerald-950/30 p-6 rounded-3xl border border-emerald-200 dark:border-emerald-900/50">
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="text-emerald-600" size={18} />
-            <h3 className="text-lg font-semibold text-slate-800">Habitudes</h3>
+            <TrendingUp className="text-emerald-600 dark:text-emerald-400" size={18} />
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Habitudes</h3>
           </div>
 
           <div className="space-y-3 mb-6">
             {habitStats.map((stat) => (
-              <div key={stat.habit.id} className="bg-white/60 rounded-xl p-4">
+              <div key={stat.habit.id} className="bg-white/60 dark:bg-zinc-800/60 rounded-xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                      <HabitIcon name={stat.habit.emoji} size={18} className="text-emerald-600" />
+                    <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center">
+                      <HabitIcon name={stat.habit.emoji} size={18} className="text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <span className="font-medium text-slate-800">{stat.habit.name}</span>
+                    <span className="font-medium text-slate-800 dark:text-slate-100">{stat.habit.name}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-lg font-bold text-slate-800">{stat.completionRate}%</span>
+                    <span className="text-lg font-bold text-slate-800 dark:text-slate-100">{stat.completionRate}%</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   <CheckCircle size={12} />
                   <span>
                     {stat.completions} jour{stat.completions > 1 ? "s" : ""} sur {stat.totalDays}
                   </span>
                 </div>
-                <div className="mt-2 h-2 bg-emerald-100 rounded-full overflow-hidden">
+                <div className="mt-2 h-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full bg-linear-to-r from-emerald-400 to-teal-500 transition-all duration-500"
                     style={{ width: `${stat.completionRate}%` }}
@@ -434,16 +446,16 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
       {/* Statistiques de l'humeur */}
       {moodStats.length > 0 && (
-        <div className="bento-card bg-violet-50 p-6 rounded-3xl border border-violet-200">
+        <div className="bento-card bg-violet-50 dark:bg-violet-950/30 p-6 rounded-3xl border border-violet-200 dark:border-violet-900/50">
           <div className="flex items-center gap-2 mb-4">
-            <Sparkles className="text-violet-600" size={18} />
-            <h3 className="text-lg font-semibold text-slate-800">Humeur</h3>
+            <Sparkles className="text-violet-600 dark:text-violet-400" size={18} />
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Humeur</h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Graphique en camembert */}
             <div>
-              <h4 className="text-sm font-semibold text-slate-700 mb-3">Répartition</h4>
+              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Répartition</h4>
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie
@@ -451,7 +463,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="value"
@@ -462,10 +474,11 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "white",
-                      border: "1px solid #e2e8f0",
+                      backgroundColor: chartColors.tooltipBg,
+                      border: `1px solid ${chartColors.tooltipBorder}`,
                       borderRadius: "8px",
                       fontSize: "12px",
+                      color: isDark ? "#f1f5f9" : "#1e293b",
                     }}
                     formatter={(value: number | undefined) => [`${value} jour${(value || 0) > 1 ? "s" : ""}`, "Humeur"]}
                   />
@@ -475,17 +488,17 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
             {/* Liste des humeurs */}
             <div>
-              <h4 className="text-sm font-semibold text-slate-700 mb-3">Détails</h4>
+              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Détails</h4>
               <div className="space-y-2">
                 {moodStats.map((stat) => (
-                  <div key={stat.mood} className="flex items-center justify-between bg-white/60 rounded-lg p-3">
+                  <div key={stat.mood} className="flex items-center justify-between bg-white/60 dark:bg-zinc-800/60 rounded-lg p-3">
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{MOOD_CONFIG[stat.mood].emoji}</span>
-                      <span className="text-sm font-medium text-slate-700">{MOOD_CONFIG[stat.mood].label}</span>
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{MOOD_CONFIG[stat.mood].label}</span>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-bold text-slate-800">{stat.count}</span>
-                      <span className="text-xs text-slate-400 ml-1">({stat.percentage}%)</span>
+                      <span className="text-sm font-bold text-slate-800 dark:text-slate-100">{stat.count}</span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500 ml-1">({stat.percentage}%)</span>
                     </div>
                   </div>
                 ))}
@@ -496,11 +509,11 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
           {/* Graphique quotidien de l'humeur */}
           {moodDailyData.length > 0 && (
             <div className="mt-6">
-              <h4 className="text-sm font-semibold text-slate-700 mb-3">Évolution quotidienne</h4>
+              <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Évolution quotidienne</h4>
               <div className="flex flex-wrap gap-1">
                 {moodDailyData.map((item, idx) => {
                   const moodStat = moodStats.find((s) => MOOD_CONFIG[s.mood].label === item.mood);
-                  const bgColor = moodStat ? MOOD_CONFIG[moodStat.mood].bgColor : "bg-slate-100";
+                  const bgColor = moodStat ? MOOD_CONFIG[moodStat.mood].bgColor : "bg-slate-100 dark:bg-zinc-800";
                   const emoji = moodStat ? MOOD_CONFIG[moodStat.mood].emoji : "—";
                   return (
                     <div
@@ -509,7 +522,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
                       title={item.mood || "Non renseigné"}
                     >
                       <span className="text-sm">{emoji}</span>
-                      <span className="text-[10px] text-slate-500 mt-0.5">{item.date}</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">{item.date}</span>
                     </div>
                   );
                 })}

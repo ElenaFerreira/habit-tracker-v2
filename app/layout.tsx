@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/lib/hooks/useTheme";
 
 const dmSans = DM_Sans({
   variable: "--font-geist-sans",
@@ -40,14 +41,27 @@ export const metadata: Metadata = {
   },
 };
 
+// Script pour éviter le flash de thème incorrect
+const themeScript = `
+  (function() {
+    try {
+      const theme = localStorage.getItem('theme');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link rel="icon" type="image/png" href="/images/favicon/favicon-96x96.png" sizes="96x96" />
         <link rel="icon" type="image/svg+xml" href="/images/favicon/favicon.svg" />
         <link rel="shortcut icon" href="/images/favicon/favicon.ico" />
@@ -59,7 +73,7 @@ export default function RootLayout({
         <link rel="manifest" href="/images/favicon/site.webmanifest" />
       </head>
       <body className={`${dmSans.variable} antialiased`}>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
         <script
           dangerouslySetInnerHTML={{
             __html: `

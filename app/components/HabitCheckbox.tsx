@@ -63,8 +63,8 @@ export default function HabitCheckbox({ habit, date, onToggle }: HabitCheckboxPr
         active:outline-none active:ring-0
         ${
           isCompleted
-            ? "bg-linear-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25 border-2 border-transparent"
-            : "bg-white border-2 border-slate-200 hover:border-amber-300 hover:shadow-md"
+            ? "bg-linear-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25 dark:shadow-emerald-500/15 border-2 border-transparent"
+            : "bg-white dark:bg-zinc-800 border-2 border-slate-200 dark:border-zinc-700 hover:border-amber-300 dark:hover:border-amber-500/50 hover:shadow-md"
         }
         ${isLoading ? "opacity-70 cursor-wait" : "cursor-pointer"}
       `}
@@ -74,7 +74,11 @@ export default function HabitCheckbox({ habit, date, onToggle }: HabitCheckboxPr
       <div
         className={`
         w-7 h-7 rounded-lg flex items-center justify-center transition-all
-        ${isCompleted ? "bg-white/20" : "border-2 border-slate-300 group-hover:border-amber-400"}
+        ${
+          isCompleted
+            ? "bg-white/20"
+            : "border-2 border-slate-300 dark:border-zinc-600 group-hover:border-amber-400 dark:group-hover:border-amber-500"
+        }
       `}
       >
         {isCompleted && <Check size={18} className="text-white" strokeWidth={3} />}
@@ -82,18 +86,18 @@ export default function HabitCheckbox({ habit, date, onToggle }: HabitCheckboxPr
 
       {/* Icône */}
       <div
-        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${isCompleted ? "bg-white/20" : "bg-amber-100"} ${
-          isCompleted ? "scale-110" : ""
-        }`}
+        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+          isCompleted ? "bg-white/20" : "bg-amber-100 dark:bg-amber-900/50"
+        } ${isCompleted ? "scale-110" : ""}`}
       >
-        <HabitIcon name={habit.emoji} size={20} className={isCompleted ? "text-white" : "text-amber-600"} />
+        <HabitIcon name={habit.emoji} size={20} className={isCompleted ? "text-white" : "text-amber-600 dark:text-amber-400"} />
       </div>
 
       {/* Nom */}
       <span
         className={`
         flex-1 text-left font-medium transition-colors
-        ${isCompleted ? "text-white" : "text-slate-700"}
+        ${isCompleted ? "text-white" : "text-slate-700 dark:text-slate-200"}
       `}
       >
         {habit.name}
