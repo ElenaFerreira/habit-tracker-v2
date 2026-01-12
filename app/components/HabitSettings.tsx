@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Habit } from "@/lib/types";
 import { X, Plus, Trash2, GripVertical, TrendingUp, Pencil, Save } from "lucide-react";
 import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -218,7 +218,17 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   const supabase = createClient();
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })

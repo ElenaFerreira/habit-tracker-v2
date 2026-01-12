@@ -6,7 +6,7 @@ import { Goal, GoalType, GoalPeriod, Habit } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { X, Plus, Trash2, Target, Flame, Calendar, Star, Gift, Pencil, Save, GripVertical } from "lucide-react";
 import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -138,7 +138,17 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
   const [activeCategory, setActiveCategory] = useState(0);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
