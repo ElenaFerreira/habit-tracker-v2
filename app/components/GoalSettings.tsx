@@ -33,8 +33,13 @@ function SortableGoalItem({ goal, onStartEdit, onDelete }: SortableGoalItemProps
 
   return (
     <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-zinc-800 rounded-xl group">
-      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
-        <GripVertical size={16} className="text-slate-300 dark:text-zinc-600" />
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing p-2 -m-2 rounded-lg hover:bg-slate-200/50 dark:hover:bg-zinc-700/50 transition-colors"
+        style={{ touchAction: "none" }}
+      >
+        <GripVertical size={18} className="text-slate-400 dark:text-zinc-500" />
       </div>
 
       <div
