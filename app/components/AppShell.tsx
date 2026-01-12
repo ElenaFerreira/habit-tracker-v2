@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { User, ListChecks, LogOut, History, Target, Footprints, Menu, X } from "lucide-react";
+import { User, TrendingUp, LogOut, History, Target, Footprints, Menu, X } from "lucide-react";
 import Link from "next/link";
 import HabitList from "./HabitList";
 import HabitSettings from "./HabitSettings";
@@ -80,7 +80,7 @@ export default function AppShell({ userEmail }: AppShellProps) {
               className="p-2.5 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
               title="Gérer mes habitudes"
             >
-              <ListChecks size={18} className="text-slate-600" />
+              <TrendingUp size={18} className="text-slate-600" />
             </button>
 
             {/* User info */}
@@ -153,7 +153,7 @@ export default function AppShell({ userEmail }: AppShellProps) {
                 }}
                 className="w-full flex items-center gap-3 p-3 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer text-left"
               >
-                <ListChecks size={20} className="text-slate-600" />
+                <TrendingUp size={20} className="text-slate-600" />
                 <span className="text-slate-700 font-medium">Gérer mes habitudes</span>
               </button>
 

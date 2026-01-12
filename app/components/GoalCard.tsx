@@ -30,11 +30,11 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
   const isQuantitative = goal.type === "quantitative";
   const progressClamp = Math.min(goal.progress_percent, 100);
 
-  // Couleurs selon le type - plus sobre
+  // Couleurs selon le type - cohérent avec HabitSettings
   const getColors = () => {
     return {
-      bgLight: "bg-slate-100",
-      textAccent: "text-slate-600",
+      bgLight: "bg-amber-100",
+      textAccent: "text-amber-600",
       progressGradient: "from-emerald-400 to-teal-500",
       badgeBg: "bg-slate-100",
       badgeText: "text-slate-600",
@@ -46,6 +46,15 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
   // Marquer un goal one_time comme complété
   async function markAsCompleted() {
     const { error } = await supabase.from("goals").update({ completed_at: new Date().toISOString() }).eq("id", goal.id);
+
+    if (!error && onUpdate) {
+      onUpdate();
+    }
+  }
+
+  // Annuler la complétion d'un goal one_time
+  async function markAsNotCompleted() {
+    const { error } = await supabase.from("goals").update({ completed_at: null }).eq("id", goal.id);
 
     if (!error && onUpdate) {
       onUpdate();
@@ -102,12 +111,20 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
         // Goal one-time : bouton pour marquer comme fait
         <div className="space-y-3">
           {goal.is_completed ? (
-            <div className="flex items-center justify-center gap-2 py-4 bg-emerald-50 rounded-xl">
-              <Trophy size={24} className="text-emerald-500" />
-              <div>
-                <p className="font-semibold text-emerald-700">Objectif atteint !</p>
-                {goal.completed_at && <p className="text-xs text-emerald-600">Le {new Date(goal.completed_at).toLocaleDateString("fr-FR")}</p>}
+            <div className="space-y-2">
+              <div className="flex items-center justify-center gap-2 py-4 bg-emerald-50 rounded-xl">
+                <Trophy size={24} className="text-emerald-500" />
+                <div>
+                  <p className="font-semibold text-emerald-700">Objectif atteint !</p>
+                  {goal.completed_at && <p className="text-xs text-emerald-600">Le {new Date(goal.completed_at).toLocaleDateString("fr-FR")}</p>}
+                </div>
               </div>
+              <button
+                onClick={markAsNotCompleted}
+                className="w-full flex items-center justify-center gap-2 py-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 text-sm font-medium rounded-xl transition-all cursor-pointer"
+              >
+                Annuler
+              </button>
             </div>
           ) : (
             <button

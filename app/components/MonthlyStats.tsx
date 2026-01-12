@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { StepEntry, Habit, HabitCompletion, MoodEntry, MoodType, MOOD_CONFIG } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, Calendar, Footprints, Target, CheckCircle, Sparkles, ListChecks, ChevronLeft, ChevronRight } from "lucide-react";
+import { TrendingUp, Calendar, Footprints, Target, CheckCircle, Sparkles, ChevronLeft, ChevronRight, ChartColumn } from "lucide-react";
 import { HabitIcon } from "@/lib/icons";
 
 interface MonthlyData {
@@ -283,7 +283,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
     <div className="space-y-6 mt-8">
       {/* Titre */}
       <div className="flex items-center gap-2">
-        <TrendingUp className="text-slate-600" size={20} />
+        <ChartColumn className="text-slate-600" size={20} />
         <h2 className="text-lg sm:text-xl font-bold text-slate-800">Statistiques mensuelles</h2>
       </div>
 
@@ -396,7 +396,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
       {habitStats.length > 0 && (
         <div className="bento-card bg-emerald-50 p-6 rounded-3xl border border-emerald-200">
           <div className="flex items-center gap-2 mb-4">
-            <ListChecks className="text-emerald-600" size={18} />
+            <TrendingUp className="text-emerald-600" size={18} />
             <h3 className="text-lg font-semibold text-slate-800">Habitudes</h3>
           </div>
 
