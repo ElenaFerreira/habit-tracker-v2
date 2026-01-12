@@ -12,9 +12,7 @@ export async function createClient() {
       setAll(cookiesToSet) {
         try {
           cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
-        } catch {
-          // Server Components: set cookie peut échouer selon le contexte, OK ici.
-        }
+        } catch {}
       },
     },
   });

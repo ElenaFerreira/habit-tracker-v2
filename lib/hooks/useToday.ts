@@ -29,14 +29,12 @@ export function useToday() {
   const lastChecked = useRef(today);
 
   useEffect(() => {
-    // Vérifier immédiatement au montage
     const currentDate = getTodayDate();
     if (currentDate !== lastChecked.current) {
       lastChecked.current = currentDate;
       setToday(currentDate);
     }
 
-    // Vérifier toutes les 10 secondes
     const interval = setInterval(() => {
       const newDate = getTodayDate();
       if (newDate !== lastChecked.current) {
@@ -45,7 +43,6 @@ export function useToday() {
       }
     }, 10000);
 
-    // Vérifier quand la fenêtre reprend le focus
     function handleVisibility() {
       if (document.visibilityState === "visible") {
         const newDate = getTodayDate();
@@ -56,7 +53,6 @@ export function useToday() {
       }
     }
 
-    // Vérifier quand la fenêtre est focus
     function handleFocus() {
       const newDate = getTodayDate();
       if (newDate !== lastChecked.current) {

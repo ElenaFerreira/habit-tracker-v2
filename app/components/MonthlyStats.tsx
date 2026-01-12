@@ -30,7 +30,6 @@ interface MoodStats {
   percentage: number;
 }
 
-// Obtient le premier et dernier jour d'un mois
 function getMonthRange(monthOffset: number): { start: string; end: string; monthName: string } {
   const today = new Date();
   const targetMonth = new Date(today.getFullYear(), today.getMonth() - monthOffset, 1);
@@ -48,7 +47,7 @@ function getMonthRange(monthOffset: number): { start: string; end: string; month
 }
 
 interface MonthlyStatsProps {
-  refreshKey?: number; // Clé pour forcer le rafraîchissement
+  refreshKey?: number;
 }
 
 export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
@@ -59,7 +58,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [dailyGoal, setDailyGoal] = useState<number>(15000);
-  const [monthOffset, setMonthOffset] = useState<number>(0); // 0 = mois actuel, 1 = mois précédent, etc.
+  const [monthOffset, setMonthOffset] = useState<number>(0);
   const supabase = createClient();
   const { theme } = useTheme();
   const isDark = theme === "dark";
@@ -93,10 +92,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
     today.setHours(0, 0, 0, 0);
     const todayStr = formatDateLocal(today);
 
-    // Récupérer les données pour le mois sélectionné uniquement
     const { start, end, monthName } = getMonthRange(monthOffset);
-
-    // Pour le mois actuel (offset 0), limiter à aujourd'hui, sinon utiliser la fin du mois
     const isCurrentMonth = monthOffset === 0;
     const queryEndDate = isCurrentMonth ? todayStr : end;
 
@@ -113,7 +109,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
       stepsMap.set(entry.date, entry.steps);
     });
 
-    // Créer un tableau avec tous les jours du mois (ou jusqu'à aujourd'hui pour le mois actuel)
     const startDate = new Date(start);
     startDate.setHours(0, 0, 0, 0);
     const endDateForLoop = isCurrentMonth ? today : new Date(end);
@@ -142,11 +137,9 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
       },
     ]);
 
-    // Récupérer les données des habitudes pour le mois sélectionné
     const { start: monthStart } = getMonthRange(monthOffset);
     const habitQueryEndDate = isCurrentMonth ? todayStr : end;
 
-    // Récupérer les habitudes
     const { data: habitsData } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
 
     if (habitsData && habitsData.length > 0) {
@@ -158,14 +151,11 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         .gte("date", monthStart)
         .lte("date", habitQueryEndDate);
 
-      // Calculer les stats par habitude
       const stats: HabitStats[] = [];
       const habitStartDate = new Date(monthStart);
       habitStartDate.setHours(0, 0, 0, 0);
       const habitEndDate = isCurrentMonth ? new Date(today) : new Date(end);
       habitEndDate.setHours(23, 59, 59, 999);
-      // Calculer le nombre de jours inclus (de startDate à endDate inclus)
-      // Pour le mois actuel, on compte du 1er du mois jusqu'à aujourd'hui inclus
       const totalDays = Math.floor((habitEndDate.getTime() - habitStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
       habitsData.forEach((habit) => {
@@ -180,12 +170,10 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         });
       });
 
-      // Trier par taux de complétion décroissant
       stats.sort((a, b) => b.completionRate - a.completionRate);
       setHabitStats(stats);
     }
 
-    // Récupérer les données de l'humeur pour le mois sélectionné
     const { data: moodsData } = await supabase
       .from("mood_entries")
       .select("*")
@@ -195,7 +183,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
       .order("date", { ascending: true });
 
     if (moodsData && moodsData.length > 0) {
-      // Calculer la répartition des humeurs
       const moodCounts = new Map<MoodType, number>();
       moodsData.forEach((entry: MoodEntry) => {
         const count = moodCounts.get(entry.mood) || 0;
@@ -212,12 +199,10 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         });
       });
 
-      // Trier par ordre de préférence (best_day en premier)
       const moodOrder: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
       stats.sort((a, b) => moodOrder.indexOf(a.mood) - moodOrder.indexOf(b.mood));
       setMoodStats(stats);
 
-      // Préparer les données pour le graphique quotidien
       const moodStartDate = new Date(monthStart);
       const moodEndDate = isCurrentMonth ? today : new Date(end);
       const dailyMoodData: { date: string; mood: string }[] = [];
@@ -262,18 +247,16 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
     );
   }
 
-  // Données pour le graphique journalier du mois sélectionné
   const currentMonthData = monthlyData[0]?.dailyData || [];
   const selectedMonth = monthlyData[0]?.month || "";
   const isCurrentMonth = monthOffset === 0;
 
-  // Couleurs pour le graphique en camembert des humeurs
   const MOOD_COLORS: Record<MoodType, string> = {
-    best_day: "#10b981", // emerald
-    good: "#3b82f6", // blue
-    moody: "#64748b", // slate
-    bad: "#f59e0b", // amber
-    awful: "#ef4444", // red
+    best_day: "#10b981",
+    good: "#3b82f6",
+    moody: "#64748b",
+    bad: "#f59e0b",
+    awful: "#ef4444",
   };
 
   const pieData = moodStats.map((stat) => ({
@@ -282,7 +265,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
     color: MOOD_COLORS[stat.mood],
   }));
 
-  // Couleurs pour les graphiques selon le thème
   const chartColors = {
     grid: isDark ? "#3f3f46" : "#e2e8f0",
     axis: isDark ? "#a1a1aa" : "#64748b",
@@ -292,15 +274,12 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
 
   return (
     <div className="space-y-6 mt-8">
-      {/* Titre */}
       <div className="flex items-center gap-2">
         <ChartColumn className="text-slate-600 dark:text-slate-400" size={20} />
         <h2 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">Statistiques mensuelles</h2>
       </div>
 
-      {/* Navigation entre les mois */}
       <div className="flex items-center justify-between gap-2">
-        {/* Mois précédent */}
         <button
           onClick={() => setMonthOffset((prev) => prev + 1)}
           className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-700 hover:text-slate-800 dark:hover:text-slate-100 transition-all cursor-pointer"
@@ -310,7 +289,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
           <span className="font-medium text-xs sm:text-sm hidden sm:inline">Mois précédent</span>
         </button>
 
-        {/* Mois affiché */}
         <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
           <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
             <Calendar size={16} />
@@ -321,7 +299,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
           </div>
         </div>
 
-        {/* Mois suivant */}
         <button
           onClick={() => setMonthOffset((prev) => Math.max(0, prev - 1))}
           disabled={isCurrentMonth}
@@ -337,7 +314,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         </button>
       </div>
 
-      {/* Statistiques du mois sélectionné */}
       {monthlyData[0] && (
         <div className="bento-card bg-blue-50 dark:bg-blue-950/30 p-4 sm:p-6 rounded-3xl border border-blue-200 dark:border-blue-900/50">
           <div className="flex items-center gap-2 mb-4">
@@ -377,7 +353,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
             </div>
           </div>
 
-          {/* Graphique journalier du mois actuel */}
           {currentMonthData.length > 0 && (
             <div className="mt-6">
               <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Évolution quotidienne</h4>
@@ -404,7 +379,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         </div>
       )}
 
-      {/* Statistiques des habitudes */}
       {habitStats.length > 0 && (
         <div className="bento-card bg-emerald-50 dark:bg-emerald-950/30 p-6 rounded-3xl border border-emerald-200 dark:border-emerald-900/50">
           <div className="flex items-center gap-2 mb-4">
@@ -444,7 +418,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         </div>
       )}
 
-      {/* Statistiques de l'humeur */}
       {moodStats.length > 0 && (
         <div className="bento-card bg-violet-50 dark:bg-violet-950/30 p-6 rounded-3xl border border-violet-200 dark:border-violet-900/50">
           <div className="flex items-center gap-2 mb-4">
@@ -453,7 +426,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Graphique en camembert */}
             <div>
               <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Répartition</h4>
               <ResponsiveContainer width="100%" height={200}>
@@ -486,7 +458,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
               </ResponsiveContainer>
             </div>
 
-            {/* Liste des humeurs */}
             <div>
               <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Détails</h4>
               <div className="space-y-2">
@@ -506,7 +477,6 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
             </div>
           </div>
 
-          {/* Graphique quotidien de l'humeur */}
           {moodDailyData.length > 0 && (
             <div className="mt-6">
               <h4 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Évolution quotidienne</h4>

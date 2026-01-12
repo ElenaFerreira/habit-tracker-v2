@@ -15,7 +15,6 @@ export interface GoalsListRef {
   refresh: () => void;
 }
 
-// Helpers pour les dates
 function getStartOfWeek(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -43,7 +42,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
   const supabase = createClient();
 
   const calculateGoalProgress = useCallback(async () => {
-    // Récupérer tous les goals
     const { data: goalsData } = await supabase.from("goals").select("*").order("order_index", { ascending: true });
 
     if (!goalsData || goalsData.length === 0) {
@@ -52,7 +50,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
       return;
     }
 
-    // Récupérer les habitudes associées (seulement celles qui ont un habit_id)
     const habitIds = goalsData.filter((g) => g.habit_id).map((g) => g.habit_id);
     let habitsMap = new Map<string, Habit>();
 
@@ -64,7 +61,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
     const today = new Date();
     const todayStr = getDateString(today);
 
-    // Pour chaque goal, calculer la progression
     const goalsWithProgress: GoalWithProgress[] = await Promise.all(
       goalsData.map(async (goal: Goal) => {
         const habit = goal.habit_id ? habitsMap.get(goal.habit_id) : null;
@@ -73,11 +69,9 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
         let is_completed = false;
 
         if (goal.type === "one_time") {
-          // Goal one-time : complété si completed_at est défini
           is_completed = !!goal.completed_at;
           current_value = is_completed ? 1 : 0;
         } else if (goal.type === "quantitative" && goal.habit_id) {
-          // Calculer le nombre de complétions dans la période
           let startDate: string;
           let endDate: string = todayStr;
 
@@ -109,7 +103,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
           current_value = count || 0;
           is_completed = current_value >= goal.target_value;
         } else if (goal.type === "streak" && goal.habit_id) {
-          // Type streak - calculer la série actuelle
           const ninetyDaysAgo = new Date();
           ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
@@ -122,9 +115,7 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
 
           const completedDates = new Set(completions?.map((c) => c.date) || []);
 
-          // Calculer le streak en partant d'aujourd'hui ou d'hier
           let checkDate = new Date(today);
-          // Si aujourd'hui n'est pas complété, commencer à hier
           if (!completedDates.has(todayStr)) {
             checkDate.setDate(checkDate.getDate() - 1);
           }
@@ -154,7 +145,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
     setLoading(false);
   }, [supabase]);
 
-  // Exposer la méthode refresh via ref
   useImperativeHandle(
     ref,
     () => ({
@@ -167,7 +157,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
     calculateGoalProgress();
   }, [calculateGoalProgress]);
 
-  // Refresh toutes les 30 secondes
   useEffect(() => {
     const interval = setInterval(calculateGoalProgress, 30000);
     return () => clearInterval(interval);
@@ -206,13 +195,11 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
     );
   }
 
-  // Séparer les goals actifs des goals complétés
   const activeGoals = goals.filter((g) => !g.is_completed);
   const completedGoals = goals.filter((g) => g.is_completed);
 
   return (
     <div className="bento-card bg-rose-50 dark:bg-rose-950/30 p-6 rounded-3xl border border-rose-200 dark:border-rose-900/50">
-      {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center">
@@ -234,7 +221,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
         </button>
       </div>
 
-      {/* Goals actifs */}
       {activeGoals.length > 0 && (
         <div className="space-y-3 mb-4">
           {activeGoals.map((goal) => (
@@ -243,7 +229,6 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
         </div>
       )}
 
-      {/* Goals complétés */}
       {completedGoals.length > 0 && (
         <div className="pt-3 border-t border-slate-100 dark:border-zinc-800">
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider flex items-center gap-1.5">

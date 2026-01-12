@@ -86,21 +86,17 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 dark:from-zinc-950 dark:to-zinc-900 p-6">
-      {/* Theme Toggle - Fixed position */}
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 
       <div className="w-full max-w-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">Habit Tracker</h1>
           <p className="text-slate-500 dark:text-slate-400">{mode === "login" ? "Connecte-toi pour continuer" : "Crée ton compte gratuitement"}</p>
         </div>
 
-        {/* Card */}
         <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-black/30 border border-slate-200 dark:border-zinc-800 p-8 space-y-6">
-          {/* Google Button */}
           <button
             onClick={signInWithGoogle}
             className="w-full flex items-center justify-center gap-3 rounded-xl border-2 border-slate-200 dark:border-zinc-700 px-4 py-3.5 font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-zinc-800 hover:border-slate-300 dark:hover:border-zinc-600 transition-all cursor-pointer"
@@ -126,14 +122,12 @@ export default function LoginPage() {
             Continuer avec Google
           </button>
 
-          {/* Divider */}
           <div className="flex items-center gap-4">
             <div className="h-px flex-1 bg-slate-200 dark:bg-zinc-700" />
             <span className="text-sm text-slate-400 dark:text-slate-500 font-medium">ou par email</span>
             <div className="h-px flex-1 bg-slate-200 dark:bg-zinc-700" />
           </div>
 
-          {/* Mode Toggle */}
           <div className="flex gap-1 p-1 bg-slate-100 dark:bg-zinc-800 rounded-xl">
             <button
               onClick={() => setMode("login")}
@@ -157,9 +151,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Form */}
           <div className="space-y-4">
-            {/* Email */}
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
               <input
@@ -172,7 +164,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Password */}
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={20} />
               <input
@@ -192,7 +183,6 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Confirm Password (signup only) */}
             {mode === "signup" && (
               <>
                 <div className="relative">
@@ -220,7 +210,6 @@ export default function LoginPage() {
                   </button>
                 </div>
 
-                {/* Password Requirements */}
                 <div className="bg-slate-50 dark:bg-zinc-800 rounded-xl p-4 space-y-2">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">Critères du mot de passe :</p>
                   <PasswordCheck valid={passwordChecks.minLength} label="Au moins 8 caractères" />
@@ -231,7 +220,6 @@ export default function LoginPage() {
               </>
             )}
 
-            {/* Submit Button */}
             <button
               onClick={signWithEmail}
               disabled={loading}
@@ -242,7 +230,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Message */}
           {msg && (
             <div
               className={`rounded-xl p-4 text-sm ${

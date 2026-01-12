@@ -8,7 +8,6 @@ import { Footprints, TrendingUp, Minus, Target, CheckCircle } from "lucide-react
 
 const DEFAULT_DAILY_GOAL = 15000;
 
-// Récupère le lundi de la semaine courante
 function getMondayOfWeek(date: Date): Date {
   const d = new Date(date);
   const day = d.getDay();
@@ -20,7 +19,6 @@ function getDateString(date: Date): string {
   return formatDateLocal(date);
 }
 
-// Génère les jours de la semaine depuis lundi jusqu'à aujourd'hui
 function getWeekDays(): { date: string; dayName: string; dayShort: string }[] {
   const today = new Date();
   const monday = getMondayOfWeek(today);
@@ -30,8 +28,6 @@ function getWeekDays(): { date: string; dayName: string; dayShort: string }[] {
   for (let i = 0; i < 7; i++) {
     const currentDay = new Date(monday);
     currentDay.setDate(monday.getDate() + i);
-
-    // On s'arrête si on dépasse aujourd'hui
     if (currentDay > today) break;
 
     days.push({
@@ -67,7 +63,6 @@ export default function StepCounter() {
     if (data) {
       return data.daily_step_goal;
     } else {
-      // Créer les paramètres par défaut si ils n'existent pas
       const { data: newSettings } = await supabase
         .from("user_settings")
         .insert({ user_id: user.id, daily_step_goal: DEFAULT_DAILY_GOAL })
@@ -79,7 +74,6 @@ export default function StepCounter() {
   }, [supabase]);
 
   const fetchWeekSteps = useCallback(async () => {
-    // Récupérer l'utilisateur connecté
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -88,8 +82,6 @@ export default function StepCounter() {
       return;
     }
     setUserId(user.id);
-
-    // Récupérer l'objectif personnalisé
     const goal = await fetchUserSettings();
     setDailyGoal(goal);
 
@@ -118,16 +110,13 @@ export default function StepCounter() {
     const steps = parseInt(todaySteps) || 0;
     setSaving(true);
 
-    // Vérifier si une entrée existe déjà pour aujourd'hui
     const { data: existing } = await supabase.from("step_entries").select("id").eq("user_id", userId).eq("date", today).single();
 
     let error;
     if (existing) {
-      // Mettre à jour l'entrée existante
       const result = await supabase.from("step_entries").update({ steps }).eq("id", existing.id);
       error = result.error;
     } else {
-      // Créer une nouvelle entrée
       const result = await supabase.from("step_entries").insert({ user_id: userId, date: today, steps });
       error = result.error;
     }
@@ -142,14 +131,12 @@ export default function StepCounter() {
     setIsEditing(false);
   };
 
-  // Calcul de la moyenne (seulement les jours avec des données)
   const stepsValues = Array.from(weekSteps.values());
   const daysWithData = stepsValues.filter((v) => v > 0).length;
   const totalSteps = stepsValues.reduce((acc, val) => acc + val, 0);
   const average = daysWithData > 0 ? Math.round(totalSteps / daysWithData) : 0;
   const todayValue = weekSteps.get(today) || 0;
 
-  // Progression du jour vers l'objectif journalier
   const todayProgressPercent = Math.min(100, Math.round((todayValue / dailyGoal) * 100));
   const todayGoalReached = todayValue >= dailyGoal;
 
@@ -166,7 +153,6 @@ export default function StepCounter() {
       </div>
 
       <div className="relative z-10 space-y-3">
-        {/* Header + bouton modifier aligné juste à côté du titre */}
         <div className="flex items-center gap-2">
           <p className="text-blue-600 dark:text-blue-400 text-xs font-medium uppercase tracking-wider">steps</p>
           {!isEditing && (
@@ -179,7 +165,6 @@ export default function StepCounter() {
           )}
         </div>
 
-        {/* Input ou affichage */}
         {isEditing ? (
           <div className="flex items-center gap-2">
             <input
@@ -205,7 +190,6 @@ export default function StepCounter() {
           </div>
         )}
 
-        {/* Barre de progression du jour */}
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
@@ -228,7 +212,6 @@ export default function StepCounter() {
           )}
         </div>
 
-        {/* Moyenne vs Objectif */}
         <div className="flex items-center justify-between bg-blue-100/50 dark:bg-blue-900/30 rounded-xl px-3 py-2.5">
           <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-xs">
             <TrendingUp size={14} />
@@ -246,7 +229,6 @@ export default function StepCounter() {
           </div>
         </div>
 
-        {/* Barre des jours de la semaine */}
         <div className="pt-2 border-t border-blue-100 dark:border-blue-900/50">
           <div className="grid grid-cols-7 gap-1">
             {["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"].map((day, idx) => {

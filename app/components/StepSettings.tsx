@@ -24,7 +24,6 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
     }
   }, [isOpen]);
 
-  // Fermer la modale avec la touche Échap
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -57,7 +56,6 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
     if (data) {
       setDailyStepGoal(data.daily_step_goal);
     } else {
-      // Créer les paramètres par défaut si ils n'existent pas
       const { data: newSettings } = await supabase
         .from("user_settings")
         .insert({ user_id: user.id, daily_step_goal: DEFAULT_STEP_GOAL })
@@ -81,7 +79,6 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
 
     setSaving(true);
 
-    // Upsert pour créer ou mettre à jour
     const { error } = await supabase.from("user_settings").upsert(
       {
         user_id: user.id,
@@ -102,12 +99,9 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-xl flex items-center justify-center">
@@ -120,7 +114,6 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
           {loading ? (
             <div className="flex items-center justify-center py-12">
@@ -128,7 +121,6 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Formulaire */}
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
@@ -146,7 +138,6 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
                   </div>
                 </div>
 
-                {/* Suggestions rapides */}
                 <div>
                   <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">Suggestions rapides</label>
                   <div className="grid grid-cols-3 gap-2">
@@ -166,7 +157,6 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
                   </div>
                 </div>
 
-                {/* Bouton sauvegarder */}
                 <button
                   onClick={saveSettings}
                   disabled={saving || dailyStepGoal < 1}

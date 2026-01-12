@@ -13,7 +13,6 @@ export default async function HistoryPage() {
 
   return (
     <main className="min-h-screen bg-white dark:bg-zinc-950">
-      {/* Header */}
       <header className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-40">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
           <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100">Historique</h1>
@@ -32,7 +31,6 @@ export default async function HistoryPage() {
         </div>
       </header>
 
-      {/* Content */}
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8">
         <HistoryTable />
       </div>

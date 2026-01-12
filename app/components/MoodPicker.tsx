@@ -6,7 +6,6 @@ import { MoodType, MoodEntry, MOOD_CONFIG } from "@/lib/types";
 import { useToday } from "@/lib/hooks/useToday";
 import { Loader2, Sparkles } from "lucide-react";
 
-// Ordre des moods pour l'affichage
 const MOOD_ORDER: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
 
 export default function MoodPicker() {
@@ -45,7 +44,6 @@ export default function MoodPicker() {
     [supabase]
   );
 
-  // Fetch initial et quand la date change
   useEffect(() => {
     fetchTodayMood(today);
   }, [fetchTodayMood, today]);
@@ -55,12 +53,10 @@ export default function MoodPicker() {
 
     setSaving(true);
 
-    // Si on clique sur le même mood, on le désélectionne
     if (todayMood === mood) {
       await supabase.from("mood_entries").delete().eq("user_id", userId).eq("date", today);
       setTodayMood(null);
     } else {
-      // Upsert pour créer ou mettre à jour
       await supabase.from("mood_entries").upsert({ user_id: userId, date: today, mood }, { onConflict: "user_id,date" });
       setTodayMood(mood);
     }
@@ -81,7 +77,6 @@ export default function MoodPicker() {
 
   return (
     <div className="bento-card bg-violet-50 dark:bg-violet-950/30 p-6 rounded-3xl border border-violet-200 dark:border-violet-900/50">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-5">
         <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center">
           <Sparkles size={16} className="text-violet-600 dark:text-violet-400" />
@@ -89,7 +84,6 @@ export default function MoodPicker() {
         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Comment tu te sens aujourd'hui ?</h2>
       </div>
 
-      {/* Mood buttons */}
       <div className="flex flex-wrap gap-2 justify-center">
         {MOOD_ORDER.map((mood) => {
           const config = MOOD_CONFIG[mood];

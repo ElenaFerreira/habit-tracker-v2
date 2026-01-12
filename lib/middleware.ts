@@ -9,10 +9,8 @@ export async function middleware(request: NextRequest) {
   const isLogin = url.pathname.startsWith("/login");
   const isCallback = url.pathname.startsWith("/auth/callback");
 
-  // laisse passer login & callback
   if (!isAppRoute || isLogin || isCallback) return response;
 
-  // check user (cookie session)
   const hasSbCookie = request.cookies.getAll().some((c) => c.name.startsWith("sb-"));
   if (!hasSbCookie) {
     const redirectUrl = new URL("/login", request.url);

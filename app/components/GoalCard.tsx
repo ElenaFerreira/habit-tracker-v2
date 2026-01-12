@@ -29,7 +29,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
   const isOneTime = goal.type === "one_time";
   const progressClamp = Math.min(goal.progress_percent, 100);
 
-  // Couleurs selon le type - cohérent avec HabitSettings
   const getColors = () => {
     return {
       bgLight: "bg-amber-100 dark:bg-amber-900/50",
@@ -42,7 +41,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
   const colors = getColors();
 
-  // Marquer un goal one_time comme complété
   async function markAsCompleted() {
     const { error } = await supabase.from("goals").update({ completed_at: new Date().toISOString() }).eq("id", goal.id);
 
@@ -51,7 +49,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
     }
   }
 
-  // Annuler la complétion d'un goal one_time
   async function markAsNotCompleted() {
     const { error } = await supabase.from("goals").update({ completed_at: null }).eq("id", goal.id);
 
@@ -60,7 +57,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
     }
   }
 
-  // Icône à afficher
   const getIcon = () => {
     if (goal.habit_emoji) {
       return <HabitIcon name={goal.habit_emoji} size={20} className={colors.textAccent} />;
@@ -73,7 +69,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
     return <Target size={20} className={colors.textAccent} />;
   };
 
-  // Badge type
   const getBadge = () => {
     if (isOneTime) return { icon: <Star size={14} className="text-slate-600 dark:text-slate-400" />, label: "Accomplissement" };
     if (isStreak) return { icon: <Flame size={14} className="text-slate-600 dark:text-slate-400" />, label: "Streak" };
@@ -84,7 +79,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-rose-200 dark:border-rose-900/50 p-4">
-      {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 ${colors.bgLight} rounded-xl flex items-center justify-center`}>{getIcon()}</div>
@@ -98,16 +92,13 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           </div>
         </div>
 
-        {/* Badge type */}
         <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${colors.badgeBg} ${colors.badgeText}`}>
           <span className="shrink-0">{badge.icon}</span>
           <span>{badge.label}</span>
         </div>
       </div>
 
-      {/* Contenu selon le type */}
       {isOneTime ? (
-        // Goal one-time : bouton pour marquer comme fait
         <div className="space-y-3">
           {goal.is_completed ? (
             <div className="space-y-2">
@@ -137,7 +128,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
             </button>
           )}
 
-          {/* Date de fin si définie */}
           {goal.end_date && !goal.is_completed && (
             <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
               <Calendar size={14} className="text-slate-500 dark:text-slate-400 shrink-0" />
@@ -146,7 +136,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           )}
         </div>
       ) : (
-        // Goals quantitatifs et streak : barre de progression
         <div className="space-y-2">
           <div className="flex items-end justify-between">
             <div className="flex items-baseline gap-1">
@@ -162,7 +151,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
             )}
           </div>
 
-          {/* Barre de progression */}
           <div className="h-2.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
             <div
               className={`h-full bg-linear-to-r ${colors.progressGradient} rounded-full transition-all duration-500`}
@@ -170,7 +158,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
             />
           </div>
 
-          {/* Footer infos */}
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 pt-1">
             <div className="flex items-center gap-1.5">
               {isStreak ? (
@@ -193,7 +180,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
             <span className="font-medium text-slate-600 dark:text-slate-300">{Math.round(progressClamp)}%</span>
           </div>
 
-          {/* Date de fin si définie */}
           {goal.end_date && (
             <div className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500 pt-1">
               <Calendar size={14} className="text-slate-500 dark:text-slate-400 shrink-0" />
@@ -203,7 +189,6 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
         </div>
       )}
 
-      {/* Récompense si définie */}
       {goal.reward && (
         <div className="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-2 text-xs">

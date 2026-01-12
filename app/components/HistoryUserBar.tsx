@@ -22,10 +22,8 @@ export default function HistoryUserBar({ userEmail }: HistoryUserBarProps) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Theme Toggle */}
       <ThemeToggle />
 
-      {/* User info */}
       <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-zinc-800 rounded-xl">
         <button
           onClick={() => setShowEmail(!showEmail)}
@@ -39,7 +37,6 @@ export default function HistoryUserBar({ userEmail }: HistoryUserBarProps) {
         </span>
       </div>
 
-      {/* Sign out */}
       <button
         onClick={handleSignOut}
         className="p-2.5 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-xl transition-colors cursor-pointer group"

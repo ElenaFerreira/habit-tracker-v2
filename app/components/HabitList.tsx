@@ -38,7 +38,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
   const supabase = createClient();
 
   const fetchHabitsWithStatus = useCallback(async () => {
-    // Récupérer les habitudes
     const { data: habitsData } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
 
     if (!habitsData || habitsData.length === 0) {
@@ -49,13 +48,11 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       return;
     }
 
-    // Récupérer les complétions du jour
     const habitIds = habitsData.map((h) => h.id);
     const { data: completions } = await supabase.from("habit_completions").select("habit_id").in("habit_id", habitIds).eq("date", today);
 
     const completedHabitIds = new Set(completions?.map((c) => c.habit_id) || []);
 
-    // Combiner les données
     const habitsWithStatus: HabitWithStatus[] = habitsData.map((habit) => ({
       ...habit,
       completed_today: completedHabitIds.has(habit.id),
@@ -63,11 +60,9 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
 
     setHabits(habitsWithStatus);
 
-    // Calculer le streak
     const totalHabits = habitsData.length;
     const todayCompleted = completedHabitIds.size === totalHabits;
 
-    // Récupérer les complétions des 90 derniers jours pour calculer le streak
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
     const { data: allCompletions } = await supabase
@@ -76,7 +71,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       .in("habit_id", habitIds)
       .gte("date", formatDateLocal(ninetyDaysAgo));
 
-    // Grouper les complétions par date
     const completionsByDate = new Map<string, Set<string>>();
     allCompletions?.forEach((c) => {
       if (!completionsByDate.has(c.date)) {
@@ -85,7 +79,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       completionsByDate.get(c.date)!.add(c.habit_id);
     });
 
-    // Calculer le streak actuel en remontant dans le temps
     let currentStreak = 0;
     let checkDate = todayCompleted ? today : getPreviousDate(today);
 
@@ -99,10 +92,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       }
     }
 
-    // Calculer la série la plus longue
     let maxStreak = 0;
-
-    // Créer un Set des dates parfaites pour un accès rapide
     const perfectDaysSet = new Set<string>();
     completionsByDate.forEach((habitIds, date) => {
       if (habitIds.size === totalHabits) {
@@ -110,8 +100,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       }
     });
 
-    // Parcourir toutes les dates depuis 90 jours en arrière jusqu'à aujourd'hui
-    // pour trouver la série la plus longue
     let currentMaxStreak = 0;
     let checkDateForMax = formatDateLocal(ninetyDaysAgo);
 
@@ -129,7 +117,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       checkDateForMax = formatDateLocal(nextDate);
     }
 
-    // Vérifier aussi le streak actuel qui pourrait être plus long
     maxStreak = Math.max(maxStreak, currentStreak);
 
     setStreak(currentStreak);
@@ -141,26 +128,19 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
     fetchHabitsWithStatus();
   }, [fetchHabitsWithStatus]);
 
-  // Mise à jour optimiste quand une habitude est cochée
   const handleHabitToggle = useCallback(
     (habitId: string, newCompleted: boolean) => {
-      // Mise à jour optimiste des habitudes
       setHabits((prev) => prev.map((h) => (h.id === habitId ? { ...h, completed_today: newCompleted } : h)));
-
-      // Calcul optimiste du streak
       const updatedHabits = habits.map((h) => (h.id === habitId ? { ...h, completed_today: newCompleted } : h));
       const allCompleted = updatedHabits.every((h) => h.completed_today);
       const wasAllCompleted = habits.every((h) => h.completed_today);
 
       if (allCompleted && !wasAllCompleted) {
-        // On vient de compléter toutes les habitudes -> +1 streak
         setStreak((s) => s + 1);
       } else if (!allCompleted && wasAllCompleted) {
-        // On vient de décocher une habitude alors que tout était fait -> -1 streak (si > 0)
         setStreak((s) => Math.max(0, s - 1));
       }
 
-      // Refresh en arrière-plan pour synchroniser
       fetchHabitsWithStatus();
       onHabitToggle?.();
     },
@@ -187,9 +167,7 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {/* Colonne gauche : Date + Streak */}
       <div className="flex flex-col gap-4">
-        {/* Bento Card: Date d'aujourd'hui */}
         <div className="bento-card bg-slate-50 dark:bg-zinc-900 p-5 rounded-3xl border border-slate-200 dark:border-zinc-800 relative overflow-hidden">
           <div className="absolute top-3 right-3 opacity-10">
             <Calendar size={40} strokeWidth={1.5} className="text-slate-800 dark:text-slate-200" />
@@ -202,7 +180,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
           </div>
         </div>
 
-        {/* Bento Card: Streak */}
         <div className="bento-card bg-amber-50 dark:bg-amber-950/30 p-5 rounded-3xl border border-amber-200 dark:border-amber-900/50 relative overflow-hidden">
           <div className={`absolute top-3 right-3 ${streak >= 1 ? "opacity-30" : "opacity-10"}`}>
             <Flame size={40} strokeWidth={1.5} className={streak >= 1 ? "text-orange-500" : "text-amber-800 dark:text-amber-200"} />
@@ -210,7 +187,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
           <div className="relative z-10">
             <p className="text-amber-600 dark:text-amber-400 text-xs font-medium uppercase tracking-wider mb-1">Streaks</p>
             <div className="space-y-3">
-              {/* Streak actuel */}
               <div>
                 <div className="flex items-baseline gap-2">
                   <p className="text-4xl font-black leading-none text-slate-800 dark:text-slate-100">{streak}</p>
@@ -221,7 +197,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
                 </p>
               </div>
 
-              {/* Série la plus longue */}
               <div className="pt-2 border-t border-amber-200 dark:border-amber-800/50">
                 <div className="flex items-center justify-between mb-1">
                   <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">Série la plus longue</p>
@@ -232,15 +207,12 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
           </div>
         </div>
 
-        {/* Bento Card: Compteur de pas */}
         <StepCounter key={`steps-${stepCounterKey || 0}`} />
       </div>
 
-      {/* Bento Card: Progression + Habitudes */}
       <div className="md:col-span-2 bento-card bg-emerald-50 dark:bg-emerald-950/30 p-6 rounded-3xl border border-emerald-200 dark:border-emerald-900/50">
         {totalCount > 0 ? (
           <div className="space-y-5">
-            {/* Barre de progression */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -262,7 +234,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
               </div>
             </div>
 
-            {/* Liste des habitudes */}
             <div className="space-y-2.5 pt-2">
               {habits.map((habit) => (
                 <HabitCheckbox key={habit.id} habit={habit} date={today} onToggle={(newCompleted) => handleHabitToggle(habit.id, newCompleted)} />
@@ -285,8 +256,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
           </div>
         )}
       </div>
-
-      {/* TODO: Bento Card félicitations - désactivée pour l'instant */}
     </div>
   );
 }

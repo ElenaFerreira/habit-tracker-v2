@@ -41,7 +41,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Script pour éviter le flash de thème incorrect
 const themeScript = `
   (function() {
     try {

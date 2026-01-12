@@ -18,7 +18,6 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // IMPORTANT: appelle getUser() pour rafraîchir la session si besoin
   await supabase.auth.getUser();
 
   return response;

@@ -51,7 +51,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-// Catégories d'icônes
 export const ICON_CATEGORIES: { name: string; icons: { name: string; icon: LucideIcon }[] }[] = [
   {
     name: "Général",
@@ -137,10 +136,8 @@ export const ICON_CATEGORIES: { name: string; icons: { name: string; icon: Lucid
   },
 ];
 
-// Map pour récupérer l'icône par nom
 const ICON_MAP: Record<string, LucideIcon> = Object.fromEntries(ICON_CATEGORIES.flatMap((cat) => cat.icons.map((i) => [i.name, i.icon])));
 
-// Composant pour afficher une icône par son nom
 export function HabitIcon({ name, size = 20, className = "" }: { name: string; size?: number; className?: string }) {
   const IconComponent = ICON_MAP[name] || Check;
   return <IconComponent size={size} className={className} />;

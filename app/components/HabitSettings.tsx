@@ -62,15 +62,12 @@ function SortableHabitItem({
         <GripVertical size={16} className="text-slate-300 dark:text-zinc-600" />
       </div>
 
-      {/* Icône - cliquable directement sauf en mode édition */}
       <div className="relative">
         {isEditing ? (
-          // En mode édition, l'icône n'est pas cliquable
           <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-xl flex items-center justify-center">
             <HabitIcon name={habit.emoji} size={22} className="text-amber-600 dark:text-amber-400" />
           </div>
         ) : (
-          // Hors mode édition, l'icône est cliquable
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -84,14 +81,12 @@ function SortableHabitItem({
           </button>
         )}
 
-        {/* Mini picker pour modifier l'icône - seulement si pas en mode édition */}
         {!isEditing && editingIconFor === habit.id && (
           <div
             className="absolute top-12 left-0 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-700 pt-6 pb-4 px-4 z-50 w-80 max-w-[calc(100vw-3rem)]"
             onClick={(e) => e.stopPropagation()}
             onMouseDown={(e) => e.stopPropagation()}
           >
-            {/* Bouton de fermeture */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -103,7 +98,6 @@ function SortableHabitItem({
               <X size={14} />
             </button>
 
-            {/* Catégories */}
             <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
               {ICON_CATEGORIES.map((cat, idx) => (
                 <button
@@ -123,7 +117,6 @@ function SortableHabitItem({
               ))}
             </div>
 
-            {/* Icônes */}
             <div className="grid grid-cols-4 gap-2">
               {ICON_CATEGORIES[activeCategory].icons.map((item) => {
                 const IconComp = item.icon;
@@ -150,7 +143,6 @@ function SortableHabitItem({
         )}
       </div>
 
-      {/* Nom - en mode édition ou affichage */}
       {isEditing ? (
         <input
           type="text"
@@ -172,7 +164,6 @@ function SortableHabitItem({
         <p className="flex-1 min-w-0 text-slate-700 dark:text-slate-200 font-medium truncate">{habit.name}</p>
       )}
 
-      {/* Boutons d'action */}
       <div className="flex items-center gap-1">
         {isEditing ? (
           <>
@@ -226,7 +217,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   const [activeCategory, setActiveCategory] = useState(0);
   const supabase = createClient();
 
-  // Configuration des sensors pour le drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -234,7 +224,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     })
   );
 
-  // Fermer les pickers avec la touche Échap
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -252,7 +241,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     };
   }, [showIconPicker, editingIconFor]);
 
-  // Fermer la modale avec la touche Échap
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && !showIconPicker && !editingIconFor) {
@@ -287,19 +275,10 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     setLoading(true);
     const { data: userData, error: authError } = await supabase.auth.getUser();
 
-    if (authError) {
-      console.error("Erreur auth:", authError);
+    if (authError || !userData.user) {
       setLoading(false);
       return;
     }
-
-    if (!userData.user) {
-      console.error("Pas d'utilisateur connecté");
-      setLoading(false);
-      return;
-    }
-
-    console.log("Ajout habitude pour user:", userData.user.id);
 
     const { data, error } = await supabase
       .from("habits")
@@ -311,10 +290,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
       })
       .select();
 
-    if (error) {
-      console.error("Erreur insertion:", error);
-    } else {
-      console.log("Habitude ajoutée:", data);
+    if (!error) {
       setNewHabitName("");
       setNewHabitIcon("Check");
       await fetchHabits();
@@ -334,36 +310,28 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   async function updateHabit(habitId: string, updates: Partial<Habit>) {
     const { error } = await supabase.from("habits").update(updates).eq("id", habitId);
     if (!error) {
-      // Mise à jour optimiste du state local
       setHabits((prev) => prev.map((h) => (h.id === habitId ? { ...h, ...updates } : h)));
       onHabitsChange();
-      // Recharger en arrière-plan sans bloquer
       fetchHabits();
     }
   }
 
   async function updateHabitsOrder(newOrder: Habit[]) {
-    // Mise à jour optimiste de l'ordre local
     setHabits(newOrder);
 
-    // Mettre à jour les order_index dans la base de données
     const updates = newOrder.map((habit, index) => ({
       id: habit.id,
       order_index: index,
     }));
 
-    // Mettre à jour toutes les habitudes
     for (const update of updates) {
       const { error } = await supabase.from("habits").update({ order_index: update.order_index }).eq("id", update.id);
       if (error) {
-        console.error("Erreur lors de la mise à jour de l'ordre:", error);
-        // En cas d'erreur, recharger depuis la base de données
         await fetchHabits();
         return;
       }
     }
 
-    // Notifier le changement (sans recharger car on a déjà mis à jour le state)
     onHabitsChange();
   }
 
@@ -374,7 +342,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
       const oldIndex = habits.findIndex((item) => item.id === active.id);
       const newIndex = habits.findIndex((item) => item.id === over.id);
       const newOrder = arrayMove(habits, oldIndex, newIndex);
-      // Mettre à jour l'ordre dans la base de données
       await updateHabitsOrder(newOrder);
     }
   }
@@ -405,22 +372,18 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={(e) => {
-        // Fermer seulement si on clique directement sur le backdrop (pas sur la modale)
         if (e.target === e.currentTarget && !showIconPicker && !editingIconFor) {
           onClose();
         }
       }}
     >
-      {/* Backdrop */}
       <div className={`absolute inset-0 bg-black/40 backdrop-blur-sm ${showIconPicker || editingIconFor ? "pointer-events-none" : ""}`} />
 
-      {/* Modal */}
       <div
         className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden z-10"
         onClick={(e) => e.stopPropagation()}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl flex items-center justify-center">
@@ -433,9 +396,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
-          {/* Liste des habitudes existantes */}
           {habits.length > 0 ? (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={habits.map((h) => h.id)} strategy={verticalListSortingStrategy}>
@@ -473,11 +434,9 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
             </div>
           )}
 
-          {/* Ajouter une habitude */}
           <div className="border-t border-slate-100 dark:border-zinc-800 pt-6">
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-4">Nouvelle habitude</p>
             <div className="flex gap-2 min-w-0">
-              {/* Icon picker button */}
               <div className="relative">
                 <button
                   onClick={() => {
@@ -495,7 +454,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                     onClick={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
                   >
-                    {/* Bouton de fermeture */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -507,7 +465,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                       <X size={14} />
                     </button>
 
-                    {/* Catégories */}
                     <div className="flex gap-1 mb-3 overflow-x-auto pb-2 -mx-1 px-1 pr-6">
                       {ICON_CATEGORIES.map((cat, idx) => (
                         <button
@@ -527,7 +484,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                       ))}
                     </div>
 
-                    {/* Icônes de la catégorie active */}
                     <div className="grid grid-cols-4 gap-2">
                       {ICON_CATEGORIES[activeCategory].icons.map((item) => {
                         const IconComp = item.icon;
@@ -554,7 +510,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 )}
               </div>
 
-              {/* Input */}
               <input
                 type="text"
                 value={newHabitName}
@@ -564,7 +519,6 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 className="flex-1 min-w-0 px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500"
               />
 
-              {/* Add button */}
               <button
                 onClick={addHabit}
                 disabled={loading || !newHabitName.trim()}
@@ -573,7 +527,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                 <Plus size={20} />
               </button>
             </div>
-            <div className="h-4" /> {/* Espace en bas */}
+            <div className="h-4" />
           </div>
         </div>
       </div>

@@ -37,7 +37,6 @@ function SortableGoalItem({ goal, onStartEdit, onDelete }: SortableGoalItemProps
         <GripVertical size={16} className="text-slate-300 dark:text-zinc-600" />
       </div>
 
-      {/* Icône type */}
       <div
         className={`w-10 h-10 rounded-xl flex items-center justify-center ${
           goal.type === "streak"
@@ -138,7 +137,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
 
-  // Configuration des sensors pour le drag and drop
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -153,7 +151,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     }
   }, [isOpen]);
 
-  // Fermer le picker d'icône avec la touche Échap
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -170,7 +167,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     };
   }, [showIconPicker]);
 
-  // Fermer la modale avec la touche Échap
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && !showIconPicker) {
@@ -196,7 +192,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     const { data: goalsData } = await supabase.from("goals").select("*").order("order_index", { ascending: true });
 
     if (goalsData) {
-      // Récupérer les infos des habitudes associées (seulement celles qui ont un habit_id)
       const habitIds = goalsData.filter((g) => g.habit_id).map((g) => g.habit_id);
       let habitsMap = new Map<string, Habit>();
 
@@ -215,27 +210,22 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
   }
 
   async function updateGoalsOrder(newOrder: (Goal & { habit?: Habit })[]) {
-    // Mise à jour optimiste de l'ordre local
     setGoals(newOrder);
 
-    // Mettre à jour les order_index dans la base de données
     const updates = newOrder.map((goal, index) => ({
       id: goal.id,
       order_index: index,
     }));
 
-    // Mettre à jour tous les objectifs
     for (const update of updates) {
       const { error } = await supabase.from("goals").update({ order_index: update.order_index }).eq("id", update.id);
       if (error) {
         console.error("Erreur lors de la mise à jour de l'ordre:", error);
-        // En cas d'erreur, recharger depuis la base de données
         await fetchGoals();
         return;
       }
     }
 
-    // Notifier le changement
     onGoalsChange();
   }
 
@@ -246,14 +236,12 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
       const oldIndex = goals.findIndex((item) => item.id === active.id);
       const newIndex = goals.findIndex((item) => item.id === over.id);
       const newOrder = arrayMove(goals, oldIndex, newIndex);
-      // Mettre à jour l'ordre dans la base de données
       await updateGoalsOrder(newOrder);
     }
   }
 
   async function addGoal() {
     if (!goalName.trim()) return;
-    // Pour les goals liés à une habitude (quantitative/streak), on a besoin d'une habitude
     if ((goalType === "quantitative" || goalType === "streak") && !selectedHabit) return;
     if (goalType !== "one_time" && targetValue < 1) return;
 
@@ -283,7 +271,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     const { error } = await supabase.from("goals").insert(newGoal);
 
     if (!error) {
-      // Reset form
       setGoalName("");
       setSelectedHabit("");
       setTargetValue(10);
@@ -307,7 +294,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     }
   }
 
-  // Pré-remplir le formulaire pour éditer un goal
   function startEdit(goal: Goal & { habit?: Habit }) {
     setEditingGoalId(goal.id);
     setGoalName(goal.name);
@@ -320,7 +306,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     setSelectedIcon(goal.icon || "Star");
   }
 
-  // Annuler l'édition et reset le formulaire
   function cancelEdit() {
     setEditingGoalId(null);
     setGoalName("");
@@ -333,7 +318,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     setSelectedIcon("Star");
   }
 
-  // Mettre à jour un goal existant
   async function updateGoal() {
     if (!editingGoalId || !goalName.trim()) return;
     if ((goalType === "quantitative" || goalType === "streak") && !selectedHabit) return;
@@ -362,23 +346,17 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
     setLoading(false);
   }
 
-  // Détermine si on a besoin d'une habitude selon le type
   const needsHabit = goalType === "quantitative" || goalType === "streak";
   const isEditing = editingGoalId !== null;
-
-  // Validation du formulaire
   const isFormValid = goalName.trim() && (!needsHabit || selectedHabit);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm cursor-pointer" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-zinc-800">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-rose-100 dark:bg-rose-900/50 rounded-xl flex items-center justify-center">
@@ -391,9 +369,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
           </button>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
-          {/* Liste des goals existants */}
           {goals.length > 0 ? (
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={goals.map((g) => g.id)} strategy={verticalListSortingStrategy}>
@@ -412,7 +388,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
             </div>
           )}
 
-          {/* Formulaire objectif */}
           <div className="border-t border-slate-100 dark:border-zinc-800 pt-6">
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{isEditing ? "Modifier l'objectif" : "Nouvel objectif"}</p>
@@ -427,7 +402,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
             </div>
 
             <div className="space-y-4">
-              {/* Type d'objectif */}
               <div>
                 <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                   Type d'objectif <span className="text-rose-500">*</span>
@@ -469,7 +443,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 </div>
               </div>
 
-              {/* Nom + Icône pour one_time sans habitude */}
               <div className="flex gap-2 items-end min-w-0">
                 {goalType === "one_time" && !selectedHabit && (
                   <div className="relative">
@@ -483,7 +456,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
 
                     {showIconPicker && (
                       <div className="absolute bottom-14 left-0 bg-white dark:bg-zinc-900 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-700 pt-6 pb-4 px-4 z-20 w-80 max-w-[calc(100vw-3rem)]">
-                        {/* Bouton de fermeture */}
                         <button
                           onClick={() => setShowIconPicker(false)}
                           className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer"
@@ -553,7 +525,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 </div>
               </div>
 
-              {/* Sélection habitude (optionnel pour one_time, requis pour autres) */}
               {(needsHabit || (goalType === "one_time" && habits.length > 0)) && (
                 <div>
                   <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
@@ -579,7 +550,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 </div>
               )}
 
-              {/* Configuration selon le type */}
               {goalType !== "one_time" && (
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -614,7 +584,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 </div>
               )}
 
-              {/* Date de fin optionnelle */}
               <div>
                 <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                   <span className="flex items-center gap-1">
@@ -630,7 +599,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 />
               </div>
 
-              {/* Récompense optionnelle */}
               <div>
                 <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-2">
                   <span className="flex items-center gap-1">
@@ -647,7 +615,6 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                 />
               </div>
 
-              {/* Bouton ajouter/modifier */}
               <button
                 onClick={isEditing ? updateGoal : addGoal}
                 disabled={loading || !isFormValid}

@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Configuration du dark mode avec la classe .dark */
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
@@ -27,7 +26,6 @@
   --scrollbar-thumb-hover: #52525b;
 }
 
-/* @theme est une directive Tailwind CSS v4 valide */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -47,7 +45,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Désactiver les outlines par défaut sur les boutons */
 button {
   outline: none !important;
   -webkit-tap-highlight-color: transparent;
@@ -60,7 +57,6 @@ button:active {
   box-shadow: none !important;
 }
 
-/* Animations */
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -91,7 +87,6 @@ button:active {
   animation: scale-in 0.2s ease-out forwards;
 }
 
-/* Scrollbar personnalisée */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -110,7 +105,6 @@ button:active {
   background: var(--scrollbar-thumb-hover);
 }
 
-/* Bento Cards */
 .bento-card {
   animation: bento-appear 0.5s ease-out forwards;
   opacity: 0;

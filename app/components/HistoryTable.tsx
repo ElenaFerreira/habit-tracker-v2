@@ -8,23 +8,17 @@ import { HabitIcon } from "@/lib/icons";
 import { Check, ChevronLeft, ChevronRight, Footprints, Calendar, Loader2, Sparkles, Home } from "lucide-react";
 import MonthlyStats from "./MonthlyStats";
 
-// Ordre des moods pour l'affichage dans le sélecteur
 const MOOD_ORDER: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
 
-// Génère les jours d'une semaine (lundi -> dimanche), weekOffset = 0 = semaine actuelle, 1 = semaine précédente, etc.
 function getWeekDays(weekOffset: number = 0): { date: string; dayName: string; dayNum: string; monthName: string }[] {
   const days: { date: string; dayName: string; dayNum: string; monthName: string }[] = [];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  // Trouver le lundi de la semaine courante
   const currentWeekMonday = new Date(today);
   const day = currentWeekMonday.getDay(); // 0 = dimanche, 1 = lundi, ...
   const diffToMonday = (day + 6) % 7; // 0 si lundi, 1 si mardi, etc.
   currentWeekMonday.setDate(currentWeekMonday.getDate() - diffToMonday);
-
-  // Appliquer l'offset de semaine (en arrière uniquement)
   const startOfWeek = new Date(currentWeekMonday);
   startOfWeek.setDate(startOfWeek.getDate() - weekOffset * 7);
 
@@ -34,8 +28,6 @@ function getWeekDays(weekOffset: number = 0): { date: string; dayName: string; d
   for (let i = 0; i < 7; i++) {
     const date = new Date(startOfWeek);
     date.setDate(startOfWeek.getDate() + i);
-
-    // dayNames commence à Lundi = index 0
     const dayNameIndex = i % 7;
 
     days.push({
@@ -49,7 +41,6 @@ function getWeekDays(weekOffset: number = 0): { date: string; dayName: string; d
   return days;
 }
 
-// Indique si une date (YYYY-MM-DD) est dans le futur par rapport à aujourd'hui (en se basant sur la date locale formatée)
 function isFutureDate(dateStr: string): boolean {
   const todayStr = formatDateLocal(new Date()); // ex: "2026-01-06"
   return dateStr > todayStr;
@@ -75,7 +66,6 @@ export default function HistoryTable() {
   const fetchData = useCallback(async () => {
     setLoading(true);
 
-    // Récupérer l'utilisateur
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -94,12 +84,10 @@ export default function HistoryTable() {
       return;
     }
 
-    // Récupérer les habitudes
     const { data: habitsData } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
 
     setHabits(habitsData || []);
 
-    // Récupérer les complétions
     if (habitsData && habitsData.length > 0) {
       const habitIds = habitsData.map((h) => h.id);
       const { data: completionsData } = await supabase
@@ -119,7 +107,6 @@ export default function HistoryTable() {
       setCompletions(completionsMap);
     }
 
-    // Récupérer les pas
     const { data: stepsData } = await supabase.from("step_entries").select("*").gte("date", startDate).lte("date", endDate);
 
     const stepsMap = new Map<string, number>();
@@ -128,7 +115,6 @@ export default function HistoryTable() {
     });
     setSteps(stepsMap);
 
-    // Récupérer les moods
     const { data: moodsData } = await supabase.from("mood_entries").select("*").gte("date", startDate).lte("date", endDate);
 
     const moodsMap = new Map<string, MoodType>();
@@ -144,25 +130,20 @@ export default function HistoryTable() {
     fetchData();
   }, [fetchData]);
 
-  // Toggle une habitude
   async function toggleHabit(habitId: string, date: string) {
     const cellKey = `${habitId}-${date}`;
     setSavingCells((prev) => new Set(prev).add(cellKey));
 
     const dateCompletions = completions.get(date) || new Set();
     const isCompleted = dateCompletions.has(habitId);
-
-    // Optimistic update
     const newCompletions = new Map(completions);
     const newDateCompletions = new Set(dateCompletions);
 
     if (isCompleted) {
       newDateCompletions.delete(habitId);
-      // Supprimer dans la DB
       await supabase.from("habit_completions").delete().eq("habit_id", habitId).eq("date", date);
     } else {
       newDateCompletions.add(habitId);
-      // Ajouter dans la DB
       await supabase.from("habit_completions").upsert({ habit_id: habitId, date, completed: true }, { onConflict: "habit_id,date" });
     }
 
@@ -179,7 +160,6 @@ export default function HistoryTable() {
     });
   }
 
-  // Sauvegarder les pas
   async function saveSteps(date: string) {
     if (!userId) return;
 
@@ -187,7 +167,6 @@ export default function HistoryTable() {
     const cellKey = `steps-${date}`;
     setSavingCells((prev) => new Set(prev).add(cellKey));
 
-    // Vérifier si une entrée existe (maybeSingle pour éviter erreur 406 si pas de résultat)
     const { data: existing } = await supabase.from("step_entries").select("id").eq("user_id", userId).eq("date", date).maybeSingle();
 
     if (existing) {
@@ -203,16 +182,12 @@ export default function HistoryTable() {
       newSteps.delete(date);
     }
     setSteps(newSteps);
-
-    // Rafraîchir les stats mensuelles
     setStatsRefreshKey((prev) => prev + 1);
-
     setSavingCells((prev) => {
       const newSet = new Set(prev);
       newSet.delete(cellKey);
       return newSet;
     });
-
     setEditingStep(null);
   }
 
@@ -221,7 +196,6 @@ export default function HistoryTable() {
     setStepValue(steps.get(date)?.toString() || "");
   }
 
-  // Sauvegarder le mood
   async function saveMood(date: string, mood: MoodType | null) {
     if (!userId) return;
 
@@ -231,21 +205,16 @@ export default function HistoryTable() {
     const newMoods = new Map(moods);
 
     if (mood === null) {
-      // Supprimer le mood
       await supabase.from("mood_entries").delete().eq("user_id", userId).eq("date", date);
       newMoods.delete(date);
     } else {
-      // Upsert le mood
       await supabase.from("mood_entries").upsert({ user_id: userId, date, mood }, { onConflict: "user_id,date" });
       newMoods.set(date, mood);
     }
 
     setMoods(newMoods);
     setEditingMood(null);
-
-    // Rafraîchir les stats mensuelles
     setStatsRefreshKey((prev) => prev + 1);
-
     setSavingCells((prev) => {
       const newSet = new Set(prev);
       newSet.delete(cellKey);
@@ -276,9 +245,7 @@ export default function HistoryTable() {
 
   return (
     <div className="space-y-4">
-      {/* Navigation */}
       <div className="flex items-center justify-between gap-2">
-        {/* Semaine précédente */}
         <button
           onClick={() => setPageOffset((p) => p + 1)}
           className="flex items-center justify-center gap-1.5 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-zinc-700 hover:text-slate-800 dark:hover:text-slate-100 transition-all cursor-pointer"
@@ -287,7 +254,6 @@ export default function HistoryTable() {
           <span className="font-medium text-xs sm:text-sm hidden sm:inline">Semaine précédente</span>
         </button>
 
-        {/* Période affichée + retour aujourd'hui */}
         <div className="flex items-center gap-2 sm:gap-3 flex-1 justify-center">
           <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 text-xs sm:text-sm">
             <Calendar size={16} />
@@ -307,7 +273,6 @@ export default function HistoryTable() {
           )}
         </div>
 
-        {/* Semaine suivante */}
         <button
           onClick={() => setPageOffset((p) => Math.max(0, p - 1))}
           disabled={pageOffset === 0}
@@ -322,7 +287,6 @@ export default function HistoryTable() {
         </button>
       </div>
 
-      {/* Tableau */}
       <div className="bento-card bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -341,7 +305,6 @@ export default function HistoryTable() {
               </tr>
             </thead>
             <tbody>
-              {/* Ligne pour le mood */}
               <tr className="border-b border-slate-100 dark:border-zinc-800 bg-violet-50/50 dark:bg-violet-950/20">
                 <td className="py-4 px-5 sticky left-0 bg-violet-50/80 dark:bg-violet-950/30 z-10">
                   <div className="flex items-center gap-3">
@@ -412,7 +375,6 @@ export default function HistoryTable() {
                 })}
               </tr>
 
-              {/* Ligne pour les pas */}
               <tr className="border-b border-slate-100 dark:border-zinc-800 bg-blue-50/50 dark:bg-blue-950/20">
                 <td className="py-4 px-5 sticky left-0 bg-blue-50/80 dark:bg-blue-950/30 z-10">
                   <div className="flex items-center gap-3">
@@ -468,7 +430,6 @@ export default function HistoryTable() {
                 })}
               </tr>
 
-              {/* Lignes pour chaque habitude */}
               {habits.map((habit, idx) => (
                 <tr
                   key={habit.id}
@@ -520,12 +481,10 @@ export default function HistoryTable() {
         </div>
       </div>
 
-      {/* Note d'info */}
       <p className="text-center text-slate-400 dark:text-slate-500 text-sm">
         Clique sur une case pour modifier l'état d'une habitude ou éditer tes pas.
       </p>
 
-      {/* Statistiques mensuelles */}
       <MonthlyStats refreshKey={statsRefreshKey} />
     </div>
   );
