@@ -44,7 +44,7 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
 
   const calculateGoalProgress = useCallback(async () => {
     // Récupérer tous les goals
-    const { data: goalsData } = await supabase.from("goals").select("*").order("created_at", { ascending: false });
+    const { data: goalsData } = await supabase.from("goals").select("*").order("order_index", { ascending: true });
 
     if (!goalsData || goalsData.length === 0) {
       setGoals([]);

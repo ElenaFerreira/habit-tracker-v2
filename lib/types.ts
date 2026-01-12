@@ -48,6 +48,7 @@ export interface Goal {
   completed_at: string | null; // Date où l'objectif a été accompli (pour one_time)
   icon: string | null; // Icône personnalisée pour les goals sans habitude
   reward: string | null; // Récompense optionnelle
+  order_index: number; // Ordre d'affichage pour le drag and drop
   created_at: string;
 }
 

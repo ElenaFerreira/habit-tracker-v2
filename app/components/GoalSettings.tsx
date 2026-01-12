@@ -4,13 +4,113 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Goal, GoalType, GoalPeriod, Habit } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
-import { X, Plus, Trash2, Target, Flame, Calendar, Star, Gift, Pencil, Save } from "lucide-react";
+import { X, Plus, Trash2, Target, Flame, Calendar, Star, Gift, Pencil, Save, GripVertical } from "lucide-react";
 import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface GoalSettingsProps {
   isOpen: boolean;
   onClose: () => void;
   onGoalsChange: () => void;
+}
+
+interface SortableGoalItemProps {
+  goal: Goal & { habit?: Habit };
+  onStartEdit: (goal: Goal & { habit?: Habit }) => void;
+  onDelete: (goalId: string) => void;
+}
+
+function SortableGoalItem({ goal, onStartEdit, onDelete }: SortableGoalItemProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: goal.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
+      <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing">
+        <GripVertical size={16} className="text-slate-300" />
+      </div>
+
+      {/* Icône type */}
+      <div
+        className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+          goal.type === "streak" ? "bg-violet-100" : goal.type === "one_time" ? "bg-amber-100" : "bg-emerald-100"
+        }`}
+      >
+        {goal.type === "streak" ? (
+          <Flame size={20} className="text-violet-600" />
+        ) : goal.type === "one_time" ? (
+          goal.icon ? (
+            <HabitIcon name={goal.icon} size={20} className="text-amber-600" />
+          ) : (
+            <Star size={20} className="text-amber-600" />
+          )
+        ) : (
+          <Target size={20} className="text-emerald-600" />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="font-medium text-slate-800 truncate">{goal.name}</p>
+          {goal.habit && (
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 rounded-lg">
+              <HabitIcon name={goal.habit.emoji} size={12} className="text-amber-600" />
+              <span className="text-xs text-amber-700 truncate max-w-[80px]">{goal.habit.name}</span>
+            </div>
+          )}
+          {goal.completed_at && (
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 rounded-lg">
+              <span className="text-xs text-green-700">✓ Fait</span>
+            </div>
+          )}
+        </div>
+        <p className="text-sm text-slate-500">
+          {goal.type === "one_time" ? (
+            "Accomplissement unique"
+          ) : goal.type === "streak" ? (
+            <>
+              {goal.target_value} jour{goal.target_value > 1 ? "s" : ""} consécutif{goal.target_value > 1 ? "s" : ""}
+            </>
+          ) : (
+            <>
+              {goal.target_value} fois {goal.period === "week" ? "par semaine" : goal.period === "month" ? "par mois" : "par an"}
+            </>
+          )}
+          {goal.end_date && <span className="text-slate-400"> · jusqu'au {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>}
+        </p>
+        {goal.reward && (
+          <p className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
+            <Gift size={10} />
+            {goal.reward}
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onStartEdit(goal)}
+          className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
+          title="Modifier"
+        >
+          <Pencil size={16} />
+        </button>
+        <button
+          onClick={() => onDelete(goal.id)}
+          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+          title="Supprimer"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSettingsProps) {
@@ -31,6 +131,14 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
   const [selectedIcon, setSelectedIcon] = useState<string>("Star");
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [activeCategory, setActiveCategory] = useState(0);
+
+  // Configuration des sensors pour le drag and drop
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -79,7 +187,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
   }
 
   async function fetchGoals() {
-    const { data: goalsData } = await supabase.from("goals").select("*").order("created_at", { ascending: false });
+    const { data: goalsData } = await supabase.from("goals").select("*").order("order_index", { ascending: true });
 
     if (goalsData) {
       // Récupérer les infos des habitudes associées (seulement celles qui ont un habit_id)
@@ -97,6 +205,43 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
       }));
 
       setGoals(goalsWithHabits);
+    }
+  }
+
+  async function updateGoalsOrder(newOrder: (Goal & { habit?: Habit })[]) {
+    // Mise à jour optimiste de l'ordre local
+    setGoals(newOrder);
+
+    // Mettre à jour les order_index dans la base de données
+    const updates = newOrder.map((goal, index) => ({
+      id: goal.id,
+      order_index: index,
+    }));
+
+    // Mettre à jour tous les objectifs
+    for (const update of updates) {
+      const { error } = await supabase.from("goals").update({ order_index: update.order_index }).eq("id", update.id);
+      if (error) {
+        console.error("Erreur lors de la mise à jour de l'ordre:", error);
+        // En cas d'erreur, recharger depuis la base de données
+        await fetchGoals();
+        return;
+      }
+    }
+
+    // Notifier le changement
+    onGoalsChange();
+  }
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = goals.findIndex((item) => item.id === active.id);
+      const newIndex = goals.findIndex((item) => item.id === over.id);
+      const newOrder = arrayMove(goals, oldIndex, newIndex);
+      // Mettre à jour l'ordre dans la base de données
+      await updateGoalsOrder(newOrder);
     }
   }
 
@@ -126,6 +271,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
       icon: !selectedHabit ? selectedIcon : null,
       reward: reward.trim() || null,
       completed_at: null,
+      order_index: goals.length, // Ajouter à la fin
     };
 
     const { error } = await supabase.from("goals").insert(newGoal);
@@ -243,84 +389,15 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-6 py-6">
           {/* Liste des goals existants */}
           {goals.length > 0 ? (
-            <div className="space-y-3 mb-8">
-              {goals.map((goal) => (
-                <div key={goal.id} className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl group">
-                  {/* Icône type */}
-                  <div
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      goal.type === "streak" ? "bg-violet-100" : goal.type === "one_time" ? "bg-amber-100" : "bg-emerald-100"
-                    }`}
-                  >
-                    {goal.type === "streak" ? (
-                      <Flame size={20} className="text-violet-600" />
-                    ) : goal.type === "one_time" ? (
-                      goal.icon ? (
-                        <HabitIcon name={goal.icon} size={20} className="text-amber-600" />
-                      ) : (
-                        <Star size={20} className="text-amber-600" />
-                      )
-                    ) : (
-                      <Target size={20} className="text-emerald-600" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-slate-800 truncate">{goal.name}</p>
-                      {goal.habit && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-100 rounded-lg">
-                          <HabitIcon name={goal.habit.emoji} size={12} className="text-amber-600" />
-                          <span className="text-xs text-amber-700 truncate max-w-[80px]">{goal.habit.name}</span>
-                        </div>
-                      )}
-                      {goal.completed_at && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-green-100 rounded-lg">
-                          <span className="text-xs text-green-700">✓ Fait</span>
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-500">
-                      {goal.type === "one_time" ? (
-                        "Accomplissement unique"
-                      ) : goal.type === "streak" ? (
-                        <>
-                          {goal.target_value} jour{goal.target_value > 1 ? "s" : ""} consécutif{goal.target_value > 1 ? "s" : ""}
-                        </>
-                      ) : (
-                        <>
-                          {goal.target_value} fois {goal.period === "week" ? "par semaine" : goal.period === "month" ? "par mois" : "par an"}
-                        </>
-                      )}
-                      {goal.end_date && <span className="text-slate-400"> · jusqu'au {new Date(goal.end_date).toLocaleDateString("fr-FR")}</span>}
-                    </p>
-                    {goal.reward && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
-                        <Gift size={10} />
-                        {goal.reward}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => startEdit(goal)}
-                      className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors cursor-pointer"
-                      title="Modifier"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => deleteGoal(goal.id)}
-                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
-                      title="Supprimer"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={goals.map((g) => g.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-3 mb-8">
+                  {goals.map((goal) => (
+                    <SortableGoalItem key={goal.id} goal={goal} onStartEdit={startEdit} onDelete={deleteGoal} />
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           ) : (
             <div className="text-center py-8 mb-8">
               <div className="text-5xl mb-4">🎯</div>
