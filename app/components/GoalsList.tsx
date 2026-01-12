@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Goal, GoalWithProgress, Habit } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import GoalCard from "./GoalCard";
-import { Target, Plus, CheckCircle2 } from "lucide-react";
+import { Target, Plus, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 
 interface GoalsListProps {
   onOpenSettings: () => void;
@@ -39,6 +39,7 @@ function getDateString(date: Date): string {
 const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ onOpenSettings }, ref) {
   const [goals, setGoals] = useState<GoalWithProgress[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAllCompleted, setShowAllCompleted] = useState(false);
   const supabase = createClient();
 
   const calculateGoalProgress = useCallback(async () => {
@@ -233,15 +234,30 @@ const GoalsList = forwardRef<GoalsListRef, GoalsListProps>(function GoalsList({ 
         <div className="pt-3 border-t border-slate-100 dark:border-zinc-800">
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider flex items-center gap-1.5">
             <CheckCircle2 size={14} className="text-emerald-500 dark:text-emerald-400" />
-            <span>Objectifs atteints</span>
+            <span>Objectifs atteints ({completedGoals.length})</span>
           </p>
           <div className="space-y-3 opacity-70">
-            {completedGoals.slice(0, 2).map((goal) => (
+            {(showAllCompleted ? completedGoals : completedGoals.slice(0, 2)).map((goal) => (
               <GoalCard key={goal.id} goal={goal} onUpdate={calculateGoalProgress} />
             ))}
           </div>
           {completedGoals.length > 2 && (
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-3 text-center">+{completedGoals.length - 2} autres objectifs atteints</p>
+            <button
+              onClick={() => setShowAllCompleted(!showAllCompleted)}
+              className="w-full mt-3 py-2 px-3 flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 rounded-lg transition-colors cursor-pointer"
+            >
+              {showAllCompleted ? (
+                <>
+                  <ChevronUp size={14} />
+                  <span>Voir moins</span>
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={14} />
+                  <span>+{completedGoals.length - 2} autres objectifs atteints</span>
+                </>
+              )}
+            </button>
           )}
         </div>
       )}
