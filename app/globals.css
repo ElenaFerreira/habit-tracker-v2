@@ -38,11 +38,21 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  /* Support des safe areas pour PWA sur iOS/Android */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Safe area pour le header sticky */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
 }
 
 button {

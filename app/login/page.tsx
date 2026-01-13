@@ -86,7 +86,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 dark:from-zinc-950 dark:to-zinc-900 p-6">
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed right-4 z-50" style={{ top: "max(1rem, env(safe-area-inset-top))" }}>
         <ThemeToggle />
       </div>
 

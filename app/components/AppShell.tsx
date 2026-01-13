@@ -44,7 +44,7 @@ export default function AppShell({ userEmail }: AppShellProps) {
 
   return (
     <>
-      <header className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-40">
+      <header className="bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-40 safe-top">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           {/* Titre - aligné à gauche */}
           <h1 className="text-lg sm:text-xl font-bold text-slate-800 dark:text-slate-100 hidden sm:block flex-1">Habit Tracker</h1>
