@@ -74,9 +74,7 @@ export default function HistoryTable() {
   const [completions, setCompletions] = useState<Map<string, Set<string>>>(new Map());
   const [steps, setSteps] = useState<Map<string, number>>(new Map());
   const [moods, setMoods] = useState<Map<string, MoodType>>(new Map());
-  const [editingStep, setEditingStep] = useState<string | null>(null);
   const [editingMood, setEditingMood] = useState<string | null>(null);
-  const [stepValue, setStepValue] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [savingCells, setSavingCells] = useState<Set<string>>(new Set());
   const [pageOffset, setPageOffset] = useState(0); // 0 = semaine actuelle (lundi -> dimanche), 1 = semaine précédente, etc.
@@ -183,42 +181,6 @@ export default function HistoryTable() {
       newSet.delete(cellKey);
       return newSet;
     });
-  }
-
-  async function saveSteps(date: string) {
-    if (!userId) return;
-
-    const stepsNum = parseInt(stepValue) || 0;
-    const cellKey = `steps-${date}`;
-    setSavingCells((prev) => new Set(prev).add(cellKey));
-
-    const { data: existing } = await supabase.from("step_entries").select("id").eq("user_id", userId).eq("date", date).maybeSingle();
-
-    if (existing) {
-      await supabase.from("step_entries").update({ steps: stepsNum }).eq("id", existing.id);
-    } else if (stepsNum > 0) {
-      await supabase.from("step_entries").insert({ user_id: userId, date, steps: stepsNum });
-    }
-
-    const newSteps = new Map(steps);
-    if (stepsNum > 0) {
-      newSteps.set(date, stepsNum);
-    } else {
-      newSteps.delete(date);
-    }
-    setSteps(newSteps);
-    setStatsRefreshKey((prev) => prev + 1);
-    setSavingCells((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(cellKey);
-      return newSet;
-    });
-    setEditingStep(null);
-  }
-
-  function startEditingStep(date: string) {
-    setEditingStep(date);
-    setStepValue(steps.get(date)?.toString() || "");
   }
 
   async function saveMood(date: string, mood: MoodType | null) {
@@ -410,44 +372,16 @@ export default function HistoryTable() {
                 {days.map((day) => {
                   const isFuture = isFutureDate(day.date);
                   const daySteps = steps.get(day.date) || 0;
-                  const isEditing = editingStep === day.date;
-                  const isSaving = savingCells.has(`steps-${day.date}`);
 
                   return (
                     <td key={day.date} className="py-3 px-2 text-center">
-                      {isEditing ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <input
-                            type="number"
-                            value={stepValue}
-                            onChange={(e) => setStepValue(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") saveSteps(day.date);
-                              if (e.key === "Escape") setEditingStep(null);
-                            }}
-                            className="w-16 px-2 py-1.5 text-center text-sm border border-blue-300 dark:border-blue-600 bg-white dark:bg-zinc-800 text-slate-800 dark:text-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500"
-                            autoFocus
-                          />
-                          <button
-                            onClick={() => saveSteps(day.date)}
-                            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium cursor-pointer"
-                          >
-                            OK
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => startEditingStep(day.date)}
-                          disabled={isSaving || isFuture}
-                          className={`w-16 py-2 rounded-xl text-sm font-semibold transition-all ${
-                            daySteps > 0
-                              ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/50"
-                              : "bg-slate-50 dark:bg-zinc-800 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-700"
-                          } ${isSaving || isFuture ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                        >
-                          {isSaving ? "..." : daySteps > 0 ? daySteps.toLocaleString("fr-FR") : "—"}
-                        </button>
-                      )}
+                      <div
+                        className={`w-16 py-2 mx-auto rounded-xl text-sm font-semibold ${
+                          daySteps > 0 ? "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300" : "bg-slate-50 dark:bg-zinc-800 text-slate-400 dark:text-slate-500"
+                        } ${isFuture ? "opacity-50" : ""}`}
+                      >
+                        {daySteps > 0 ? daySteps.toLocaleString("fr-FR") : "—"}
+                      </div>
                     </td>
                   );
                 })}
@@ -518,7 +452,7 @@ export default function HistoryTable() {
       </div>
 
       <p className="text-center text-slate-400 dark:text-slate-500 text-sm">
-        Clique sur une case pour modifier l'état d'une habitude ou éditer tes pas.
+        Clique sur une case pour modifier l'état d'une habitude. Les pas viennent d'Apple Santé.
       </p>
 
       <MonthlyStats refreshKey={statsRefreshKey} />

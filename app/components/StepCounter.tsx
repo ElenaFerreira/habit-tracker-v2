@@ -42,11 +42,7 @@ function getWeekDays(): { date: string; dayName: string; dayShort: string }[] {
 
 export default function StepCounter() {
   const [weekSteps, setWeekSteps] = useState<Map<string, number>>(new Map());
-  const [todaySteps, setTodaySteps] = useState<string>("");
-  const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [dailyGoal, setDailyGoal] = useState<number>(DEFAULT_DAILY_GOAL);
   const today = useToday();
   const weekDays = getWeekDays();
@@ -81,7 +77,6 @@ export default function StepCounter() {
       setLoading(false);
       return;
     }
-    setUserId(user.id);
     const goal = await fetchUserSettings();
     setDailyGoal(goal);
 
@@ -96,7 +91,6 @@ export default function StepCounter() {
     });
 
     setWeekSteps(stepsMap);
-    setTodaySteps(stepsMap.get(today)?.toString() || "");
     setLoading(false);
   }, [supabase, today, fetchUserSettings]);
 
@@ -107,38 +101,11 @@ export default function StepCounter() {
   // Les pas peuvent arriver en arrière-plan (Raccourci Apple Santé) : on recharge au retour sur l'app
   useEffect(() => {
     function handleVisibility() {
-      if (document.visibilityState === "visible" && !isEditing) fetchWeekSteps();
+      if (document.visibilityState === "visible") fetchWeekSteps();
     }
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [fetchWeekSteps, isEditing]);
-
-  const handleSaveSteps = async () => {
-    if (!userId) return;
-
-    const steps = parseInt(todaySteps) || 0;
-    setSaving(true);
-
-    const { data: existing } = await supabase.from("step_entries").select("id").eq("user_id", userId).eq("date", today).single();
-
-    let error;
-    if (existing) {
-      const result = await supabase.from("step_entries").update({ steps }).eq("id", existing.id);
-      error = result.error;
-    } else {
-      const result = await supabase.from("step_entries").insert({ user_id: userId, date: today, steps });
-      error = result.error;
-    }
-
-    if (!error) {
-      const newMap = new Map(weekSteps);
-      newMap.set(today, steps);
-      setWeekSteps(newMap);
-    }
-
-    setSaving(false);
-    setIsEditing(false);
-  };
+  }, [fetchWeekSteps]);
 
   const stepsValues = Array.from(weekSteps.values());
   const daysWithData = stepsValues.filter((v) => v > 0).length;
@@ -164,40 +131,13 @@ export default function StepCounter() {
       <div className="relative z-10 space-y-3">
         <div className="flex items-center gap-2">
           <p className="text-blue-600 dark:text-blue-400 text-xs font-medium uppercase tracking-wider">steps</p>
-          {!isEditing && (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="px-2.5 py-1 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/50 text-blue-600 dark:text-blue-400 text-xs font-medium rounded-lg transition-colors cursor-pointer"
-            >
-              Modifier
-            </button>
-          )}
+          <p className="text-[10px] text-blue-400 dark:text-blue-500">via Apple Santé</p>
         </div>
 
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              value={todaySteps}
-              onChange={(e) => setTodaySteps(e.target.value)}
-              placeholder="0"
-              className="w-full px-3 py-2 bg-blue-100 dark:bg-blue-900/50 rounded-xl text-slate-800 dark:text-slate-100 placeholder-blue-300 dark:placeholder-blue-600 text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600"
-              autoFocus
-            />
-            <button
-              onClick={handleSaveSteps}
-              disabled={saving}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {saving ? "..." : "OK"}
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-baseline gap-2">
-            <p className="text-4xl font-black leading-none text-slate-800 dark:text-slate-100">{todayValue.toLocaleString("fr-FR")}</p>
-            <p className="text-lg font-semibold text-slate-600 dark:text-slate-400">pas</p>
-          </div>
-        )}
+        <div className="flex items-baseline gap-2">
+          <p className="text-4xl font-black leading-none text-slate-800 dark:text-slate-100">{todayValue.toLocaleString("fr-FR")}</p>
+          <p className="text-lg font-semibold text-slate-600 dark:text-slate-400">pas</p>
+        </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
