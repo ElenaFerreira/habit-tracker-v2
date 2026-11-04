@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Habit } from "@/lib/types";
-import { X, Plus, Trash2, GripVertical, TrendingUp, Pencil, Save } from "lucide-react";
+import { X, Plus, Trash2, GripVertical, TrendingUp, Pencil, Save, Archive, ArchiveRestore } from "lucide-react";
+import { HABITS_WITH_ARCHIVES, isArchived } from "@/lib/habitArchive";
+import { formatDateLocal } from "@/lib/hooks/useToday";
 import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
@@ -24,7 +26,7 @@ interface SortableHabitItemProps {
   onStartEdit: (habit: Habit) => void;
   onCancelEdit: () => void;
   onSaveEdit: (habitId: string) => void;
-  onDelete: (habitId: string) => void;
+  onArchive: (habitId: string) => void;
   onUpdateHabit: (habitId: string, updates: Partial<Habit>) => void;
   onEditingHabitNameChange: (name: string) => void;
   onEditingIconForChange: (id: string | null) => void;
@@ -41,7 +43,7 @@ function SortableHabitItem({
   onStartEdit,
   onCancelEdit,
   onSaveEdit,
-  onDelete,
+  onArchive,
   onUpdateHabit,
   onEditingHabitNameChange,
   onEditingIconForChange,
@@ -197,11 +199,11 @@ function SortableHabitItem({
               <Pencil size={16} />
             </button>
             <button
-              onClick={() => onDelete(habit.id)}
-              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
-              title="Supprimer"
+              onClick={() => onArchive(habit.id)}
+              className="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/50 rounded-lg transition-colors cursor-pointer"
+              title="Archiver"
             >
-              <Trash2 size={16} />
+              <Archive size={16} />
             </button>
           </>
         )}
@@ -211,7 +213,9 @@ function SortableHabitItem({
 }
 
 export default function HabitSettings({ isOpen, onClose, onHabitsChange }: HabitSettingsProps) {
-  const [habits, setHabits] = useState<Habit[]>([]);
+  const [allHabits, setAllHabits] = useState<Habit[]>([]);
+  const habits = allHabits.filter((h) => !isArchived(h));
+  const archivedHabits = allHabits.filter(isArchived);
   const [newHabitName, setNewHabitName] = useState("");
   const [newHabitIcon, setNewHabitIcon] = useState("Check");
   const [loading, setLoading] = useState(false);
@@ -279,9 +283,9 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   }, [isOpen]);
 
   async function fetchHabits() {
-    const { data } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
+    const { data } = await supabase.from("habits").select(HABITS_WITH_ARCHIVES).order("order_index", { ascending: true });
 
-    if (data) setHabits(data);
+    if (data) setAllHabits(data);
   }
 
   async function addHabit() {
@@ -301,7 +305,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
         user_id: userData.user.id,
         name: newHabitName.trim(),
         emoji: newHabitIcon, // On réutilise le champ emoji pour stocker le nom de l'icône
-        order_index: habits.length,
+        order_index: allHabits.length,
       })
       .select();
 
@@ -314,8 +318,38 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
     setLoading(false);
   }
 
-  async function deleteHabit(habitId: string) {
-    const { error } = await supabase.from("habits").delete().eq("id", habitId);
+  async function archiveHabit(habitId: string) {
+    const { error } = await supabase.from("habit_archives").insert({ habit_id: habitId, archived_on: formatDateLocal(new Date()) });
+    if (!error) {
+      await fetchHabits();
+      onHabitsChange();
+    }
+  }
+
+  async function restoreHabit(habit: Habit) {
+    const openPeriod = habit.habit_archives?.find((p) => p.restored_on === null);
+    if (!openPeriod) return;
+
+    const today = formatDateLocal(new Date());
+    // Archivée et restaurée le même jour : la période est vide, on la supprime
+    const { error } =
+      openPeriod.archived_on >= today
+        ? await supabase.from("habit_archives").delete().eq("id", openPeriod.id)
+        : await supabase.from("habit_archives").update({ restored_on: today }).eq("id", openPeriod.id);
+
+    if (!error) {
+      await fetchHabits();
+      onHabitsChange();
+    }
+  }
+
+  async function deleteHabit(habit: Habit) {
+    const confirmed = window.confirm(
+      `Supprimer définitivement « ${habit.name} » ?\n\nToutes ses coches passées et les objectifs liés à cette habitude seront effacés. Cette action est irréversible.`
+    );
+    if (!confirmed) return;
+
+    const { error } = await supabase.from("habits").delete().eq("id", habit.id);
     if (!error) {
       await fetchHabits();
       onHabitsChange();
@@ -325,14 +359,14 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
   async function updateHabit(habitId: string, updates: Partial<Habit>) {
     const { error } = await supabase.from("habits").update(updates).eq("id", habitId);
     if (!error) {
-      setHabits((prev) => prev.map((h) => (h.id === habitId ? { ...h, ...updates } : h)));
+      setAllHabits((prev) => prev.map((h) => (h.id === habitId ? { ...h, ...updates } : h)));
       onHabitsChange();
       fetchHabits();
     }
   }
 
   async function updateHabitsOrder(newOrder: Habit[]) {
-    setHabits(newOrder);
+    setAllHabits((prev) => [...newOrder, ...prev.filter(isArchived)]);
 
     const updates = newOrder.map((habit, index) => ({
       id: habit.id,
@@ -429,7 +463,7 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
                         onStartEdit={startEditHabit}
                         onCancelEdit={cancelEditHabit}
                         onSaveEdit={saveEditHabit}
-                        onDelete={deleteHabit}
+                        onArchive={archiveHabit}
                         onUpdateHabit={updateHabit}
                         onEditingHabitNameChange={setEditingHabitName}
                         onEditingIconForChange={setEditingIconFor}
@@ -544,6 +578,49 @@ export default function HabitSettings({ isOpen, onClose, onHabitsChange }: Habit
             </div>
             <div className="h-4" />
           </div>
+
+          {archivedHabits.length > 0 && (
+            <div className="border-t border-slate-100 dark:border-zinc-800 pt-6">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Archivées</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">
+                Elles ne comptent plus pour tes flammes ni tes stats, mais restent visibles dans l&apos;historique des périodes où elles étaient actives.
+              </p>
+              <div className="space-y-2">
+                {archivedHabits.map((habit) => {
+                  const since = habit.habit_archives?.find((p) => p.restored_on === null)?.archived_on;
+                  return (
+                    <div key={habit.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-zinc-800 rounded-xl opacity-70">
+                      <div className="w-9 h-9 bg-slate-200 dark:bg-zinc-700 rounded-xl flex items-center justify-center">
+                        <HabitIcon name={habit.emoji} size={18} className="text-slate-500 dark:text-slate-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-slate-600 dark:text-slate-300 font-medium truncate">{habit.name}</p>
+                        {since && (
+                          <p className="text-xs text-slate-400 dark:text-slate-500">
+                            Archivée le {new Date(since + "T00:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => restoreHabit(habit)}
+                        className="p-2 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-lg transition-colors cursor-pointer"
+                        title="Restaurer"
+                      >
+                        <ArchiveRestore size={16} />
+                      </button>
+                      <button
+                        onClick={() => deleteHabit(habit)}
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-lg transition-colors cursor-pointer"
+                        title="Supprimer définitivement"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

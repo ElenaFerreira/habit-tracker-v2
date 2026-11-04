@@ -5,6 +5,13 @@ export interface Habit {
   emoji: string;
   created_at: string;
   order_index: number;
+  habit_archives?: HabitArchive[]; // Périodes d'archive (présentes si chargées avec HABITS_WITH_ARCHIVES)
+}
+
+export interface HabitArchive {
+  id: string;
+  archived_on: string; // format YYYY-MM-DD, premier jour où l'habitude ne compte plus
+  restored_on: string | null; // format YYYY-MM-DD, premier jour où elle compte de nouveau (null = toujours archivée)
 }
 
 export interface HabitCompletion {

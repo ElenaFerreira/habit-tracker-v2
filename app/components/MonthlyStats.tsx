@@ -9,6 +9,7 @@ import { TrendingUp, Calendar, Footprints, Target, CheckCircle, ChevronLeft, Che
 import { HabitIcon } from "@/lib/icons";
 import { useTheme } from "@/lib/hooks/useTheme";
 import MonthPicker from "./MonthPicker";
+import { HABITS_WITH_ARCHIVES, isActiveOn, isArchived } from "@/lib/habitArchive";
 
 interface MonthlyData {
   month: string;
@@ -149,7 +150,7 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
     const { start: monthStart } = getMonthRange(monthOffset);
     const habitQueryEndDate = isCurrentMonth ? todayStr : end;
 
-    const { data: habitsData } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
+    const { data: habitsData } = await supabase.from("habits").select(HABITS_WITH_ARCHIVES).order("order_index", { ascending: true });
 
     if (habitsData && habitsData.length > 0) {
       const habitIds = habitsData.map((h) => h.id);
@@ -160,16 +161,24 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
         .gte("date", monthStart)
         .lte("date", habitQueryEndDate);
 
-      const stats: HabitStats[] = [];
-      const habitStartDate = new Date(monthStart);
-      habitStartDate.setHours(0, 0, 0, 0);
-      const habitEndDate = isCurrentMonth ? new Date(today) : new Date(end);
-      habitEndDate.setHours(23, 59, 59, 999);
-      const totalDays = Math.floor((habitEndDate.getTime() - habitStartDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      // Tous les jours du mois (jusqu'à aujourd'hui pour le mois en cours)
+      const monthDays: string[] = [];
+      const cursor = new Date(monthStart + "T00:00:00");
+      for (let d = monthStart; d <= habitQueryEndDate; d = formatDateLocal(cursor)) {
+        monthDays.push(d);
+        cursor.setDate(cursor.getDate() + 1);
+      }
 
-      habitsData.forEach((habit) => {
-        const completions = completionsData?.filter((c) => c.habit_id === habit.id).length || 0;
-        const completionRate = totalDays > 0 ? Math.round((completions / totalDays) * 100) : 0;
+      const stats: HabitStats[] = [];
+
+      habitsData.forEach((habit: Habit) => {
+        // Une habitude archivée ne compte que sur les jours où elle était active
+        const activeDays = new Set(monthDays.filter((d) => isActiveOn(habit, d)));
+        if (activeDays.size === 0) return;
+
+        const totalDays = activeDays.size;
+        const completions = completionsData?.filter((c) => c.habit_id === habit.id && activeDays.has(c.date)).length || 0;
+        const completionRate = Math.round((completions / totalDays) * 100);
 
         stats.push({
           habit,
@@ -338,6 +347,11 @@ export default function MonthlyStats({ refreshKey }: MonthlyStatsProps = {}) {
                       <HabitIcon name={stat.habit.emoji} size={18} className="text-emerald-600 dark:text-emerald-400" />
                     </div>
                     <span className="font-medium text-slate-800 dark:text-slate-100">{stat.habit.name}</span>
+                    {isArchived(stat.habit) && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-slate-200 dark:bg-zinc-700 text-slate-500 dark:text-slate-400">
+                        Archivée
+                      </span>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="text-lg font-bold text-slate-800 dark:text-slate-100">{stat.completionRate}%</span>

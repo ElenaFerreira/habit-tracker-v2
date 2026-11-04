@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Habit, StepEntry, MoodType, MoodEntry, MOOD_CONFIG } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { HabitIcon } from "@/lib/icons";
+import { HABITS_WITH_ARCHIVES, isActiveOn } from "@/lib/habitArchive";
 import { Check, ChevronLeft, ChevronRight, Footprints, Loader2, Sparkles, Home, Calendar } from "lucide-react";
 import MonthlyStats from "./MonthlyStats";
 import WeekPicker from "./WeekPicker";
@@ -106,9 +107,11 @@ export default function HistoryTable() {
       return;
     }
 
-    const { data: habitsData } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
+    const { data: allHabitsData } = await supabase.from("habits").select(HABITS_WITH_ARCHIVES).order("order_index", { ascending: true });
 
-    setHabits(habitsData || []);
+    // On garde les habitudes actives au moins un jour de la semaine affichée
+    const habitsData = (allHabitsData as Habit[] | null)?.filter((h) => pastDays.some((d) => isActiveOn(h, d.date))) ?? [];
+    setHabits(habitsData);
 
     if (habitsData && habitsData.length > 0) {
       const habitIds = habitsData.map((h) => h.id);
@@ -473,6 +476,19 @@ export default function HistoryTable() {
                     const isFuture = isFutureDate(day.date);
                     const isCompleted = completions.get(day.date)?.has(habit.id) || false;
                     const isSaving = savingCells.has(`${habit.id}-${day.date}`);
+
+                    if (!isActiveOn(habit, day.date)) {
+                      return (
+                        <td key={day.date} className="py-3 px-2 text-center">
+                          <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto text-slate-300 dark:text-zinc-600"
+                            title="Habitude archivée ce jour-là"
+                          >
+                            —
+                          </div>
+                        </td>
+                      );
+                    }
 
                     return (
                       <td key={day.date} className="py-3 px-2 text-center">

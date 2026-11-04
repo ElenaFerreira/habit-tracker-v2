@@ -6,6 +6,7 @@ import { Goal, GoalType, GoalPeriod, Habit } from "@/lib/types";
 import { formatDateLocal } from "@/lib/hooks/useToday";
 import { X, Plus, Trash2, Target, Flame, Calendar, Star, Gift, Pencil, Save, GripVertical } from "lucide-react";
 import { HabitIcon, ICON_CATEGORIES } from "@/lib/icons";
+import { HABITS_WITH_ARCHIVES, isArchived } from "@/lib/habitArchive";
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -199,7 +200,7 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
   }, [isOpen, showIconPicker, onClose]);
 
   async function fetchHabits() {
-    const { data } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
+    const { data } = await supabase.from("habits").select(HABITS_WITH_ARCHIVES).order("order_index", { ascending: true });
     if (data) setHabits(data);
   }
 
@@ -556,11 +557,14 @@ export default function GoalSettings({ isOpen, onClose, onGoalsChange }: GoalSet
                     className="w-full px-4 py-3 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:border-slate-400 dark:focus:border-slate-500 cursor-pointer"
                   >
                     <option value="">{goalType === "one_time" ? "Aucune (objectif personnel)" : "Choisir une habitude..."}</option>
-                    {habits.map((habit) => (
-                      <option key={habit.id} value={habit.id}>
-                        {habit.name}
-                      </option>
-                    ))}
+                    {habits
+                      .filter((habit) => !isArchived(habit) || habit.id === selectedHabit)
+                      .map((habit) => (
+                        <option key={habit.id} value={habit.id}>
+                          {habit.name}
+                          {isArchived(habit) ? " (archivée)" : ""}
+                        </option>
+                      ))}
                   </select>
                 </div>
               )}

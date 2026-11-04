@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { HabitWithStatus } from "@/lib/types";
+import { Habit, HabitWithStatus } from "@/lib/types";
+import { HABITS_WITH_ARCHIVES, isActiveOn, isArchived } from "@/lib/habitArchive";
 import { useToday, formatDateLocal } from "@/lib/hooks/useToday";
 import HabitCheckbox from "./HabitCheckbox";
 import StepCounter from "./StepCounter";
@@ -38,7 +39,9 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
   const supabase = createClient();
 
   const fetchHabitsWithStatus = useCallback(async () => {
-    const { data: habitsData } = await supabase.from("habits").select("*").order("order_index", { ascending: true });
+    // Toutes les habitudes (archivées comprises) : une habitude archivée compte
+    // encore pour les flammes sur les jours où elle était active.
+    const { data: habitsData } = await supabase.from("habits").select(HABITS_WITH_ARCHIVES).order("order_index", { ascending: true });
 
     if (!habitsData || habitsData.length === 0) {
       setHabits([]);
@@ -48,20 +51,20 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       return;
     }
 
-    const habitIds = habitsData.map((h) => h.id);
-    const { data: completions } = await supabase.from("habit_completions").select("habit_id").in("habit_id", habitIds).eq("date", today);
+    const allHabits: Habit[] = habitsData;
+    const habitIds = allHabits.map((h) => h.id);
+    const activeHabits = allHabits.filter((h) => !isArchived(h));
+    const activeHabitIds = activeHabits.map((h) => h.id);
+    const { data: completions } = await supabase.from("habit_completions").select("habit_id").in("habit_id", activeHabitIds).eq("date", today);
 
     const completedHabitIds = new Set(completions?.map((c) => c.habit_id) || []);
 
-    const habitsWithStatus: HabitWithStatus[] = habitsData.map((habit) => ({
+    const habitsWithStatus: HabitWithStatus[] = activeHabits.map((habit) => ({
       ...habit,
       completed_today: completedHabitIds.has(habit.id),
     }));
 
     setHabits(habitsWithStatus);
-
-    const totalHabits = habitsData.length;
-    const todayCompleted = completedHabitIds.size === totalHabits;
 
     const ninetyDaysAgo = new Date();
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
@@ -79,23 +82,25 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
       completionsByDate.get(c.date)!.add(c.habit_id);
     });
 
-    let currentStreak = 0;
-    let checkDate = todayCompleted ? today : getPreviousDate(today);
+    // Jour parfait = toutes les habitudes actives ce jour-là sont cochées
+    const isPerfectDay = (date: string): boolean => {
+      const required = allHabits.filter((h) => isActiveOn(h, date));
+      const done = completionsByDate.get(date);
+      return required.length > 0 && !!done && required.every((h) => done.has(h.id));
+    };
 
-    while (true) {
-      const dateCompletions = completionsByDate.get(checkDate);
-      if (dateCompletions && dateCompletions.size === totalHabits) {
-        currentStreak++;
-        checkDate = getPreviousDate(checkDate);
-      } else {
-        break;
-      }
+    let currentStreak = 0;
+    let checkDate = isPerfectDay(today) ? today : getPreviousDate(today);
+
+    while (isPerfectDay(checkDate)) {
+      currentStreak++;
+      checkDate = getPreviousDate(checkDate);
     }
 
     let maxStreak = 0;
     const perfectDaysSet = new Set<string>();
-    completionsByDate.forEach((habitIds, date) => {
-      if (habitIds.size === totalHabits) {
+    completionsByDate.forEach((_, date) => {
+      if (isPerfectDay(date)) {
         perfectDaysSet.add(date);
       }
     });
