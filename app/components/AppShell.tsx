@@ -9,6 +9,8 @@ import GoalSettings from "./GoalSettings";
 import StepSettings from "./StepSettings";
 import GoalsList, { GoalsListRef } from "./GoalsList";
 import MonsterTracker from "./MonsterTracker";
+import BudgetTracker from "./BudgetTracker";
+import BudgetSettings from "./BudgetSettings";
 import MoodPicker from "./MoodPicker";
 import ThemeToggle from "./ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +24,8 @@ export default function AppShell({ userEmail }: AppShellProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [goalsSettingsOpen, setGoalsSettingsOpen] = useState(false);
   const [stepSettingsOpen, setStepSettingsOpen] = useState(false);
+  const [budgetSettingsOpen, setBudgetSettingsOpen] = useState(false);
+  const [budgetKey, setBudgetKey] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [habitsKey, setHabitsKey] = useState(0);
   const [stepCounterKey, setStepCounterKey] = useState(0);
@@ -198,11 +202,14 @@ export default function AppShell({ userEmail }: AppShellProps) {
 
         <MonsterTracker />
 
+        <BudgetTracker key={`budget-${budgetKey}`} onOpenSettings={() => setBudgetSettingsOpen(true)} />
+
         <GoalsList ref={goalsListRef} onOpenSettings={() => setGoalsSettingsOpen(true)} />
       </div>
 
       <HabitSettings isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} onHabitsChange={handleHabitsChange} />
       <GoalSettings isOpen={goalsSettingsOpen} onClose={() => setGoalsSettingsOpen(false)} onGoalsChange={refreshGoals} />
+      <BudgetSettings isOpen={budgetSettingsOpen} onClose={() => setBudgetSettingsOpen(false)} onBudgetChange={() => setBudgetKey((k) => k + 1)} />
       <StepSettings isOpen={stepSettingsOpen} onClose={() => setStepSettingsOpen(false)} onStepGoalChange={() => setStepCounterKey((k) => k + 1)} />
     </>
   );

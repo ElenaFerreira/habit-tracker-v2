@@ -80,6 +80,28 @@ export const MOOD_CONFIG: Record<MoodType, { label: string; emoji: string; color
   awful: { label: "Awful", emoji: "😢", color: "text-red-600", bgColor: "bg-red-100" },
 };
 
+export type BudgetKind = "expense" | "income";
+
+export interface BudgetItem {
+  id: string;
+  user_id: string;
+  name: string;
+  kind: BudgetKind;
+  amount: number; // Montant prévu
+  is_variable: boolean; // Montant réel saisi au moment de cocher
+  day_of_month: number | null; // Jour du mois (facultatif)
+  order_index: number;
+  created_at: string;
+}
+
+export interface BudgetPayment {
+  id: string;
+  item_id: string;
+  month: string; // format YYYY-MM-01
+  amount: number; // Montant réel
+  paid_on: string; // format YYYY-MM-DD
+}
+
 export interface UserSettings {
   id: string;
   user_id: string;
