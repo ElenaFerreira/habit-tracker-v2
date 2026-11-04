@@ -8,6 +8,7 @@ import HabitSettings from "./HabitSettings";
 import GoalSettings from "./GoalSettings";
 import StepSettings from "./StepSettings";
 import GoalsList, { GoalsListRef } from "./GoalsList";
+import MonsterTracker from "./MonsterTracker";
 import MoodPicker from "./MoodPicker";
 import ThemeToggle from "./ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
@@ -194,6 +195,8 @@ export default function AppShell({ userEmail }: AppShellProps) {
           onHabitToggle={refreshGoals}
           stepCounterKey={stepCounterKey}
         />
+
+        <MonsterTracker />
 
         <GoalsList ref={goalsListRef} onOpenSettings={() => setGoalsSettingsOpen(true)} />
       </div>
