@@ -121,9 +121,9 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           ) : (
             <button
               onClick={markAsCompleted}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-800 font-semibold rounded-xl transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-900 dark:bg-zinc-800 dark:hover:bg-zinc-700 border border-transparent dark:border-zinc-700text-white dark:text-slate-100 font-semibold rounded-xl transition-all cursor-pointer"
             >
-              <Check size={18} />
+              <Check size={18} className="dark:text-emerald-400" />
               Marquer comme accompli
             </button>
           )}
