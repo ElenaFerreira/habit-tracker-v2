@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { MoodType, MoodEntry, MOOD_CONFIG } from "@/lib/types";
 import { useToday } from "@/lib/hooks/useToday";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const MOOD_ORDER: MoodType[] = ["best_day", "good", "moody", "bad", "awful"];
 
@@ -77,12 +77,7 @@ export default function MoodPicker() {
 
   return (
     <div className="bento-card bg-violet-50 dark:bg-violet-950/30 p-6 rounded-3xl border border-violet-200 dark:border-violet-900/50">
-      <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 bg-violet-100 dark:bg-violet-900/50 rounded-xl flex items-center justify-center">
-          <Sparkles size={16} className="text-violet-600 dark:text-violet-400" />
-        </div>
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Comment tu te sens aujourd'hui ?</h2>
-      </div>
+      <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100 text-center mb-5">Comment tu te sens aujourd'hui ?</h2>
 
       <div className="flex flex-wrap gap-2 justify-center">
         {MOOD_ORDER.map((mood) => {
