@@ -104,6 +104,15 @@ export default function StepCounter() {
     fetchWeekSteps();
   }, [fetchWeekSteps]);
 
+  // Les pas peuvent arriver en arrière-plan (Raccourci Apple Santé) : on recharge au retour sur l'app
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === "visible" && !isEditing) fetchWeekSteps();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [fetchWeekSteps, isEditing]);
+
   const handleSaveSteps = async () => {
     if (!userId) return;
 

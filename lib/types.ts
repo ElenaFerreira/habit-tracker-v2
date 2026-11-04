@@ -77,6 +77,7 @@ export interface UserSettings {
   id: string;
   user_id: string;
   daily_step_goal: number;
+  step_sync_token: string | null; // Jeton du Raccourci iOS pour la synchro Apple Santé
   created_at: string;
   updated_at: string;
 }

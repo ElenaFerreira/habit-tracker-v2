@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { X, Footprints, Save } from "lucide-react";
+import { X, Footprints, Save, Heart, Copy, Check, RefreshCw } from "lucide-react";
 
 interface StepSettingsProps {
   isOpen: boolean;
@@ -12,10 +12,19 @@ interface StepSettingsProps {
 
 const DEFAULT_STEP_GOAL = 15000;
 
+function generateToken(): string {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 export default function StepSettings({ isOpen, onClose, onStepGoalChange }: StepSettingsProps) {
   const [dailyStepGoal, setDailyStepGoal] = useState<number>(DEFAULT_STEP_GOAL);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [syncToken, setSyncToken] = useState<string | null>(null);
+  const [generatingToken, setGeneratingToken] = useState(false);
+  const [copied, setCopied] = useState<"url" | "token" | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -55,6 +64,7 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
 
     if (data) {
       setDailyStepGoal(data.daily_step_goal);
+      setSyncToken(data.step_sync_token ?? null);
     } else {
       const { data: newSettings } = await supabase
         .from("user_settings")
@@ -68,6 +78,29 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
     }
 
     setLoading(false);
+  }
+
+  async function regenerateSyncToken() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (syncToken && !confirm("Générer un nouveau jeton ? L'ancien ne fonctionnera plus, il faudra mettre à jour ton Raccourci.")) return;
+
+    setGeneratingToken(true);
+    const token = generateToken();
+    const { error } = await supabase.from("user_settings").update({ step_sync_token: token }).eq("user_id", user.id);
+    if (!error) setSyncToken(token);
+    setGeneratingToken(false);
+  }
+
+  async function copy(value: string, kind: "url" | "token") {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(kind);
+      setTimeout(() => setCopied(null), 1500);
+    } catch {}
   }
 
   async function saveSettings() {
@@ -164,6 +197,71 @@ export default function StepSettings({ isOpen, onClose, onStepGoalChange }: Step
                 >
                   <Save size={18} />
                   {saving ? "Enregistrement..." : "Enregistrer"}
+                </button>
+              </div>
+
+              <div className="pt-6 border-t border-slate-100 dark:border-zinc-800 space-y-4">
+                <div className="flex items-center gap-2">
+                  <Heart size={16} className="text-rose-500" />
+                  <h3 className="font-semibold text-slate-800 dark:text-slate-100">Synchro Apple Santé</h3>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Une app web ne peut pas lire Apple Santé directement. Un Raccourci iOS lit tes pas et les envoie ici automatiquement.
+                </p>
+
+                {syncToken ? (
+                  <>
+                    {[
+                      { kind: "url" as const, label: "URL", value: typeof window !== "undefined" ? `${window.location.origin}/api/steps/sync` : "" },
+                      { kind: "token" as const, label: "Jeton (secret)", value: syncToken },
+                    ].map(({ kind, label, value }) => (
+                      <div key={kind}>
+                        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">{label}</label>
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 min-w-0 truncate px-3 py-2 bg-slate-50 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl text-xs text-slate-700 dark:text-slate-300">
+                            {value}
+                          </code>
+                          <button
+                            onClick={() => copy(value, kind)}
+                            className="p-2 bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 rounded-xl transition-colors cursor-pointer"
+                            aria-label={`Copier ${label}`}
+                          >
+                            {copied === kind ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} className="text-slate-500" />}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+
+                    <ol className="list-decimal pl-5 space-y-1 text-xs text-slate-600 dark:text-slate-400">
+                      <li>App <b>Raccourcis</b> → nouveau raccourci.</li>
+                      <li>
+                        Action <b>Rechercher des échantillons de santé</b> : type <i>Nombre de pas</i>, date <i>Aujourd&apos;hui</i>, regrouper par{" "}
+                        <i>Jour</i>, sans limite.
+                      </li>
+                      <li>
+                        Action <b>Calculer les statistiques</b> : <i>Somme</i> des échantillons.
+                      </li>
+                      <li>
+                        Action <b>Obtenir le contenu de l&apos;URL</b> : l&apos;URL ci-dessus, méthode <i>POST</i>, en-tête{" "}
+                        <code>Authorization</code> = <code>Bearer &lt;jeton&gt;</code>, corps <i>JSON</i> avec <code>steps</code> = la Somme.
+                      </li>
+                      <li>
+                        Onglet <b>Automatisation</b> → <i>Heure de la journée</i> (ex. toutes les heures ou 23h30) → lancer ce raccourci,{" "}
+                        <i>Exécuter immédiatement</i>.
+                      </li>
+                    </ol>
+                  </>
+                ) : (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Génère un jeton pour configurer ton Raccourci.</p>
+                )}
+
+                <button
+                  onClick={regenerateSyncToken}
+                  disabled={generatingToken}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 text-rose-600 dark:text-rose-400 font-medium rounded-xl transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw size={16} className={generatingToken ? "animate-spin" : ""} />
+                  {syncToken ? "Régénérer le jeton" : "Activer la synchro Apple Santé"}
                 </button>
               </div>
             </div>
