@@ -7,16 +7,7 @@ import { HABITS_WITH_ARCHIVES, isActiveOn, isArchived } from "@/lib/habitArchive
 import { useToday, formatDateLocal } from "@/lib/hooks/useToday";
 import HabitCheckbox from "./HabitCheckbox";
 import StepCounter from "./StepCounter";
-import { Sparkles, Calendar, TrendingUp, Flame } from "lucide-react";
-
-function formatDate(dateStr: string): { weekday: string; day: string; month: string } {
-  const date = new Date(dateStr + "T00:00:00");
-  return {
-    weekday: date.toLocaleDateString("fr-FR", { weekday: "long" }),
-    day: date.toLocaleDateString("fr-FR", { day: "numeric" }),
-    month: date.toLocaleDateString("fr-FR", { month: "long" }),
-  };
-}
+import { Sparkles, TrendingUp, Flame } from "lucide-react";
 
 function getPreviousDate(dateStr: string): string {
   const date = new Date(dateStr + "T00:00:00");
@@ -155,13 +146,11 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
   const completedCount = habits.filter((h) => h.completed_today).length;
   const totalCount = habits.length;
   const progressPercent = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
-  const dateInfo = formatDate(today);
 
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="flex flex-col gap-4">
-          <div className="h-36 bg-slate-200/50 dark:bg-zinc-800/50 rounded-3xl animate-pulse" />
           <div className="h-28 bg-slate-200/50 dark:bg-zinc-800/50 rounded-3xl animate-pulse" />
           <div className="h-48 bg-slate-200/50 dark:bg-zinc-800/50 rounded-3xl animate-pulse" />
         </div>
@@ -173,18 +162,6 @@ export default function HabitList({ onOpenSettings, onHabitToggle, stepCounterKe
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div className="flex flex-col gap-4">
-        <div className="bento-card bg-slate-50 dark:bg-zinc-900 p-5 rounded-3xl border border-slate-200 dark:border-zinc-800 relative overflow-hidden">
-          <div className="absolute top-3 right-3 opacity-10">
-            <Calendar size={40} strokeWidth={1.5} className="text-slate-800 dark:text-slate-200" />
-          </div>
-          <div className="relative z-10">
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Aujourd'hui</p>
-            <p className="text-4xl font-black leading-none mb-0.5 text-slate-800 dark:text-slate-100">{dateInfo.day}</p>
-            <p className="text-lg font-semibold capitalize text-slate-700 dark:text-slate-300">{dateInfo.month}</p>
-            <p className="text-slate-400 dark:text-slate-500 text-xs capitalize mt-1">{dateInfo.weekday}</p>
-          </div>
-        </div>
-
         <div className="bento-card bg-amber-50 dark:bg-amber-950/30 p-5 rounded-3xl border border-amber-200 dark:border-amber-900/50 relative overflow-hidden">
           <div className={`absolute top-3 right-3 ${streak >= 1 ? "opacity-30" : "opacity-10"}`}>
             <Flame size={40} strokeWidth={1.5} className={streak >= 1 ? "text-orange-500" : "text-amber-800 dark:text-amber-200"} />
