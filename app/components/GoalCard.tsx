@@ -79,10 +79,10 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-rose-200 dark:border-rose-900/50 p-4">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 ${colors.bgLight} rounded-xl flex items-center justify-center`}>{getIcon()}</div>
-          <div>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className={`w-10 h-10 shrink-0 ${colors.bgLight} rounded-xl flex items-center justify-center`}>{getIcon()}</div>
+          <div className="min-w-0">
             <p className="font-semibold text-slate-800 dark:text-slate-100 text-sm">{goal.name}</p>
             {goal.habit_name ? (
               <p className="text-xs text-slate-500 dark:text-slate-400">{goal.habit_name}</p>
@@ -92,9 +92,12 @@ export default function GoalCard({ goal, onUpdate }: GoalCardProps) {
           </div>
         </div>
 
-        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${colors.badgeBg} ${colors.badgeText}`}>
+        <div
+          className={`flex shrink-0 items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium ${colors.badgeBg} ${colors.badgeText}`}
+          title={badge.label}
+        >
           <span className="shrink-0">{badge.icon}</span>
-          <span>{badge.label}</span>
+          <span className="hidden sm:inline">{badge.label}</span>
         </div>
       </div>
 
